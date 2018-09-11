@@ -6,7 +6,9 @@
 // One moves linearly down the screen.
 // One moves toward the mouse cursor.
 
-
+// This is the object that goes from left to right
+var objectx;
+var objecty;
 // The image of a clown face
 var clownImage;
 // The current position of the clown face
@@ -18,6 +20,7 @@ var feltTextureImage;
 // The current position of the transparent image of "felt"
 var feltTextureImageX;
 var feltTextureImageY;
+
 
 
 // preload()
@@ -41,6 +44,11 @@ function setup() {
   // Start the clown image at the centre of the canvas
   clownImageX = width/2;
   clownImageY = height/2;
+  //Start the object on the left side of the canvas somewhere along the y axis
+  objectx = 0;
+  objecty = height/2;
+
+
 
   // Start the felt image perfectly off screen above the canvas
   feltTextureImageX = width/2;
@@ -48,6 +56,8 @@ function setup() {
 
   // We'll use imageMode CENTER for this script
   imageMode(CENTER);
+  // Why not work with rectMode CENTER aswell
+  rectMode(CENTER);
 }
 
 
@@ -60,6 +70,8 @@ function draw() {
 
   // Move the felt image down by increasing its y position
   feltTextureImageY += 1;
+  // Do the same but for our object's x position
+  objectx+=1;
 
   // Display the felt image
   image(feltTextureImage,feltTextureImageX,feltTextureImageY);
@@ -75,4 +87,6 @@ function draw() {
 
   // Display the clown image
   image(clownImage,clownImageX,clownImageY);
+  // Display the object
+  ellipse(objectx, objecty, 20, 20);
 }

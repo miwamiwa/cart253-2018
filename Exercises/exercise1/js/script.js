@@ -7,13 +7,19 @@
 // One moves toward the mouse cursor.
 
 // This is the object that goes from left to right
-var objectx;
-var objecty;
+var leftRightObjectX;
+var leftRightObjectY;
 // The image of a clown face
 var clownImage;
+
 // The current position of the clown face
 var clownImageX;
 var clownImageY;
+// This shape behaves similarly to the clown face
+var mouseObject;
+// This is its position
+var mouseObjectX;
+var mouseObjectY;
 
 // The transparent image of "felt" that wipes down the canvas
 var feltTextureImage;
@@ -35,7 +41,8 @@ function preload() {
   clownImage = loadImage("assets/images/clown.png");
   feltTextureImage = loadImage("assets/images/black-felt-texture.png");
   mugImage = loadImage("assets/images/coffeicon.png");
-  console.log("all good");
+  // Did we even get past this point?
+  // console.log("all good");
 }
 
 
@@ -52,9 +59,15 @@ function setup() {
   // Start the clown image at the centre of the canvas
   clownImageX = width/2;
   clownImageY = height/2;
+
+  // Our mouseObject will start somewhere else on the canvas
+  mouseObjectX = width;
+  mouseObjectY = height;
+
+
   //Start the object on the left side of the canvas somewhere along the y axis
-  objectx = 0;
-  objecty = height/2;
+  leftRightObjectX = 0;
+  leftRightObjectY = height/2;
 
 
 
@@ -79,7 +92,7 @@ function draw() {
   // Move the felt image down by increasing its y position
   feltTextureImageY += 1;
   // Do the same but for our object's x position
-  objectx+=1;
+  leftRightObjectX+=1;
 
   // Display the felt image
   image(feltTextureImage,feltTextureImageX,feltTextureImageY);
@@ -94,12 +107,20 @@ function draw() {
   // Calculate the distance in X and in Y
   var xDistance = mouseX - clownImageX;
   var yDistance = mouseY - clownImageY;
+  // Do the same for the mouseObject
+  var xDistance2 = mouseX - mouseObjectX;
+  var yDistance2 = mouseY - mouseObjectY;
   // Add 1/10th of the x and y distance to the clown's current (x,y) location
   clownImageX = clownImageX + xDistance/10;
   clownImageY = clownImageY + yDistance/10;
+  // Do the same for mouseObject, but slower. Thus distance traveled must be smaller.
+  mouseObjectX = mouseObjectX + xDistance2/40;
+  mouseObjectY = mouseObjectY + yDistance2/40;
 
   // Display the clown image
   image(clownImage,clownImageX,clownImageY);
   // Display the object
-  ellipse(objectx, objecty, 20, 20);
+  ellipse(leftRightObjectX, leftRightObjectY, 20, 20);
+  // Display mouseObjectX
+  rect(mouseObjectX, mouseObjectY, 40, 40);
 }

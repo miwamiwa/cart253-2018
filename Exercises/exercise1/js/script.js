@@ -17,6 +17,10 @@ var clownImageY;
 
 // The transparent image of "felt" that wipes down the canvas
 var feltTextureImage;
+// This is the image that will follow the mouse. It's nice because it has transparent background
+// Source: http://www.iconarchive.com/show/food-icons-by-aha-soft/coffee-icon.html
+
+var mugImage;
 // The current position of the transparent image of "felt"
 var feltTextureImageX;
 var feltTextureImageY;
@@ -30,6 +34,8 @@ var feltTextureImageY;
 function preload() {
   clownImage = loadImage("assets/images/clown.png");
   feltTextureImage = loadImage("assets/images/black-felt-texture.png");
+  mugImage = loadImage("assets/images/coffeicon.png");
+  console.log("all good");
 }
 
 
@@ -40,6 +46,8 @@ function preload() {
 function setup() {
   // Create our canvas
   createCanvas(640,640);
+  // Start my mug image somewhere
+
 
   // Start the clown image at the centre of the canvas
   clownImageX = width/2;
@@ -75,6 +83,11 @@ function draw() {
 
   // Display the felt image
   image(feltTextureImage,feltTextureImageX,feltTextureImageY);
+
+  // Display coffee mug image at mouse location. It's resized since this "icon" is a bit large
+  // The mug will indeed appear behind the clown.
+  // The clown wants coffee. this code tells a story.
+  image(mugImage, mouseX, mouseY, 60, 60);
 
   // Move the clown by moving it 1/10th of its current distance from the mouse
 

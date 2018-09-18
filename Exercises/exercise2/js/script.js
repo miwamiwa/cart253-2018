@@ -152,13 +152,4 @@ function draw() {
   // Draw the enemy as a circle
   ellipse(enemyX,enemyY,enemySize,enemySize);
 
-  // Display DODGES
-  fill(0);
-  textSize(10);
-  text("successful dodges: ", 20, 20);
-  fill(255, 10, 25);
-  textSize(30);
-  text(dodges, 20, 45);
-
-
 }

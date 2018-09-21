@@ -24,23 +24,23 @@ var wasDodged=true;
 var avatarSpeed = 10;
 var avatarVX = 0;
 var avatarVY = 0;
-var initSpecialSpeed=7;
+var initSpecialSpeed=6;
 var specialSpeed=initSpecialSpeed;
-var specialSize=110;
+var specialSize=100;
 
 // The position and size of the enemy circle
 var enemyX;
 var enemyY;
 var enemySize = 50;
 // How much bigger the enemy circle gets with each successful dodge
-var enemySizeIncrease = 5;
+var enemySizeIncrease = 4;
 
 // The speed and velocity of our enemy circle
 var enemySpeed = 5;
 var enemyVX = 5;
 // How much bigger the enemy circle gets with each successful dodge
-var enemySpeedIncrease = 0.25;
-var specialSpeedIncrease=0.1;
+var enemySpeedIncrease = 0.2;
+var specialSpeedIncrease=0.09;
 // How many dodges the player has made
 var dodges = 0;
 
@@ -317,9 +317,9 @@ else{gameOverText="game over."}
   text(life, width-40*scaleIt+1, 50*scaleIt+1);
   textSize(17*scaleIt);
   fill(0);
-  text("1up for every 10 dodges. \npress q to toggle cheese mode.", 10*scaleIt, height-30*scaleIt);
+  text("1up for every 10 dodges. \nq or drag three fingers to toggle cheese mode.", 10*scaleIt, height-30*scaleIt);
   fill(255);
-  text("1up for every 10 dodges. \npress q to toggle cheese mode.", 10*scaleIt-1, height-30*scaleIt-1);
+  text("1up for every 10 dodges. \nq or drag three fingers to toggle cheese mode.", 10*scaleIt-1, height-30*scaleIt-1);
 }
 
 function keyPressed(){
@@ -345,7 +345,7 @@ if(mouseY>0.3*height){//go down
 }
 }
 function touchMoved(){
-if(touches.length>=2){
+if(touches.length>=3){
   console.log("backspace pressed")
   cheeseMode=!cheeseMode;
   if(cheeseMode){alph=alphaCheese;}else{alph=alphaNotCheese;}

@@ -24,9 +24,9 @@ var wasDodged=true;
 var avatarSpeed = 10;
 var avatarVX = 0;
 var avatarVY = 0;
-var initSpecialSpeed=10;
+var initSpecialSpeed=7;
 var specialSpeed=initSpecialSpeed;
-var specialSize=120;
+var specialSize=110;
 
 // The position and size of the enemy circle
 var enemyX;
@@ -63,6 +63,7 @@ var mouseImg;
 var hiScore=0;
 var record=false;
 var cheeseMode=true;
+var scaleIt=1;
 var cheeseDown, cheeseUp, cheeseLeft, cheeseRight;
 //preload
 
@@ -83,7 +84,9 @@ function setup() {
   console.log("setup");
   // Create our playing area
   createCanvas(window.innerWidth,window.innerHeight);
-
+  scaleIt=window.innerWidth/500;
+defaultSpeed=defaultSpeed*scaleIt;
+defaultSize=defaultSize*scaleIt;
   // Put the avatar in the centre
   avatarX = width/2;
   avatarY = height/2;
@@ -121,12 +124,13 @@ rect(0, 0, width, height);
   // Check which keys are down and set the avatar's velocity based on its
   // speed appropriately
   if(mouseIsPressed){
+    cheeseImg=cheeseDown;
     if(mouseX-avatarX>0){
       avatarVX = avatarSpeed;
-      cheeseImg=cheeseLeft;
+
     }  else{
       avatarVX = -avatarSpeed;
-    cheeseImg=cheeseRight;}
+    }
     if(mouseY-avatarY>0){avatarVY = avatarSpeed;}
     else{avatarVY = -avatarSpeed;}
 
@@ -176,8 +180,8 @@ rect(0, 0, width, height);
     enemyX = 0;
     enemyY = random(0,height);
     // Reset the enemy's size and speed
-    enemySize = 20;
-    enemySpeed = 5;
+    enemySize = 20*scaleIt;
+    enemySpeed = 5*scaleIt;
     // Reset the avatar's position
     avatarX = width/2;
     avatarY = height/2;
@@ -185,9 +189,9 @@ rect(0, 0, width, height);
     if(dodges>hiScore){hiScore=dodges;record=true;}
     // Reset the dodge counter
     dodges = 0;
-    defaultSpeed=5;
-    defaultSize=20;
-    specialSpeed=initSpecialSpeed;
+    defaultSpeed=5*scaleIt;
+    defaultSize=20*scaleIt;
+    specialSpeed=initSpecialSpeed*scaleIt;
   } else {life-=1;
 
     wasDodged=false;
@@ -203,9 +207,9 @@ rect(0, 0, width, height);
     timer=millis()+textTimer;
     enemyX = 0;
     enemyY = random(0,height);
-    defaultSize = 20;
-    defaultSpeed = 5;
-    specialSpeed=initSpecialSpeed;
+    defaultSize = 20*scaleIt;
+    defaultSpeed = 5*scaleIt;
+    specialSpeed=initSpecialSpeed*scaleIt;
     avatarX = width/2;
     avatarY = height/2;
     if(dodges>hiScore){
@@ -221,10 +225,10 @@ rect(0, 0, width, height);
   if (enemyX > width) {
     // This means the player dodged so update its dodge statistic
     if(wasDodged){dodges = dodges + 1;}
-    avatarSize=random(10, 100);
-    avatarSpeed=random(5, 20);
-    if(defaultSpeed>=specialSpeed+2){
-      specialSpeed+=2;
+    avatarSize=random(10, 85)*scaleIt;
+    avatarSpeed=random(5, 20)*scaleIt;
+    if(defaultSpeed>=specialSpeed-2){
+      specialSpeed+=2*scaleIt;
     }
     if(dodges%oneup===0&&dodges!=0){life+=1;}
     // Tell them how many dodges they have made
@@ -237,14 +241,14 @@ rect(0, 0, width, height);
     // Add a random chance for a much larger but slower enemy.
     if(random()>0.5){
     special=false;
-    defaultSpeed = defaultSpeed + enemySpeedIncrease;
-    defaultSize = defaultSize + enemySizeIncrease;
+    defaultSpeed = defaultSpeed + enemySpeedIncrease*scaleIt;
+    defaultSize = defaultSize + enemySizeIncrease*scaleIt;
     enemySpeed=defaultSpeed;
     enemySize=defaultSize;
   } else {
     special=true;
-    enemySpeed = specialSpeed;
-    enemySize = specialSize;
+    enemySpeed = specialSpeed*scaleIt;
+    enemySize = specialSize*scaleIt;
     specialSpeed+=specialSpeedIncrease;
   }
 console.log("defaultspeed:"+defaultSpeed+" specialSpeed: "+specialSpeed);
@@ -284,7 +288,7 @@ if(record){gameOverText="game over. New record: "+hiScore;}
 else{gameOverText="game over."}
 
  if(millis()<timer){
-   textSize(25);
+   textSize(25*scaleIt);
    fill(0);
    text(gameOverText, width/2-textWidth(gameOverText)/2, height/2);
    fill(255);
@@ -292,30 +296,30 @@ else{gameOverText="game over."}
  }else {record=false;}
   // Display dodges in top left corner of the screen
   fill(0);
-  textSize(15);
-  text("successful dodges :", 20, 20);
+  textSize(15*scaleIt);
+  text("successful dodges :", 20*scaleIt, 20*scaleIt);
   fill(255);
-  text("successful dodges :", 19, 19);
+  text("successful dodges :", 20*scaleIt-1, 20*scaleIt-1);
   fill(255, 10, 25);
-  textSize(35);
-  text(dodges, 20, 50);
+  textSize(35*scaleIt);
+  text(dodges, 20*scaleIt, 50*scaleIt);
   fill(255);
-  text(dodges, 21, 51);
+  text(dodges, 20*scaleIt+1, 50*scaleIt+1);
   fill(0);
-  textSize(15);
-  text("hp : ", width-40, 20);
+  textSize(15*scaleIt);
+  text("hp: ", width-40*scaleIt, 20*scaleIt);
   fill(255);
-  text("hp : ", width-41, 19);
+  text("hp: ", width-40*scaleIt-1, 20*scaleIt-1);
   fill(255, 10, 25);
-  textSize(35);
-  text(life, width-40, 50);
+  textSize(35*scaleIt);
+  text(life, width-40*scaleIt, 50*scaleIt);
   fill(255);
-  text(life, width-39, 51);
-  textSize(17);
+  text(life, width-40*scaleIt+1, 50*scaleIt+1);
+  textSize(17*scaleIt);
   fill(0);
-  text("1up for every 10 dodges. \npress q to toggle cheese mode.", 10, height-30);
+  text("1up for every 10 dodges. \npress q to toggle cheese mode.", 10*scaleIt, height-30*scaleIt);
   fill(255);
-  text("1up for every 10 dodges. \npress q to toggle cheese mode.", 9, height-31);
+  text("1up for every 10 dodges. \npress q to toggle cheese mode.", 10*scaleIt-1, height-30*scaleIt-1);
 }
 
 function keyPressed(){
@@ -341,12 +345,9 @@ if(mouseY>0.3*height){//go down
 }
 }
 function touchMoved(){
-  if(mouseX<0.3*width){//go left
-  }
-  if(mouseX>0.3*width){//go right
-  }
-  if(mouseY<0.3*height){//go up
-  }
-  if(mouseY>0.3*height){//go down
-  }
+if(touches.length>=2){
+  console.log("backspace pressed")
+  cheeseMode=!cheeseMode;
+  if(cheeseMode){alph=alphaCheese;}else{alph=alphaNotCheese;}
+}
 }

@@ -163,7 +163,7 @@ cheeseImg=cheeseDown;
 // Minus a few pixels because I find things often fit better that way
 createCanvas(window.innerWidth-20,window.innerHeight-20);
 // Determine the scaling factor, which depends on screen size on load
-scaleIt=window.innerWidth/500;
+scaleIt=(window.innerWidth/500+window.innerHeight/400)/2;
 // Scale default speed
 defaultSpeed=defaultSpeed*scaleIt;
 defaultSize=defaultSize*scaleIt;

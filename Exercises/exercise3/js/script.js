@@ -14,6 +14,9 @@ https://creativenerds.co.uk/freebies/80-free-wildlife-icons-the-best-ever-animal
 var targetX;
 var targetY;
 var targetImage;
+var targetVX=0;
+var targetVY=0;
+var targetSpeed=10;
 
 // Position of the help image.
 var helpImageX, helpImageY;
@@ -36,7 +39,13 @@ var uiTextFill;
 var uiFill;
 var uiFill2;
 var uiStrokeWeight=8;
-var questText="$2 reward"
+var questText="$2 reward";
+var exclamation="woof!";
+var targetCentered=false;
+var timerDone=0;
+var targetSizeX;
+var targetSizeY;
+var targetSizeIncrease=0;
 
 // var decoyList= [10];
 
@@ -79,6 +88,8 @@ function setup() {
   uiFill=color(255, 25, 25);
   uiFill2=color(255, 85, 85);
   uiTextFill=color(255);
+  targetSizeX=targetImage.width;
+  targetSizeY=targetImage.height;
   // Use a for loop to draw as many decoys as we need
   for (var i = 0; i < numDecoys; i++) {
     // Choose a random location for this decoy
@@ -139,11 +150,22 @@ function setup() {
   // Once we've displayed all decoys, we choose a location for the target
   targetX = random(0,width);
   targetY = random(0,height);
+
+ // Make sure target image is not hidden behind the ui by generating coordinates again if needed
+ while(targetX>width-targetImage.width&&targetY<targetImage.height+uiTextSize+5){
+   targetX = random(0,width);
+   targetY = random(0,height);
+ }
+
   // And draw it (this means it will always be on top)
   image(targetImage,targetX,targetY);
 }
 
 function draw() {
+  // Update target position based on speed
+  targetX=targetX+targetVX;
+  targetY=targetY+targetVY;
+
   if (gameOver) {
     // Prepare our typography
     textFont("Helvetica");
@@ -154,10 +176,29 @@ function draw() {
     // Tell them they won!
     text("YOU WINNED!",width/2,height/2);
 
-    noFill();
-    stroke(random(255));
-    strokeWeight(10);
-    ellipse(targetX,targetY,targetImage.width,targetImage.height);
+
+    if(!targetCentered){
+      noFill();
+      stroke(random(255));
+      strokeWeight(10);
+      //background(0);
+      ellipse(targetX,targetY,targetImage.width,targetImage.height);
+      targetX=width/2;
+      targetY=height/2;
+      targetCentered=true;
+      timerDone=millis()+1000;
+  }
+   if(millis()>timerDone){
+    background(0);
+    targetSizeIncrease+=20;
+    targetSizeIncrease=constrain(targetSizeIncrease, 0, width-targetSizeX);
+    targetVX=5;
+    targetVY=0;
+    fill(255);
+    textSize(20);
+    text(exclamation, width/2, height/2);
+    image(targetImage, targetX, targetY, targetSizeX-targetSizeIncrease, targetSizeY-targetSizeIncrease);
+}
   }
 }
 

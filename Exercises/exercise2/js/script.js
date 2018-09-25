@@ -9,15 +9,17 @@ This version features two different visual themes, since I tried and liked both.
 - in the other you are a fully mobile piece of cheese dodging enfuriated mice.
 Other features include:
 - a stock of 5 lives,
+- a "cherry" to eat for an extra life,
 - an extra life for every 10 enemies dodged,
 - high score,
 - chance of facing a bigger and faster enemy.
-The game canvas and objects scale to fit the screen. Control your avatar
-(cheese) with key controls or click or touch. Toggle themes with "q" or by
-quickly dragging 3 fingers.
+- game canvas and objects scale to fit the screen.
+Control your avatar (cheese) with key controls or click or touch.
+Toggle themes with "q" or by quickly dragging 3 fingers.
 
 
 *********************************************************/
+// Position size and speed
 
 // The position and size of our avatar circle
 var avatarX;
@@ -29,6 +31,40 @@ var avatarSpeed = 10;
 var avatarVX = 0;
 var avatarVY = 0;
 
+// Cherry position and size
+var cherryX;
+var cherrySize=20;
+var cherryY;
+
+// Special enemy size and state (true= is the current enemy)
+var specialSize=100;
+var special=false;
+
+// The position and size of the enemy circle
+var enemyX;
+var enemyY;
+var enemySize = 50;
+
+// The speed and velocity of our enemy
+var enemySpeed = 5;
+var enemyVX = 5;
+
+// enemySpeed and Size will change over time
+// so I will use defaultSpeed and Size to reset it
+var defaultSpeed=5;
+var defaultSize=20;
+
+// Same idea for special enemy speed.
+var defaultSpecialSpeed=6;
+var specialSpeed=defaultSpecialSpeed;
+
+// How much bigger the enemy circle gets with each successful dodge
+var enemySizeIncrease = 2.5;
+
+// How much faster the enemy circle gets with each successful dodge
+var enemySpeedIncrease = 0.3;
+var specialSpeedIncrease=0.1;
+
 // Game variables:
 
 // Variables to hold score and high score
@@ -38,14 +74,20 @@ var hiScore=0;
 // Number of dodges needed for an extra life
 var oneup=10;
 
-// Text to appear upon reaching the end of the game (gets filled later)
-var gameOverText="";
-
 // Stock of lives to start with
 var startingLife=5;
 
 // Variable to save number of lives
 var life=startingLife;
+
+// Set number of lives a cherry gives
+var cherryBonus=1;
+
+// How many dodges the player has made
+var dodges = 0;
+
+// Text to appear upon reaching the end of the game (gets filled later)
+var gameOverText="";
 
 // wasDodged is false when there's a collision.
 // It will prevent a hit to be counted as a dodge for score keeping purposes.
@@ -62,46 +104,14 @@ var cheeseMode=true;
 // Number used to scale canvas size and objects' size and speed to fit the screen
 var scaleIt=1;
 
+// Color:
+
 // Alpha value of background in and out of cheese mode (themes)
 var alphaCheese=200;
 var alphaNotCheese=9;
 
 // Alpha value used to display things
 var alph =10;
-
-// The position and size of the enemy circle
-var enemyX;
-var enemyY;
-var enemySize = 50;
-
-// Variables for initial size and speed.
-// This way enemySize and enemySpeed are the CURRENT speed and size
-// While "default" is the normal size (which will increase),
-// As opposed to "special" which is the special enemy size.
-var defaultSpeed=5;
-var defaultSize=20;
-
-// How much bigger the enemy circle gets with each successful dodge
-var enemySizeIncrease = 4;
-
-// Special enemy's initial speed: one for safekeeping, one will be manipulated
-var initSpecialSpeed=6;
-var specialSpeed=initSpecialSpeed;
-
-// Special enemy size and state (true= is the current enemy)
-var specialSize=100;
-var special=false;
-
-// The speed and velocity of our enemy
-var enemySpeed = 5;
-var enemyVX = 5;
-
-// How much bigger the enemy circle gets with each successful dodge
-var enemySpeedIncrease = 0.2;
-var specialSpeedIncrease=0.09;
-
-// How many dodges the player has made
-var dodges = 0;
 
 // Declare a background color (will change).
 var newcolor= (255, 220, 220, alph);
@@ -119,16 +129,25 @@ var timer=0;
 var hitTimer=0;
 
 // Duration of "game over" text on in ms
-var textTimer=1500;
+var textTimer=3000;
 
 // Duration of safety timer in ms
 var safeTime=500;
 
+// Cherry timer, cherryDownTime and cherry will be used to placed
+// the cherry off screen for a moment after it's been captured
+var cherryTimer=0;
+var cherryDownTime=2000;
+var cherry=true;
+
 // Images:
+
 // Avatar image
 var cheeseImg;
 // Enemy image
 var mouseImg;
+// Cherry (or blue cheese)
+var blueCheese;
 // Avatar facing different directions (not sure how to simply rotate my image :D)
 var cheeseDown, cheeseUp, cheeseLeft, cheeseRight;
 
@@ -138,51 +157,58 @@ var cheeseDown, cheeseUp, cheeseLeft, cheeseRight;
 
 function preload(){
   // preload images to be used in game
-  // I doodled these and photographed them with my phone.
   cheeseDown=loadImage("images/cheesesmall.png");
   cheeseUp=loadImage("images/cheeseup.png");
   cheeseLeft=loadImage("images/cheeseleft.png");
   cheeseRight=loadImage("images/cheeseright.png");
   mouseImg=loadImage("images/mousesmall.png");
+  blueCheese=loadImage("images/bluecheese.png");
 }
+
 // setup()
 //
-// Make the canvas, position the avatar and anemy
+// Make the canvas, position the avatar, enemy, cherry
+// Display either theme: color mode or cheese mode.
+
 function setup() {
-console.log("setup");
-// Set font to courier
+ console.log("setup");
+
+ // Create our playing area, adapted to screen size
+ // Minus a few pixels because I find things often fit better that way
+ createCanvas(window.innerWidth-20,window.innerHeight-20);
+ // Determine the scaling factor. A different factor for x and y axis
+ // would probably give better results but this average will do I think
+ scaleIt=(window.innerWidth/500+window.innerHeight/400)/2;
+
+// Scale size of avatar, enemy, and cherry
+defaultSpeed=defaultSpeed*scaleIt;
+defaultSize=defaultSize*scaleIt;
+enemySpeed=enemySpeed*scaleIt;
+enemySize=enemySize*scaleIt;
+cherryX=width/2;
+cherrySize=cherrySize*scaleIt;
+cherryY=height/2;
+// Set font
 textFont("Courier");
 // Give and initial direction for the cheese image
 cheeseImg=cheeseDown;
 // Set alpha value of background to "cheese mode" to start.
-// Cheese mode has a static, opaque background
-// While "color mode" has a dynamic background
-// because of its alpha value.
-  alph=alphaCheese;
-// Create our playing area, adapted to screen size
-// Minus a few pixels because I find things often fit better that way
-createCanvas(window.innerWidth-20,window.innerHeight-20);
-// Determine the scaling factor, which depends on screen size on load
-scaleIt=(window.innerWidth/500+window.innerHeight/400)/2;
-// Scale default speed
-defaultSpeed=defaultSpeed*scaleIt;
-defaultSize=defaultSize*scaleIt;
-// Scale enemy speed (for the first enemy to have a scaled speed)
-enemySpeed=enemySpeed*scaleIt;
-enemySize=enemySize*scaleIt;
+alph=alphaCheese;
+// No stroke so it looks cleaner
+noStroke();
+
+// Background moved into setup()
+// I will use a transparent rect() in draw() instead
+background(255,220,220);
+// Declare an initial color for these transparent rectangles
+newcolor = (255, 220, 220, alph);
+
 // Put the avatar in the centre
 avatarX = width/2;
 avatarY = height/2;
 // Put the enemy to the left at a random y coordinate within the canvas
 enemyX = 0;
 enemyY = random(0,height);
-// No stroke so it looks cleaner
-noStroke();
-// Background moved into setup()
-// I will use transparent rectangles in draw() instead
-background(255,220,220);
-// Declare an initial color for these transparent rectangles
-newcolor = (255, 220, 220, alph);
 // Set imageMode and we're ready to go
 imageMode(CENTER);
 }
@@ -190,10 +216,14 @@ imageMode(CENTER);
 // draw()
 //
 // Handle moving the avatar and enemy and checking for dodges and
-// game over situations. Listens for key and mouse or touch controls.
+// game over situations. Places the cherry on or off screen.
+// Listens for key and mouse or touch controls.
 //
 
 function draw() {
+  // constrain enemy speed to something reasonable if needed.
+  enemySpeed=constrain(enemySpeed,0, width/20);
+  console.log("speed"+enemySpeed);
 
   // Fill screen with a transparent rectangle
   fill(newcolor);
@@ -202,18 +232,26 @@ function draw() {
   // Default the avatar's velocity to 0 in case no key is pressed this frame
   avatarVX = 0;
   avatarVY = 0;
-
+  // Check if cherry timer is over.
+  // If it is, load cherry at a random location on screen
+  if(millis()>cherryTimer&&cherry===false){
+    cherryX=random(width);
+    cherryY=random(height);
+    cherry=true;
+  }
   // Check if mouse is pressed and move avatar accordingly
   if(mouseIsPressed){
     // If mouse on right side of avatar, move right
     if(mouseX-avatarX>avatarSpeed){
       avatarVX = avatarSpeed;
+      // Cheese image will point right
       cheeseImg=cheeseRight;
-    }  else if(mouseX-avatarX<-avatarSpeed){
+      }  else if(mouseX-avatarX<-avatarSpeed){
     // If mouse is on left side move left
       avatarVX = -avatarSpeed;
+      // Cheese image will point left
       cheeseImg=cheeseLeft;
-    }
+      }
     // If mousePress was over avatar move up
     if(mouseY-avatarY>avatarSpeed){
       avatarVY = avatarSpeed;
@@ -230,6 +268,8 @@ function draw() {
       }
     }
   }
+
+
   // Check which keys are down and set the avatar's velocity based on its
   // speed appropriately. Also set cheese image to set the right direction.
   // Left and right
@@ -243,7 +283,6 @@ function draw() {
     // Use right image
     cheeseImg=cheeseRight;
   }
-
   // Up and down (separate if-statements so you can move vertically and
   // horizontally at the same time)
   if (keyIsDown(UP_ARROW)) {
@@ -256,17 +295,34 @@ function draw() {
     // Use down image
     cheeseImg=cheeseDown;
   }
+
   // Move the avatar according to its calculated velocity
-  avatarX = avatarX + avatarVX;
-  avatarY = avatarY + avatarVY;
+  // Constrain value to remain on screen
+  avatarX = constrain(avatarX + avatarVX, -5, width+5);
+  avatarY = constrain(avatarY + avatarVY, -5, height+5);
   // The enemy always moves at enemySpeed (which increases)
   enemyVX = enemySpeed;
   // Update the enemy's position based on its velocity
   enemyX = enemyX + enemyVX;
 
+  // Check if avatar is reached the cherry
+  if (dist(cherryX,cherryY,avatarX,avatarY) < cherrySize/2 + avatarSize/2 ) {
+    // If so, move the cherry off screen
+    cherryX=-100;
+    cherryY=-100;
+    cherry=false;
+    // Set the timer to bring the cherry back on
+    cherryTimer=millis()+cherryDownTime;
+    // And give the player some bonus life
+   life+=cherryBonus;
+  }
+
   // Check if the enemy and avatar overlap - if they do the player loses
   // We do this by checking if the distance between the centre of the enemy
-  // and the centre of the avatar is less that their combined radii
+  // and the centre of the avatar is less that their combined radii.
+  // I added a timer here that prevents the player from losing
+  // multiple lives in one collision: once the timer is set no hits
+  // are recorded for the duration of hitTimer (0.5 sec in this version).
   if (dist(enemyX,enemyY,avatarX,avatarY) < enemySize/2 + avatarSize/2 && millis()>hitTimer) {
     console.log("hit!");
     // If that was the last life
@@ -288,14 +344,18 @@ function draw() {
     avatarY = height/2;
     // Check if score is better than high score
     if(dodges>hiScore){
-      hiScore=dodges;record=true;
+      // If the highscore was beat,
+      // Update new high score and switch "record"
+      // to trigger an announcement in game over text.
+      hiScore=dodges;
+      record=true;
     }
     // Reset the dodge counter
     dodges = 0;
     // Reset default speed and size, and special speed too. Scale them.
     defaultSpeed=5*scaleIt;
     defaultSize=20*scaleIt;
-    specialSpeed=initSpecialSpeed*scaleIt;
+    specialSpeed=defaultSpecialSpeed*scaleIt;
   } else {
     // If that wasn't the last life, player gets minus one life
     life-=1;
@@ -318,14 +378,15 @@ function draw() {
     enemyY = random(0,height);
     defaultSize = 20*scaleIt;
     defaultSpeed = 5*scaleIt;
-    specialSpeed=initSpecialSpeed*scaleIt;
+    specialSpeed=defaultSpecialSpeed*scaleIt;
     avatarX = width/2;
     avatarY = height/2;
     if(dodges>hiScore){
       hiScore=dodges;
       record=true;}
     dodges = 0;
-  } else{life-=1;
+  } else {
+    life-=1;
     // wasDodged is not triggered here, because the enemy was dodged after all.
     hitTimer=millis()+safeTime;  }
 }
@@ -388,18 +449,18 @@ console.log("defaultspeed:"+defaultSpeed+" specialSpeed: "+specialSpeed);
   // Display the current number of successful in the console
   console.log(dodges);
   // ----------------- Display section ------------------//
-
   // One section for "cheese mode"
   // And one for the other, which we can call "color mode"
+
   // Start with cheese mode:
   if(cheeseMode===true){
     // Variables used while desiging to scale images
     var scaleCheese=1.2;
     var scaleMouse=1.5;
-    // If player was hit, display a white circle around him
+    // If player was hit, display a circle around him
     // For the duration of the hitTimer which was trigged earlier.
       if(millis()<hitTimer){
-        fill(255, 150);
+        fill(255, 25, 25);
         ellipse(avatarX,avatarY,avatarSize*scaleMouse,avatarSize*scaleMouse);
       }
     // Here we display the cheese and mouse images
@@ -412,7 +473,10 @@ console.log("defaultspeed:"+defaultSpeed+" specialSpeed: "+specialSpeed);
     // Make sure tint is off and display avatar image
     noTint();
     image(cheeseImg, avatarX, avatarY, scaleCheese*avatarSize,scaleCheese*avatarSize);
+    // Display cherry (blue cheese in this case)
+    image(blueCheese, cherryX, cherryY, cherrySize, cherrySize);
   } else {
+
   // Now we reach "color mode"
   // The player is black by default
   fill(0);
@@ -430,7 +494,11 @@ console.log("defaultspeed:"+defaultSpeed+" specialSpeed: "+specialSpeed);
   }
   // Draw the enemy as a circle
   ellipse(enemyX,enemyY,enemySize,enemySize);
+  // Draw the cherry
+  fill(225, 85, 85);
+  ellipse(cherryX, cherryY, cherrySize, cherrySize);
 }
+
   // Now we display text. All text gets scaled.
   // Determine which game over text to display.
   // If a new record was reached, mention it.
@@ -487,17 +555,24 @@ console.log("defaultspeed:"+defaultSpeed+" specialSpeed: "+specialSpeed);
   // Display some instructions at the bottom of the screen
   textSize(17*scaleIt);
   fill(0);
-  text("1up for every 10 dodges. \nq or drag three fingers to toggle cheese mode.", 10*scaleIt, height-30*scaleIt);
+  text("q or drag three fingers to toggle cheese mode.", 10*scaleIt, height-20*scaleIt);
   fill(255);
-  text("1up for every 10 dodges. \nq or drag three fingers to toggle cheese mode.", 10*scaleIt-1, height-30*scaleIt-1);
+  text("q or drag three fingers to toggle cheese mode.", 10*scaleIt-1, height-20*scaleIt-1);
+  // Display highscore text.
+  fill(0);
+  textSize(15*scaleIt);
+  text("hiscore: "+hiScore, width/2, 20*scaleIt);
+  fill(255);
+  text("hiscore: "+hiScore, width/2, 20*scaleIt-1);
 }
-
+// keyPressed()
+// allows toggling between color mode and cheese mode
 function keyPressed(){
   // Press q to toggle between cheese mode and color mode
   if(key==="q"){
     // record the toggle
     cheeseMode=!cheeseMode;
-    // switch alpha values for the background rectangle
+    // switch to appropriate alpha values for the background rectangle
     if(cheeseMode){
     alph=alphaCheese;
     } else {
@@ -506,6 +581,8 @@ function keyPressed(){
   }
 }
 
+// touchMoved
+// Allows for same functionnality as keyPressed but on a touch screen.
 function touchMoved(){
   // If three fingers are placed and dragged, toggle same as above.
 if(touches.length>=3){

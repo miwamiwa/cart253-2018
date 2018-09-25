@@ -15,6 +15,9 @@ var targetX;
 var targetY;
 var targetImage;
 
+// Position of the help image.
+var helpImageX, helpImageY;
+
 // The ten decoy images
 var decoyImage1;
 var decoyImage2;
@@ -26,6 +29,10 @@ var decoyImage7;
 var decoyImage8;
 var decoyImage9;
 var decoyImage10;
+
+var uiStrokeWeight=8;
+
+// var decoyList= [10];
 
 // The number of decoys to show on the screen, randomly
 // chosen from the decoy images
@@ -50,6 +57,7 @@ function preload() {
   decoyImage8 = loadImage("assets/images/animals-08.png");
   decoyImage9 = loadImage("assets/images/animals-09.png");
   decoyImage10 = loadImage("assets/images/animals-10.png");
+
 }
 
 // setup()
@@ -60,7 +68,7 @@ function setup() {
   createCanvas(windowWidth,windowHeight);
   background("#ffff00");
   imageMode(CENTER);
-
+  rectMode(CENTER);
   // Use a for loop to draw as many decoys as we need
   for (var i = 0; i < numDecoys; i++) {
     // Choose a random location for this decoy
@@ -102,6 +110,17 @@ function setup() {
       image(decoyImage10,x,y);
     }
   }
+
+  // Display an image that tells the user what he's looking for
+  // First determine position
+  helpImageX=width-targetImage.width/2-uiStrokeWeight/2;
+  helpImageY=targetImage.height/2+uiStrokeWeight/2;
+  // Then draw a background rectangle and the image on top.
+  strokeWeight(uiStrokeWeight);
+  stroke(255, 85, 85);
+  fill(255, 25, 25);
+  rect(helpImageX, helpImageY, targetImage.width, targetImage.height);
+  image(targetImage, helpImageX, helpImageY);
 
   // Once we've displayed all decoys, we choose a location for the target
   targetX = random(0,width);

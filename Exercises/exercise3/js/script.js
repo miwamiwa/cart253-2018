@@ -30,7 +30,13 @@ var decoyImage8;
 var decoyImage9;
 var decoyImage10;
 
+// ui design parameters
+var uiTextSize=14;
+var uiTextFill;
+var uiFill;
+var uiFill2;
 var uiStrokeWeight=8;
+var questText="$2 reward"
 
 // var decoyList= [10];
 
@@ -69,6 +75,10 @@ function setup() {
   background("#ffff00");
   imageMode(CENTER);
   rectMode(CENTER);
+  // give RGB values to fill variables
+  uiFill=color(255, 25, 25);
+  uiFill2=color(255, 85, 85);
+  uiTextFill=color(255);
   // Use a for loop to draw as many decoys as we need
   for (var i = 0; i < numDecoys; i++) {
     // Choose a random location for this decoy
@@ -117,9 +127,13 @@ function setup() {
   helpImageY=targetImage.height/2+uiStrokeWeight/2;
   // Then draw a background rectangle and the image on top.
   strokeWeight(uiStrokeWeight);
-  stroke(255, 85, 85);
-  fill(255, 25, 25);
-  rect(helpImageX, helpImageY, targetImage.width, targetImage.height);
+  stroke(uiFill2);
+  fill(uiFill);
+  rect(helpImageX, helpImageY, targetImage.width, targetImage.height+uiTextSize+5);
+  fill(uiTextFill);
+  noStroke();
+  textSize(uiTextSize);
+  text(questText, helpImageX-textWidth(questText)/2, helpImageY+targetImage.height/2);
   image(targetImage, helpImageX, helpImageY);
 
   // Once we've displayed all decoys, we choose a location for the target

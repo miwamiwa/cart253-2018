@@ -16,24 +16,30 @@ var targetY;
 var targetImage;
 var targetVX=0;
 var targetVY=0;
+var targetSizeX;
+var targetSizeY;
+
+// random decoy size
+var randomSize;
+
+// Size and Speed increase to be used in win animation
 var targetSpeed=10;
+var sizeIncrease=5;
+var targetSizeIncrease=0;
+
+// win animation triggers
+var wasHit=false;
+var timerDone=0;
+var targetOnLeftSide=false;
+var goToMiddle;
+
+// target velocity during animation
+var finalVelX=30;
 
 // Position of the help image.
 var helpImageX, helpImageY;
 
-// The ten decoy images
-var decoyImage1;
-var decoyImage2;
-var decoyImage3;
-var decoyImage4;
-var decoyImage5;
-var decoyImage6;
-var decoyImage7;
-var decoyImage8;
-var decoyImage9;
-var decoyImage10;
-
-// ui design parameters
+// text and help box design parameters
 var uiTextSize=14;
 var uiTextFill;
 var uiFill;
@@ -41,124 +47,74 @@ var uiFill2;
 var uiStrokeWeight=8;
 var questText="$2 reward";
 var exclamation="woof!";
-var targetCentered=false;
-var timerDone=0;
-var targetSizeX;
-var targetSizeY;
-var targetSizeIncrease=0;
 
-// var decoyList= [10];
+// range of possible image sizes
+var minSize=36;
+var maxSize=128;
+
+// range of decoys to generate
+var minDecoys=10;
+var maxDecoys=2*minDecoys;
+
+// decoyList holds the full list of images, assigned in preload
+var decoyList=[0];
+// and finalDecoyList is a copy of decoyList minus the random target image
+var finalDecoyList=[0];
 
 // The number of decoys to show on the screen, randomly
 // chosen from the decoy images
-var numDecoys = 100;
+var numDecoys=0;
 
 // Keep track of whether they've won
 var gameOver = false;
 
+// Will be used to save which image is the target image
+var tarNum=0;
+
+// State number of images we have
+var numImages=11;
+
+
 // preload()
 //
 // Loads the target and decoy images before the program starts
+
 function preload() {
-  targetImage = loadImage("assets/images/animals-target.png");
+  // create array based on number of images we are using (must state this number)
+  // this way we could potentially expand the image bank
+  // as long as we follow the same name syntax
+  // this way in setup() we also avoid the lengthy else/if method of displaying random images
 
-  decoyImage1 = loadImage("assets/images/animals-01.png");
-  decoyImage2 = loadImage("assets/images/animals-02.png");
-  decoyImage3 = loadImage("assets/images/animals-03.png");
-  decoyImage4 = loadImage("assets/images/animals-04.png");
-  decoyImage5 = loadImage("assets/images/animals-05.png");
-  decoyImage6 = loadImage("assets/images/animals-06.png");
-  decoyImage7 = loadImage("assets/images/animals-07.png");
-  decoyImage8 = loadImage("assets/images/animals-08.png");
-  decoyImage9 = loadImage("assets/images/animals-09.png");
-  decoyImage10 = loadImage("assets/images/animals-10.png");
-
+  // For each image, create a link to that image
+  for(var i=0; i<numImages; i++){
+    // first 9 numbers start with a "0"
+    var imageLink= "assets/images/animals-0"+(i+1)+".png";
+    // the following ones do not
+    if(i>=9){ imageLink="assets/images/animals-"+(i+1)+".png";}
+    // here's the exception: our original target image has a different syntax
+    // could have renamed it to fit the syntax but exceptions can be interesting too
+    if(i===numImages-1){ imageLink="assets/images/animals-target.png";}
+    // now that links are created, assign each image to a list element
+    decoyList[i]=loadImage(imageLink);
+ }
 }
 
 // setup()
 //
-// Creates the canvas, sets basic modes, draws correct number
-// of decoys in random positions, then the target
+// sets a few initial display parameters then fires the reset function
+// which will load everything
+
 function setup() {
-  createCanvas(windowWidth,windowHeight);
-  background("#ffff00");
+  // dislay modes
   imageMode(CENTER);
   rectMode(CENTER);
-  // give RGB values to fill variables
+  // set "ui" values (for text and rectangle on screen)
   uiFill=color(255, 25, 25);
   uiFill2=color(255, 85, 85);
   uiTextFill=color(255);
-  targetSizeX=targetImage.width;
-  targetSizeY=targetImage.height;
-  // Use a for loop to draw as many decoys as we need
-  for (var i = 0; i < numDecoys; i++) {
-    // Choose a random location for this decoy
-    var x = random(0,width);
-    var y = random(0,height);
-    // Generate a random number we can use for probability
-    var r = random();
-    // Use the random number to display one of the ten decoy
-    // images, each with a 10% chance of being shown
-    // We'll talk more about this nice quality of random soon enough
-    if (r < 0.1) {
-      image(decoyImage1,x,y);
-    }
-    else if (r < 0.2) {
-      image(decoyImage2,x,y);
-    }
-    else if (r < 0.3) {
-      image(decoyImage3,x,y);
-    }
-    else if (r < 0.4) {
-      image(decoyImage4,x,y);
-    }
-    else if (r < 0.5) {
-      image(decoyImage5,x,y);
-    }
-    else if (r < 0.6) {
-      image(decoyImage6,x,y);
-    }
-    else if (r < 0.7) {
-      image(decoyImage7,x,y);
-    }
-    else if (r < 0.8) {
-      image(decoyImage8,x,y);
-    }
-    else if (r < 0.9) {
-      image(decoyImage9,x,y);
-    }
-    else if (r < 1.0) {
-      image(decoyImage10,x,y);
-    }
-  }
-
-  // Display an image that tells the user what he's looking for
-  // First determine position
-  helpImageX=width-targetImage.width/2-uiStrokeWeight/2;
-  helpImageY=targetImage.height/2+uiStrokeWeight/2;
-  // Then draw a background rectangle and the image on top.
-  strokeWeight(uiStrokeWeight);
-  stroke(uiFill2);
-  fill(uiFill);
-  rect(helpImageX, helpImageY, targetImage.width, targetImage.height+uiTextSize+5);
-  fill(uiTextFill);
-  noStroke();
-  textSize(uiTextSize);
-  text(questText, helpImageX-textWidth(questText)/2, helpImageY+targetImage.height/2);
-  image(targetImage, helpImageX, helpImageY);
-
-  // Once we've displayed all decoys, we choose a location for the target
-  targetX = random(0,width);
-  targetY = random(0,height);
-
- // Make sure target image is not hidden behind the ui by generating coordinates again if needed
- while(targetX>width-targetImage.width&&targetY<targetImage.height+uiTextSize+5){
-   targetX = random(0,width);
-   targetY = random(0,height);
- }
-
-  // And draw it (this means it will always be on top)
-  image(targetImage,targetX,targetY);
+  textFont("Helvetica");
+  // avoid doubling setup text by placing the reset function directly here
+  resetSetup();
 }
 
 function draw() {
@@ -167,39 +123,129 @@ function draw() {
   targetY=targetY+targetVY;
 
   if (gameOver) {
+
     // Prepare our typography
-    textFont("Helvetica");
     textSize(128);
     textAlign(CENTER,CENTER);
     noStroke();
     fill(random(255));
     // Tell them they won!
     text("YOU WINNED!",width/2,height/2);
-
-
-    if(!targetCentered){
+    // A short animation is triggered upon winning
+    // First part is the "you winned" text and ellipse
+    if(!wasHit){
+      // new background
+      background(0);
+      // stylize
       noFill();
       stroke(random(255));
       strokeWeight(10);
-      //background(0);
-      ellipse(targetX,targetY,targetImage.width,targetImage.height);
-      targetX=width/2;
-      targetY=height/2;
-      targetCentered=true;
-      timerDone=millis()+1000;
+      // draw win ellipse
+      ellipse(targetX,targetY,targetSizeX*2,targetSizeY*2);
+      image(targetImage, targetX, targetY);
+      wasHit=true;
+
+      // Start timer that will trigger the next part of the win animation
+      timerDone=millis()+500;
+      // Calculate Y velocity that will bring target to the middle of the y-axis
+      goToMiddle=(targetY-height/2)/(targetX/finalVelX);
   }
+  // Timer end: animation continues
    if(millis()>timerDone){
+
     background(0);
-    targetSizeIncrease+=20;
-    targetSizeIncrease=constrain(targetSizeIncrease, 0, width-targetSizeX);
-    targetVX=5;
-    targetVY=0;
-    fill(255);
-    textSize(20);
-    text(exclamation, width/2, height/2);
+    // update target size
+    targetSizeIncrease+=sizeIncrease;
+    // update target XY pos according to previously set velocity
+    targetVX=-finalVelX;
+    targetVY=-goToMiddle;
+
+    // once target has reached left side of the screen
+    if(targetX<10){
+      // trigger next part of the animation
+      targetOnLeftSide=true;
+    }
+    // target will now move from left to right
+    if(targetOnLeftSide){
+      // update velocity accordingly
+      targetVX=finalVelX;
+      targetVY=0;
+      // once target has reached 70% of screen width
+        if(targetX>=0.7*width){
+          // stop moving
+          targetVX=0;
+          // stop size increase
+          sizeIncrease=0;
+          // stylize text
+         fill(uiFill2);
+         textSize(50);
+         // display "woof"
+         text(exclamation, width/2, height/2);
+       }
+       // display number of decoys, and reset instructions
+       // stylize text
+         textAlign(LEFT);
+         fill(uiFill);
+         textSize(25);
+         // dislay decoys and instructions twice for shadow effect
+      text("Decoys: "+numDecoys, 10, height-50);
+      text("to restart press 1 (easier), 2 (same difficulty) or 3 (harder)", 10, height-20);
+      fill(uiFill2);
+      text("Decoys: "+numDecoys, 10-2, height-50-2);
+      text("to restart press 1 (easier), 2 (same difficulty) or 3 (harder)", 10-2, height-20-2);
+    }
+    // display the moving target image.
     image(targetImage, targetX, targetY, targetSizeX-targetSizeIncrease, targetSizeY-targetSizeIncrease);
 }
   }
+}
+// Key pressed ()
+// this function manages the key controls used to reset the game
+function keyPressed(){
+  // factor by which the game is made easier or harder
+  // var variation will be used to increase or decrease the maximum
+  // and minimum boundaries of the random number of decoys displayed
+  var variation;
+  // if key press is 1, 2, or 3
+  if(key>0&&key<4){
+  switch(key){
+    // pressing 1 makes the game easier
+    case '1':
+    console.log("50% easier");
+    variation=0.5;
+    break;
+    // pressing 2 keeps the same difficulty
+    case '2':
+    console.log("same difficulty");
+    variation=1;
+    break;
+    // pressing 3 makes the game harder
+    case '3':
+    console.log("50% harder");
+    variation=1.5;
+    break;
+}
+// Calculate new range for random decoys based on difficulty setting
+minDecoys = constrain(variation*minDecoys, 1, 1000);
+maxDecoys = 2*minDecoys;
+// Calculate new range for random size
+// using 1-variation as a factor we can increase size range for added difficulty,
+// and normalise the sizes to make it easier
+minSize += (1-variation)*8;
+minSize = constrain(minSize, 10, 40);
+maxSize -= (1-variation)*16;
+maxSize = constrain(maxSize, 100, 200);
+// Reset game variables
+sizeIncrease=3;
+increase=0;
+targetSizeIncrease=0;
+wasHit=false;
+targetOnLeftSide=false;
+gameOver=false;
+numImages=11;
+//fire the reset function
+resetSetup();
+}
 }
 
 // mousePressed()
@@ -207,10 +253,97 @@ function draw() {
 // Checks if the player clicked on the target and if so tells them they won
 function mousePressed() {
   // Check if the mouse is in the x range of the target
-  if (mouseX > targetX - targetImage.width/2 && mouseX < targetX + targetImage.width/2) {
+  if (mouseX > targetX - targetSizeX/2 && mouseX < targetX + targetSizeX/2) {
     // Check if the mouse is also in the y range of the target
-    if (mouseY > targetY - targetImage.height/2 && mouseY < targetY + targetImage.height/2) {
+    if (mouseY > targetY - targetSizeY/2 && mouseY < targetY + targetSizeY/2) {
       gameOver = true;
     }
   }
+}
+
+
+ function resetSetup(){
+   // This part replaces most of setup() and is used to reset the gameOver
+   // to its initial settings as well.
+   // create playing area
+   createCanvas(windowWidth-1,windowHeight-5);
+   background("#ffff00");
+   // choose a number from 0 to 10
+   tarNum = floor(random(0, 11));
+   // use that to pick the target image from the array created in preload()
+   targetImage=decoyList[tarNum];
+   // update the final decoy list to exlude the target
+   finalDecoyList=concat(subset(decoyList, 0, tarNum), subset(decoyList, tarNum+1, decoyList.length));
+   // generate a random number of decoys
+   numDecoys=round(random(minDecoys, maxDecoys));
+   // reset target size, velocity, position
+   targetSizeX=128;
+   targetSizeY=128;
+   targetVX=0;
+   targetVY=0;
+   targetX=0;
+   targetY=0;
+   // Use a for loop to draw as many decoys as we need
+   for (var i = 0; i < numDecoys; i++) {
+     // Choose a random location for this decoy
+     var x = random(0,width);
+     var y = random(0,height);
+     // Generate a random number we can use for probability
+     var r = random();
+     // check through the list of decoys
+     for(var j=0; j<finalDecoyList.length; j++){
+     // now check range of the random number
+     if(r<0.1*j&&r>0.1*(j-1)){
+     // use that to display a random image with random size
+         randomSize=random(minSize, maxSize);
+         image(finalDecoyList[j],x,y, randomSize, randomSize);
+
+     }
+   }
+   }
+
+   // Once we've displayed all decoys, we choose a location for the target
+   targetX = random(0,width);
+   targetY = random(0,height);
+   // Make sure target image is not hidden behind the ui by generating coordinates again if needed
+   while(targetX>width-1.5*128&&targetY<1.5*128+uiTextSize){
+     targetX = random(0,width);
+     targetY = random(0,height);
+   }
+   // generate a random size
+   targetSizeX=random(minSize, maxSize);
+   targetSizeY=targetSizeX;
+  // And draw target (this means it will always be on top)
+  image(targetImage,targetX,targetY, targetSizeX, targetSizeY);
+
+   // Display a help box that tells the user what he's looking for
+   // First determine position
+   helpImageX=width-128/2-uiStrokeWeight/2;
+   helpImageY=128/2+uiStrokeWeight/2;
+   // stylize rectangle
+   strokeWeight(uiStrokeWeight);
+   stroke(uiFill2);
+   fill(uiFill);
+   // display rectangle which is the background of help box
+   rect(helpImageX, helpImageY, 128, 128+uiTextSize+5);
+   // stylize text
+   fill(uiTextFill);
+   noStroke();
+   textSize(uiTextSize);
+   // display help box text
+   text(questText, helpImageX-textWidth(questText)/2, helpImageY+64);
+   // display help box image
+   image(targetImage, helpImageX, helpImageY);
+
+  // display text at the bottom of the screen
+  // stylize text and display twice for shadow effect.
+  fill(uiFill);
+  textSize(25);
+  text("Decoys: "+numDecoys+". Current difficulty: "+floor(minDecoys)+" to "+floor(maxDecoys)+" decoys.", 10, height-50);
+  text("to restart press 1 (easier), 2 (same difficulty) or 3 (harder)", 10, height-20);
+  fill(uiFill2);
+  text("Decoys: "+numDecoys+". Current difficulty: "+floor(minDecoys)+" to "+floor(maxDecoys)+" decoys.", 10-2, height-50-2);
+  text("to restart press 1 (easier), 2 (same difficulty) or 3 (harder)", 10-2, height-20-2);
+
+
 }

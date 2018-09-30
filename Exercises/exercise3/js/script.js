@@ -1,13 +1,9 @@
 /******************************************************************************
-Where's Sausage Dog?
-by Pippin Barr
+Where's Sausage Dog II
+by Samuel Paré-Chouinard
 
-An algorithmic version of a Where's Wally searching game where you
-need to click on the sausage dog you're searching for in amongst all
-the visual noise of other animals.
+The much anticipated sequel to Where's Sausage Dog.
 
-Animal images from:
-https://creativenerds.co.uk/freebies/80-free-wildlife-icons-the-best-ever-animal-icon-set/
 ******************************************************************************/
 
 // Position and image of the sausage dog we're searching for
@@ -300,15 +296,15 @@ function mousePressed() {
    stroke(uiFill2);
    fill(uiFill);
    // display rectangle which is the background of help box
-   rect(helpImageX, helpImageY, 128, 128+uiTextSize+5);
+   rect(helpImageX, helpImageY, 128, 128+uiTextSize+15);
    // stylize text
    fill(uiTextFill);
    noStroke();
    textSize(uiTextSize);
    // display help box text
-   text(questText, helpImageX-textWidth(questText)/2, helpImageY+64);
+   text(questText, helpImageX-textWidth(questText)/2, helpImageY+74);
    // display help box image
-   image(targetImage, helpImageX, helpImageY);
+   image(targetImage, helpImageX, helpImageY, 128, 128);
 
   // display text at the bottom of the screen
   // stylize text and display twice for shadow effect.

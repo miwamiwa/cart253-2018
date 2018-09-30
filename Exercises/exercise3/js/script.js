@@ -22,16 +22,9 @@ var targetSizeY;
 // random decoy size
 var randomSize;
 
-// Size and Speed increase to be used in win animation
-var targetSpeed=10;
-var sizeIncrease=5;
-var targetSizeIncrease=0;
-
 // win animation triggers
 var wasHit=false;
 var timerDone=0;
-var targetOnLeftSide=false;
-var goToMiddle;
 
 // target velocity during animation
 var finalVelX=30;
@@ -74,6 +67,8 @@ var tarNum=0;
 // State number of images we have
 var numImages=11;
 
+// something to count frames
+ var frame=0;
 
 // preload()
 //
@@ -105,6 +100,9 @@ function preload() {
 // which will load everything
 
 function setup() {
+  // initialize inc
+
+
   // dislay modes
   imageMode(CENTER);
   rectMode(CENTER);
@@ -118,6 +116,7 @@ function setup() {
 }
 
 function draw() {
+
   // Update target position based on speed
   targetX=targetX+targetVX;
   targetY=targetY+targetVY;
@@ -147,41 +146,21 @@ function draw() {
 
       // Start timer that will trigger the next part of the win animation
       timerDone=millis()+500;
-      // Calculate Y velocity that will bring target to the middle of the y-axis
-      goToMiddle=(targetY-height/2)/(targetX/finalVelX);
   }
   // Timer end: animation continues
+  // in this part I display random target images with a tint applied
    if(millis()>timerDone){
-
-    background(0);
-    // update target size
-    targetSizeIncrease+=sizeIncrease;
-    // update target XY pos according to previously set velocity
-    targetVX=-finalVelX;
-    targetVY=-goToMiddle;
-
-    // once target has reached left side of the screen
-    if(targetX<10){
-      // trigger next part of the animation
-      targetOnLeftSide=true;
-    }
-    // target will now move from left to right
-    if(targetOnLeftSide){
-      // update velocity accordingly
-      targetVX=finalVelX;
-      targetVY=0;
-      // once target has reached 70% of screen width
-        if(targetX>=0.7*width){
-          // stop moving
-          targetVX=0;
-          // stop size increase
-          sizeIncrease=0;
-          // stylize text
-         fill(uiFill2);
-         textSize(50);
-         // display "woof"
-         text(exclamation, width/2, height/2);
-       }
+     fill(0, 3);
+     rect(width/2, height/2, width, height);
+     // starting counting frames after timer
+     frame+=1;
+     // constrain value below targetSize
+     frame=constrain(frame, 0, targetSizeX-25);
+     // pick a random color
+     tint(random(255), random(255), random(255));
+     // display a random target image
+     image(targetImage, random(width), random(height), targetSizeX-frame, targetSizeX-frame);
+     }
        // display number of decoys, and reset instructions
        // stylize text
          textAlign(LEFT);
@@ -194,11 +173,9 @@ function draw() {
       text("Decoys: "+numDecoys, 10-2, height-50-2);
       text("to restart press 1 (easier), 2 (same difficulty) or 3 (harder)", 10-2, height-20-2);
     }
-    // display the moving target image.
-    image(targetImage, targetX, targetY, targetSizeX-targetSizeIncrease, targetSizeY-targetSizeIncrease);
+
 }
-  }
-}
+
 // Key pressed ()
 // this function manages the key controls used to reset the game
 function keyPressed(){
@@ -236,13 +213,11 @@ minSize = constrain(minSize, 10, 40);
 maxSize -= (1-variation)*16;
 maxSize = constrain(maxSize, 100, 200);
 // Reset game variables
-sizeIncrease=3;
-increase=0;
-targetSizeIncrease=0;
 wasHit=false;
-targetOnLeftSide=false;
 gameOver=false;
 numImages=11;
+frame=0;
+noTint();
 //fire the reset function
 resetSetup();
 }

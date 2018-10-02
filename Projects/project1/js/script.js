@@ -24,7 +24,7 @@ var playerMaxSpeed = normalSpeed;
 var sprintSpeed =4;
 // Player health
 var playerHealth;
-var playerMaxHealth = 600;
+var playerMaxHealth = 800;
 // Rate of health loss
 var lossFactor=1;
 // Rate of health loss while player is sprinting
@@ -43,7 +43,9 @@ var preyMaxSpeed = 4;
 var preyHealth;
 var preyMaxHealth = 100;
 // Prey fill color
-var preyFill = 200;
+var normalPreyFill = 200;
+var preyFill=normalPreyFill;
+var specialPreyFill=100;
 
 // Amount of health obtained per frame of "eating" the prey
 var eatHealth = 10;
@@ -224,9 +226,12 @@ function checkEating() {
   var d = dist(playerX,playerY,preyX,preyY);
   if (d< visionRange&&preyIntel>preyLevelUp){
     playerInVisionRange=true;
+    preyFill=specialPreyFill;
+
     if(!captureTimerStarted){
     captureTimer=millis()+timerLength;
     captureTimerStarted=true;
+    preyFill=normalPreyFill;
   }
   } else {
     playerInVisionRange=false;

@@ -24,7 +24,7 @@ var playerMaxSpeed = normalSpeed;
 var sprintSpeed =4;
 // Player health
 var playerHealth;
-var playerMaxHealth = 255;
+var playerMaxHealth = 600;
 // Rate of health loss
 var lossFactor=1;
 // Rate of health loss while player is sprinting
@@ -61,12 +61,21 @@ var sprintOn=false;
 // distance at which the prey might see you
 var visionRange=100;
 
-// chance that the prey sees You
-var visionSkill=0.1;
+// how smart the prey is
+var preyIntel=0.1;
 
 // increment by which prey skills increase upon capture
-var visionSkillIncrement=0.05;
+var preyIntelIncrement=0.05;
 var visionRangeIncrement=10;
+
+// level of prey intel at which prey levels up
+var preyLevelUp=0.15;
+
+// capture timer related stuff
+var captureTimer=0;
+var timerLength=2000;
+var captureTimerStarted=false;
+var playerInVisionRange=false;
 
 // setup()
 //
@@ -213,6 +222,17 @@ function updateHealth() {
 function checkEating() {
   // Get distance of player to prey
   var d = dist(playerX,playerY,preyX,preyY);
+  if (d< visionRange&&preyIntel>preyLevelUp){
+    playerInVisionRange=true;
+    if(!captureTimerStarted){
+    captureTimer=millis()+timerLength;
+    captureTimerStarted=true;
+  }
+  } else {
+    playerInVisionRange=false;
+    captureTimer=0;
+  captureTimerStarted=false;
+}
   // Check if it's an overlap
   if (d < playerRadius + preyRadius) {
     // Increase the player health
@@ -231,8 +251,8 @@ function checkEating() {
       preyEaten++;
       // update prey vision skill or vision range
       if(random()>0.5){
-      visionSkill+=visionSkillIncrement;
-      visionSkill=constrain(visionSkill, 0, 1);
+      preyIntel+=preyIntelIncrement;
+      preyIntel=constrain(preyIntel, 0, 1);
     } else {
       visionRange+=visionRangeIncrement;
       visionRange=constrain(visionRange, 0, width/3);
@@ -267,13 +287,26 @@ function movePrey() {
 
   // random chance for prey to run away
   // this will overwrite the prey velocity generated above.
- if(random()>=1-visionSkill&&abs(dist(playerX, playerY, preyX, preyY))<visionRange){
+ if(random()>=1-preyIntel&&abs(dist(playerX, playerY, preyX, preyY))<visionRange){
    console.log("prey is running away");
 if(preyX-playerX!=0&&preyY-playerY!=0){
   preyVX=(preyX-playerX)/abs(preyX-playerX)*0.5*preyMaxSpeed;
   preyVY=(preyY-playerY)/abs(preyY-playerY)*0.5*preyMaxSpeed;
+// if prey has leveled up add that teleporty thingy
+  if(preyIntel>=preyLevelUp&&millis()>captureTimer&&captureTimerStarted){
 
+    preyX=random(width);
+    preyY=random(height);
+    preyFill=color(255, 25, 25);
+    console.log("ported");
+    while(dist(preyX, preyY, playerX, playerY)<visionRange){
+      preyX=random(width);
+      preyY=random(height);
+    }
+
+  }
 }
+
   }
 
 
@@ -309,7 +342,7 @@ function drawPrey() {
   ellipse(preyX, preyY, visionRange*2);
   noStroke();
   fill(255);
-  text("brains: "+round(visionSkill*100), preyX, preyY+preyRadius*3);
+  text("brains: "+round(preyIntel*100), preyX, preyY+preyRadius*3);
 
 
 }

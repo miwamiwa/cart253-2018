@@ -58,6 +58,15 @@ var noiseInc=0.1;
 // var that toggles sprint on and off
 var sprintOn=false;
 
+// distance at which the prey might see you
+var visionRange=100;
+
+// chance that the prey sees You
+var visionSkill=0.1;
+
+// increment by which prey skills increase upon capture
+var visionSkillIncrement=0.05;
+var visionRangeIncrement=10;
 
 // setup()
 //
@@ -220,6 +229,14 @@ function checkEating() {
       preyHealth = preyMaxHealth;
       // Track how many prey were eaten
       preyEaten++;
+      // update prey vision skill or vision range
+      if(random()>0.5){
+      visionSkill+=visionSkillIncrement;
+      visionSkill=constrain(visionSkill, 0, 1);
+    } else {
+      visionRange+=visionRangeIncrement;
+      visionRange=constrain(visionRange, 0, width/3);
+    }
     }
   }
 }
@@ -240,12 +257,25 @@ function movePrey() {
     preyVY = map(random(),0,1,-preyMaxSpeed,preyMaxSpeed);
   }
   */
+  // move up Perlin noise position by increment
   noisePos=noisePos+noiseInc;
   noiseSeed(0);
-
+  // update velocity of prey based on noise value
   preyVX= map(noise(noisePos), 0, 1, -preyMaxSpeed, preyMaxSpeed);
   noiseSeed(1);
   preyVY= map(noise(noisePos), 0, 1, -preyMaxSpeed, preyMaxSpeed);
+
+  // random chance for prey to run away
+  // this will overwrite the prey velocity generated above.
+ if(random()>=1-visionSkill&&abs(dist(playerX, playerY, preyX, preyY))<visionRange){
+   console.log("prey is running away");
+if(preyX-playerX!=0&&preyY-playerY!=0){
+  preyVX=(preyX-playerX)/abs(preyX-playerX)*0.5*preyMaxSpeed;
+  preyVY=(preyY-playerY)/abs(preyY-playerY)*0.5*preyMaxSpeed;
+
+}
+  }
+
 
 
   // Update prey position based on velocity
@@ -274,6 +304,14 @@ function movePrey() {
 function drawPrey() {
   fill(preyFill,preyHealth);
   ellipse(preyX,preyY,preyRadius*2);
+  stroke(255);
+  noFill();
+  ellipse(preyX, preyY, visionRange*2);
+  noStroke();
+  fill(255);
+  text("brains: "+round(visionSkill*100), preyX, preyY+preyRadius*3);
+
+
 }
 
 // drawPlayer()

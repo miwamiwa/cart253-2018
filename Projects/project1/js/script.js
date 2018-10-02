@@ -44,6 +44,12 @@ var eatHealth = 10;
 // Number of prey eaten during the game
 var preyEaten = 0;
 
+// position within a Perlin noise sequence
+var noisePos=0;
+// rate of change of Perlin noise position
+var noiseInc=0.1;
+
+
 // setup()
 //
 // Sets up the basic elements of the game
@@ -128,6 +134,7 @@ function handleInput() {
   else {
     playerVY = 0;
   }
+
 }
 
 // movePlayer()
@@ -202,7 +209,7 @@ function movePrey() {
   // Change the prey's velocity at random intervals
   // random() will be < 0.05 5% of the time, so the prey
   // will change direction on 5% of frames
-  if (random() < 0.05) {
+  /* if (random() < 0.05) {
     // Set velocity based on random values to get a new direction
     // and speed of movement
     // Use map() to convert from the 0-1 range of the random() function
@@ -210,6 +217,14 @@ function movePrey() {
     preyVX = map(random(),0,1,-preyMaxSpeed,preyMaxSpeed);
     preyVY = map(random(),0,1,-preyMaxSpeed,preyMaxSpeed);
   }
+  */
+  noisePos=noisePos+noiseInc;
+  noiseSeed(0);
+
+  preyVX= map(noise(noisePos), 0, 1, -preyMaxSpeed, preyMaxSpeed);
+  noiseSeed(1);
+  preyVY= map(noise(noisePos), 0, 1, -preyMaxSpeed, preyMaxSpeed);
+
 
   // Update prey position based on velocity
   preyX += preyVX;

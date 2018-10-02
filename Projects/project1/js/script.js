@@ -19,10 +19,16 @@ var playerY;
 var playerRadius = 25;
 var playerVX = 0;
 var playerVY = 0;
-var playerMaxSpeed = 2;
+var normalSpeed = 2;
+var playerMaxSpeed = normalSpeed;
+var sprintSpeed =4;
 // Player health
 var playerHealth;
 var playerMaxHealth = 255;
+// Rate of health loss
+var lossFactor=1;
+// Rate of health loss while player is sprinting
+var sprintLossFactor=2;
 // Player fill color
 var playerFill = 50;
 
@@ -48,6 +54,9 @@ var preyEaten = 0;
 var noisePos=0;
 // rate of change of Perlin noise position
 var noiseInc=0.1;
+
+// var that toggles sprint on and off
+var sprintOn=false;
 
 
 // setup()
@@ -90,6 +99,7 @@ function setupPlayer() {
 // displays the two agents.
 // When the game is over, shows the game over screen.
 function draw() {
+
   background(100,100,200);
 
   if (!gameOver) {
@@ -113,6 +123,16 @@ function draw() {
 //
 // Checks arrow keys and adjusts player velocity accordingly
 function handleInput() {
+  // check for shift key press
+  if(keyIsDown(SHIFT)){
+    sprintOn=true;
+    playerMaxSpeed=sprintSpeed;
+    lossFactor=sprintLossFactor;
+  } else {
+    sprintOn=false;
+    playerMaxSpeed=normalSpeed;
+    lossFactor=1;
+  }
   // Check for horizontal movement
   if (keyIsDown(LEFT_ARROW)) {
     playerVX = -playerMaxSpeed;
@@ -134,6 +154,8 @@ function handleInput() {
   else {
     playerVY = 0;
   }
+
+
 
 }
 
@@ -168,7 +190,7 @@ function movePlayer() {
 // Check if the player is dead
 function updateHealth() {
   // Reduce player health, constrain to reasonable range
-  playerHealth = constrain(playerHealth - 0.5,0,playerMaxHealth);
+  playerHealth = constrain(playerHealth - 0.5*lossFactor,0,playerMaxHealth);
   // Check if the player is dead
   if (playerHealth === 0) {
     // If so, the game is over
@@ -258,8 +280,12 @@ function drawPrey() {
 //
 // Draw the player as an ellipse with alpha based on health
 function drawPlayer() {
-  fill(playerFill,playerHealth);
+  // fill(playerFill,playerHealth);
+  fill(playerFill);
   ellipse(playerX,playerY,playerRadius*2);
+  fill(playerFill/2);
+  arc(playerX, playerY, playerRadius*2, playerRadius*2, -HALF_PI, map(playerHealth, playerMaxHealth, 0, -HALF_PI, PI+HALF_PI));
+
 }
 
 // showGameOver()

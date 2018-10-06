@@ -208,7 +208,7 @@ var lossFactor=0.5;
 // health bonus awarded for leveling up
 var healthBonus=0.5;
 // Rate of health loss while player is sprinting
-var sprintLossFactor=5;
+var sprintLossFactor=1;
 // Player fill color
 var playerFill = 50;
 
@@ -277,13 +277,26 @@ var obsH=100;
 // variables used to increase size of obstacle
 var obsIncrease=0;
 var obsIncrement=50;
+// background color
+var bgRed=200;
+var bgGreen=100;
+var bgBlue=100;
+// background ellipse coordinates
+var bgEllipseSize=[10];
+var bgEllipseX=[10];
+var bgEllipseY=[10];
+
 
 
 // setup()
 //
 // Sets up the basic elements of the game
 function setup() {
+
+  textFont("Courier");
+  textStyle(BOLD);
   createCanvas(700,600);
+  newBg();
   noStroke();
   setupDisplays();
   loadInstruments();
@@ -317,7 +330,6 @@ function setupPrey() {
 // Initialises player position and health
 function setupPlayer() {
   preyEaten=0;
-  frame=0;
   playerX = 4*width/5;
   playerY = height/2;
   playerHealth = playerMaxHealth;
@@ -335,7 +347,7 @@ function draw() {
   //console.log(playerHealth)
   frame+=1;
   handleMusic();
-  background(100,100,200);
+  drawBg();
 
   if (!gameOver) {
     handleInput();
@@ -353,6 +365,15 @@ function draw() {
   }
   else {
     showGameOver();
+  }
+}
+
+function drawBg(){
+  background(bgRed, bgGreen, bgBlue);
+      fill(bgRed+20, bgGreen+20, bgBlue+20);
+  for(var i=0; i<10; i++){
+
+    ellipse(bgEllipseX[i], bgEllipseY[i], bgEllipseSize[i], bgEllipseSize[i]);
   }
 }
 
@@ -540,6 +561,8 @@ function checkEating() {
       preyHealth = preyMaxHealth;
       // Track how many prey were eaten
       preyEaten++;
+      // Pick new bg color
+      newBg();
       // update preySpeed
       preyMaxSpeed+=0.005;
       //update music
@@ -560,6 +583,23 @@ function checkEating() {
     }
     }
   }
+}
+
+//
+function newBg(){
+  bgRed=random(25, 220);
+  if(random()>0.5){
+    bgGreen=220-bgRed;
+    bgBlue=random(25, 60);
+  } else {
+    bgBlue=220-bgRed;
+    bgGreen=random(25, 60);
+  }
+  for (var i=0; i<10; i++){
+  bgEllipseX[i]=random(width);
+  bgEllipseY[i]=random(height);
+  bgEllipseSize[i]=random(width/2);
+}
 }
 
 // movePrey()
@@ -715,8 +755,8 @@ function drawPrey() {
 //Draw obstacle
 function drawObstacle(){
   stroke(255);
-  strokeWeight(10);
-  fill(0);
+  strokeWeight(5);
+  fill(bgRed-25, bgGreen-25, bgBlue-25);
   rect(obsX, obsY, obsW, obsH);
   noStroke();
 }
@@ -790,21 +830,28 @@ function drawPlayer() {
 //
 // Display text about the game being over!
 function showGameOver() {
-  textSize(32);
+  textSize(20);
   textAlign(CENTER,CENTER);
   fill(0);
-  var gameOverText = "GAME OVER\n";
-  gameOverText += "You ate " + preyEaten + " prey\n";
-  gameOverText += "before you died."
-  text(gameOverText,width/2,height/2);
+  // display game over text
+  var gameOverText = "GAME OVER! ";
+  gameOverText += "You found your tail " + preyEaten + " times\n";
+  text(gameOverText,width/2,height/2+32);
+  // display game over instructions
+  text("press 4 to reset. 1-3: SFX. arrow keys: ears", width/2, height-32);
+  // set player icon at the top of the screen
   playerX=width/2;
   playerY=150;
+  playerRadius=200;
+  // set prey at bottom of the screen
+  visionRange=50;
   preyX=width/2;
   preyY=height-150;
-  playerRadius=200;
+  // fire display functions
   generateWiggle();
   handleInput();
   drawPlayer();
+  // make sure we are not moving
   preyVX=0;
   preyVY=0;
   drawPrey();
@@ -854,7 +901,7 @@ function newObstacle(){
   obsH=200+obsIncrease-obsW;
   // pick suitable X and Y coordinates
   obsX=random(10, width-10-obsW);
-  obsY=random(10, height-10-obsH);
+  obsY=random(25, height-10-obsH);
   // increase size of next obstacle
   obsIncrease+=obsIncrement;
 }
@@ -1131,6 +1178,7 @@ function rootPlus(){
 
 // function used to reset game
 function resetEverything(){
+  newBg();
   setupPrey();
   setupPlayer();
   obsIncrease=0;

@@ -1,23 +1,32 @@
 /******************************************************
-
+((()))
 Game - Chaser
 Pippin Barr
-
 A simple game of cat and mouse.
-
 Physics-based movement, keyboard controls, health/stamina,
 sprinting, random movement, screen wrap.
-
-
+((()))
+((()))
+((()))
+Game - Tail chaser
 Samuel Paré-Chouinard
 
+Hello! here's my rendition of the chaser game.
+Some context:
+You are a dog. your tail is trying to escape your control and you fear it might
+disappear forever. you are fated by this primordial stress to chase until the
+end of time. enter the cycle of a dog's life.
+
+
 ---- two major game mechanics:
-- a random obstacle blocks your way but not your enemy's. the obstacle increases in size and
-gets a new random shape every 10 captures.
-- the enemy gets "smarter" progressively. upon capture either his vision range or his
+
+- the enemy gets "smarter" progressively. upon capture either the range of his field of vision or his
 intellect will increase. Higher intellect will lead him to run away more readily when
 the player enters his field of vision. And at a certain level of intellect, the enemy
 teleports away if the player stays too long in close range.
+- a random obstacle blocks your way but not your enemy's. the obstacle increases in size and
+gets a new random shape every 10 captures.
+
 
 ---- music:
 - For this project I decided to explore the p5.sound.js library and see if I could use
@@ -27,11 +36,29 @@ in and out with random rhythms. The third voice is a noise drum: each drum hit i
 filtered with a new random frequency, fills are added to random offbeats and accents
 are randomly placed to pace the constant pulse.
 - the first three voices are transposed up by a half step every time the player "levels up"
-(meaning a new random obstacle is generated)
+(meaning a new random obstacle is generated).
 - i also added a fourth voice for SFX, which plays three different kinds of sound which
 i've tied to in game events (capture, enemy teleport and game over)
+- time is calculated in frames most of the time
 
-time is calculated in frames throughout
+---- tuning:
+- Game mechanics are tuned so that the game starts easy, then interesting things are introduced
+gradually, then the difficulty almost plateaus (though not fully, there are still small changes at the end)
+and the player simply has less time to execute his tactics.
+- different PREY MOTIONS (random, running away, and teleporting) are introduced gradually,
+and their likeliness increases over time. At the beginning the prey doesn't see you from afar,
+doesn't decide to run or teleport. things change as score increases.
+- game TACTICS eventually change from running straight to the prey to having to direct it
+to the side of the screen and use the border wrapping to ambush it.
+- prey maximum speed, prey intellect (likeliness to run away), prey teleport countdown speed all increase over time
+making the game harder. they all reach a limit eventually. the limit is conceived so that a capture without
+any tactics is made not completely impossible but very unlikely.
+- player health: player absorbs health from the prey. the prey's maximum health will decrease over time
+to lessen the health bonus received on capture. the player also receives a health bonus for leveling up
+(10 captures), which also decreases over time. once about 50 points are reached, the main difficulty
+is being efficient as you continue to gain even smaller health bonuses
+- the size of obstacles increases over time to break the monotony and add more difficulty. this
+increase has no limit but it's unlikely that the player reaches an obstacle size that is out of proportion.
 
 
 
@@ -175,11 +202,13 @@ var playerMaxSpeed = normalSpeed;
 
 // Player health
 var playerHealth;
-var playerMaxHealth = 800;
+var playerMaxHealth = 1000;
 // Rate of health loss
-var lossFactor=1;
+var lossFactor=0.5;
+// health bonus awarded for leveling up
+var healthBonus=0.5;
 // Rate of health loss while player is sprinting
-var sprintLossFactor=2;
+var sprintLossFactor=1;
 // Player fill color
 var playerFill = 50;
 
@@ -189,10 +218,10 @@ var preyY;
 var preyRadius = 100;
 var preyVX;
 var preyVY;
-var preyMaxSpeed = 4;
+var preyMaxSpeed = 3.5;
 // Prey health
 var preyHealth;
-var preyMaxHealth = 100;
+var preyMaxHealth = 50;
 // Prey fill color
 var normalPreyFill = 200;
 var preyFill=normalPreyFill;
@@ -205,7 +234,7 @@ var wiggleDist2=0;
 var maxWiggle=20;
 
 // Amount of health obtained per frame of "eating" the prey
-var eatHealth = 10;
+var eatHealth = 5;
 // Number of prey eaten during the game
 var preyEaten = 0;
 
@@ -224,16 +253,16 @@ var visionRange=100;
 var preyIntel=0.1;
 
 // increment by which prey skills increase upon capture
-var preyIntelIncrement=0.05;
-var visionRangeIncrement=10;
+var preyIntelIncrement=0.04;
+var visionRangeIncrement=12;
 
 // level of prey intel at which prey levels up
-var preyLevelUp=0.15;
+var preyLevelUp=0.30;
 
 // teleport timer trigger
 var portTimer=0;
 // teleport timer length (ms)
-var timerLength=1000;
+var timerLength=2000;
 // used to trigger timer only once
 var portTimerStarted=false;
 // used to trigger nothing really but i might use it
@@ -303,6 +332,7 @@ function setupPlayer() {
 // When the game is over, shows the game over screen.
 
 function draw() {
+  //console.log(playerHealth)
   frame+=1;
   handleMusic();
   background(100,100,200);
@@ -369,7 +399,7 @@ function handleInput() {
     syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
     // set speed and health loss to normal settings
     playerMaxSpeed=normalSpeed;
-    lossFactor=1;
+    lossFactor=0.5;
   }
   // Check for horizontal movement
   if (keyIsDown(LEFT_ARROW)) {
@@ -482,6 +512,8 @@ function checkEating() {
     portTimer=millis()+timerLength;
     // indicate a timer was started
     portTimerStarted=true;
+    timerLength-=10;
+    timerLength=constrain(timerLength, 1000, 2000);
   }
   } else {
     // if player is out of range
@@ -508,6 +540,8 @@ function checkEating() {
       preyHealth = preyMaxHealth;
       // Track how many prey were eaten
       preyEaten++;
+      // update preySpeed
+      preyMaxSpeed+=0.005;
       //update music
       if(preyEaten%nextLevel===0){
       levelUp();
@@ -515,10 +549,10 @@ function checkEating() {
       // trigger FX
       triggerUpFX();
       // update prey vision skill or vision range
-      if(random()>0.5){
+      if(random()>0.65){
         // chance to increase intellect skill
       preyIntel+=preyIntelIncrement;
-      preyIntel=constrain(preyIntel, 0, 1);
+      preyIntel=constrain(preyIntel, 0, 0.7);
     } else {
       // chance to increase vision range
       visionRange+=visionRangeIncrement;
@@ -700,7 +734,7 @@ function drawPlayer() {
   ellipse(playerX, playerY, 1.2*playerRadius, 1.2*playerRadius);
   // health bar
   fill(200, 85, 15);
-  arc(playerX, playerY, 1.15*playerRadius, 1.15*playerRadius, 0, playerHealth/playerMaxHealth*1.99**PI);
+  arc(playerX, playerY, 1.15*playerRadius, 1.15*playerRadius, 0, playerHealth/playerMaxHealth*1.99*PI);
   // encasing health bar
   fill(255);
   ellipse(playerX, playerY, 1.05*playerRadius, 1.05*playerRadius);
@@ -786,6 +820,14 @@ text(scoreText, 10, 20);
 
 // this function bunches together functions to fire upon leveling up (capturing 10)
 function levelUp(){
+  //give player some health
+  playerHealth+=healthBonus*playerMaxHealth;
+  healthBonus-=0.03;
+  playerHealth = constrain(playerHealth,0,playerMaxHealth);
+  preyMaxHealth-=4;
+  preyMaxHealth=constrain(preyMaxHealth, 20, 50);
+  console.log("new prey health: "+preyHealth);
+  console.log("new health bonus: "+healthBonus*playerMaxHealth);
   // randomize the obstacle
   newObstacle();
   // transpose music
@@ -1087,5 +1129,5 @@ function resetEverything(){
   wiggleDist=0;
   wiggleDist2=0;
   intel=0;
-
+  preyMaxSpeed=3.5;
 }

@@ -8,21 +8,57 @@ A simple game of cat and mouse.
 Physics-based movement, keyboard controls, health/stamina,
 sprinting, random movement, screen wrap.
 
+
+Samuel Paré-Chouinard
+
+---- two major game mechanics:
+- a random obstacle blocks your way but not your enemy's. the obstacle increases in size and
+gets a new random shape every 10 captures.
+- the enemy gets "smarter" progressively. upon capture either his vision range or his
+intellect will increase. Higher intellect will lead him to run away more readily when
+the player enters his field of vision. And at a certain level of intellect, the enemy
+teleports away if the player stays too long in close range.
+
+---- music:
+- For this project I decided to explore the p5.sound.js library and see if I could use
+some basic elements to generate background music (bgm). what we have here is a sequence
+of notes played at different rhythms in two voices; one is a loop and the other comes
+in and out with random rhythms. The third voice is a noise drum: each drum hit is
+filtered with a new random frequency, fills are added to random offbeats and accents
+are randomly placed to pace the constant pulse.
+- the first three voices are transposed up by a half step every time the player "levels up"
+(meaning a new random obstacle is generated)
+- i also added a fourth voice for SFX, which plays three different kinds of sound which
+i've tied to in game events (capture, enemy teleport and game over)
+
+time is calculated in frames throughout
+
+
+
+
 ******************************************************/
-// music variables:
-var syn1={ //random rhythmic phrases
+// music variables
+// four synth objects, one for each oscillator used for bgm (syn1,syn2 and syn3) and sfx (syn4)
+var syn1={ //syn1: random rhythmic phrases
+  // envelope gain
   attackLevel: 0.8,
   releaseLevel: 0,
+  // envelope time
   attackTime: 0.001,
   decayTime: 0.1,
   susPercent: 0.4,
   releaseTime: 0.2,
+  // a parameter to store the envelope object
   env:0,
+  // a parameter to store the oscillator object
   thisSynth:0,
+  // a parameter to store the filter object
   filter:0,
+  // filter frequency
   fFreq:400
 }
-var syn2={ //loop
+var syn2={ //syn2: looped synth sound
+  // same basic parameters as syn1
   attackLevel: 0.1,
   releaseLevel: 0,
   attackTime: 0.01,
@@ -33,13 +69,16 @@ var syn2={ //loop
   thisSynth:0,
     filter:0,
     fFreq:500,
+    // a parameter to store the delay object
     delay:0,
+    // delay parameters
     delayLength: 0.16,
     delayFB: 0.3,
     delayFilter: 400,
 
 }
 var syn3={ //noise drum
+  // same basic parameters as syn1
   attackLevel: 0.7,
   releaseLevel: 0,
   attackTime: 0.001,
@@ -50,12 +89,17 @@ var syn3={ //noise drum
   thisSynth:0,
     filter:0,
     fFreq:400,
+    // values used to constrain random filter frequency
     filterMin:1000,
     filterMax:4500,
+    // a parameter to trigger drums on and off
     drumsOn:true,
+    // parameters for trigger timing
     trig:0,
     nextTrig:200,
+    // drums "on" duration
     trigOn:500,
+    // drums "off" duration
     trigOff:200
 }
 var syn4={ //FX synth
@@ -67,30 +111,53 @@ var syn4={ //FX synth
   releaseTime: 0.0,
   env:0,
   thisSynth:0,
+  // parameters used to trigger the different sfx sounds
   upFX:false,
   downFX: false,
   tremFX: false,
+  // length of sfx sounds
   FXlength: 45,
+  // sfx trigger timer
   FXtimer: 0,
+  // sfx filter
   filter:0,
   fFreq:400,
+  // sfx starting frequency
   baseFreq: 650,
+  // parameter used to increment the frequency for cool effects
   FXinc:0
 }
 
-var phraseReps=0;
-var frame=0;
-var startRoot=45;
-var currentRoot=startRoot;
-var nextNote=10;
-var syn1Loop=0;
-var oct=-12;
-var thisPhrase=[oct+0, oct+4, oct+3, oct+0, oct+8, oct+7, oct+0, oct+5];
-var phraseLength=0;
-var section1length=4;
-var syn2Loop=0;
-var section2length=4;
+// syn1 goes on and off, and so it is divided in phrases.
+// of course because syn1 has random rhythm, each phrase has a different length
 
+// note transposition factor.
+var oct=-12;
+// number of phrase repetitions
+var phraseReps=0;
+// length of syn1 phrase (to which i will assign array.length)
+var phraseLength=0;
+// contents of initial phrase
+var thisPhrase=[oct+0, oct+4, oct+3, oct+0, oct+8, oct+7, oct+0, oct+5];
+// section length is the number of phrases it contains
+// section 1 is syn1 off and section 2 is syn1 on
+var section1length=4;
+var section2length=4;
+// syn2 needs a var to keep track of loop position
+var syn2Loop=0;
+
+// master clock (time is measured in frames)
+var frame=0;
+// starting root (midi value)
+var startRoot=45;
+// a variable to keep track of the new transposed root.
+var currentRoot=startRoot;
+// nextNote is time until the next syn1 note is triggered
+var nextNote=10;
+// syn1loop is used to measure position within the syn1 phrase
+var syn1Loop=0;
+
+//GAME VARIABLES
 // Track whether the game is over
 var gameOver = false;
 
@@ -100,9 +167,12 @@ var playerY;
 var playerRadius = 25;
 var playerVX = 0;
 var playerVY = 0;
+// normal and sprinting player speed
 var normalSpeed = 2;
-var playerMaxSpeed = normalSpeed;
 var sprintSpeed =4;
+// initial speed
+var playerMaxSpeed = normalSpeed;
+
 // Player health
 var playerHealth;
 var playerMaxHealth = 800;
@@ -154,22 +224,38 @@ var visionRangeIncrement=10;
 // level of prey intel at which prey levels up
 var preyLevelUp=0.15;
 
-// capture timer related stuff
-var captureTimer=0;
+// teleport timer trigger
+var portTimer=0;
+// teleport timer length (ms)
 var timerLength=1000;
-var captureTimerStarted=false;
+// used to trigger timer only once
+var portTimerStarted=false;
+// used to trigger nothing really but i might use it
 var playerInVisionRange=false;
+// number of captures needed to level up
+var nextLevel=10;
+// obstacle rectangle configuration
+var obsX=100;
+var obsY=100;
+var obsW=100;
+var obsH=100;
+// variables used to increase size of obstacle
+var obsIncrease=0;
+var obsIncrement=50;
+
 
 // setup()
 //
 // Sets up the basic elements of the game
 function setup() {
   createCanvas(500,500);
-
   noStroke();
+
   loadInstruments();
   setupPrey();
   setupPlayer();
+  newObstacle();
+
 }
 
 // setupPrey()
@@ -196,12 +282,13 @@ function setupPlayer() {
 }
 
 // draw()
-//
+// While draw is active, play music
 // While the game is active, checks input
 // updates positions of prey and player,
 // checks health (dying), checks eating (overlaps)
 // displays the two agents.
 // When the game is over, shows the game over screen.
+
 function draw() {
   frame+=1;
   handleMusic();
@@ -218,7 +305,7 @@ function draw() {
 
     drawPrey();
     drawPlayer();
-
+    drawObstacle();
     drawUI();
   }
   else {
@@ -232,17 +319,27 @@ function draw() {
 function handleInput() {
   // check for shift key press
   if(keyIsDown(SHIFT)){
+    // if shift key is pressed, player is sprinting.
+    // this triggers a different avatar color for the sprinting player
     sprintOn=true;
+    // while shift it pressed, manipulate the delay object to hear a different sound
     syn2.delayFB=0.7;
     syn2.delayFilter=1500;
+    //process the sound
     syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
+    // switch speed to sprinting speed
     playerMaxSpeed=sprintSpeed;
+    // increase rate of health loss during sprint
     lossFactor=sprintLossFactor;
   } else {
+    // if shift is not pressed, player doesn't sprint
+    // display regular avatar color
     sprintOn=false;
+    // set delay back to normal settings
     syn2.delayFB=0.3;
     syn2.delayFilter=400;
     syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
+    // set speed and health loss to normal settings
     playerMaxSpeed=normalSpeed;
     lossFactor=1;
   }
@@ -278,8 +375,33 @@ function handleInput() {
 // wraps around the edges.
 function movePlayer() {
   // Update position
-  playerX += playerVX;
-  playerY += playerVY;
+
+  // first we check if the player is close to an obstacle wall
+  // in that case he can't move into the obstacle
+  // the first four elements of the if statements check proximity to the wall,
+  // and the last element checks for movement towards the wall
+  // if all the conditions are met movement is prevented.
+
+  //if close to left obstacle wall can't move right.
+  if(playerX+playerVX<obsX && playerX+playerVX>obsX-playerRadius && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX>0){
+  playerVX=0;
+}
+//if close to right obstacle wall can't move left.
+if(playerX+playerVX>obsX+obsW && playerX+playerVX<obsX+obsW+playerRadius && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX<0){
+playerVX=0;
+}
+// if close to top wall cant move down
+if(playerY+playerVY<obsY && playerY+playerVY>obsY-playerRadius && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY>0){
+playerVY=0;
+}
+//if close to bottom obstacle wall can't move up
+if(playerY+playerVY>obsY+obsH && playerY+playerVY<obsY+obsH+playerRadius && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY<0){
+playerVY=0;
+}
+
+// move player
+playerX += playerVX;
+playerY += playerVY;
 
   // Wrap when player goes off the canvas
   if (playerX < 0) {
@@ -301,6 +423,7 @@ function movePlayer() {
 //
 // Reduce the player's health (every frame)
 // Check if the player is dead
+// play game over sound if that's the case
 function updateHealth() {
   // Reduce player health, constrain to reasonable range
   playerHealth = constrain(playerHealth - 0.5*lossFactor,0,playerMaxHealth);
@@ -314,25 +437,33 @@ function updateHealth() {
 }
 
 // checkEating()
-//
+// Check if player overlaps with vision range and trigger prey's teleport timer
+// (the actual prey position will be updated in move prey)
 // Check if the player overlaps the prey and updates health of both
 function checkEating() {
   // Get distance of player to prey
   var d = dist(playerX,playerY,preyX,preyY);
+  // first we see if prey should teleport out
+  // if player is within vision range and prey has reached 2nd level of intellect
   if (d< visionRange&&preyIntel>preyLevelUp){
+    // indicate that player is in range
     playerInVisionRange=true;
-    preyFill=specialPreyFill;
-
-    if(!captureTimerStarted){
-    captureTimer=millis()+timerLength;
-    captureTimerStarted=true;
-    preyFill=normalPreyFill;
+    // check if timer had started (used to fire it only once)
+    if(!portTimerStarted){
+      // set timer limit. if limit is reached, prey teleports
+    portTimer=millis()+timerLength;
+    // indicate a timer was started
+    portTimerStarted=true;
   }
   } else {
+    // if player is out of range
+    // set boolean off
     playerInVisionRange=false;
-    captureTimer=0;
-  captureTimerStarted=false;
+    // reset timer
+    portTimer=0;
+    portTimerStarted=false;
 }
+  // now check for eating
   // Check if it's an overlap
   if (d < playerRadius + preyRadius) {
     // Increase the player health
@@ -350,16 +481,18 @@ function checkEating() {
       // Track how many prey were eaten
       preyEaten++;
       //update music
-      if(preyEaten%5===0){
-      rootPlus();
+      if(preyEaten%nextLevel===0){
+      levelUp();
       }
       // trigger FX
       triggerUpFX();
       // update prey vision skill or vision range
       if(random()>0.5){
+        // chance to increase intellect skill
       preyIntel+=preyIntelIncrement;
       preyIntel=constrain(preyIntel, 0, 1);
     } else {
+      // chance to increase vision range
       visionRange+=visionRangeIncrement;
       visionRange=constrain(visionRange, 0, width/3);
     }
@@ -374,14 +507,14 @@ function movePrey() {
   // Change the prey's velocity at random intervals
   // random() will be < 0.05 5% of the time, so the prey
   // will change direction on 5% of frames
-  /* if (random() < 0.05) {
+  /*
     // Set velocity based on random values to get a new direction
     // and speed of movement
     // Use map() to convert from the 0-1 range of the random() function
     // to the appropriate range of velocities for the prey
-    preyVX = map(random(),0,1,-preyMaxSpeed,preyMaxSpeed);
-    preyVY = map(random(),0,1,-preyMaxSpeed,preyMaxSpeed);
-  }
+
+    constrain movement of prey away from the borders unless the player is nearby
+
   */
   // move up Perlin noise position by increment
   noisePos=noisePos+noiseInc;
@@ -391,32 +524,63 @@ function movePrey() {
   noiseSeed(1);
   preyVY= map(noise(noisePos), 0, 1, -preyMaxSpeed, preyMaxSpeed);
 
+  //if prey is close to edges, overwrite speed to move towards the center
+  // unless player is within vision range
+
+  if(abs(dist(playerX, playerY, preyX, preyY))>visionRange){
+    // check if prey is near left wide of the screen
+  if(preyX<0.1*width){
+    // manipulate speed to send prey towards the right
+    preyVX=abs(preyVX);
+  }
+  // check for right side
+  if(preyX>0.9*width){
+    // send to left
+    preyVX=-abs(preyVX);
+  }
+  //check for top of the screen
+  if(preyY<0.1*height){
+    preyVY=abs(preyVY);
+  }
+  // check for bottom of the screen
+  if(preyY>0.9*height){
+    preyVY=-abs(preyVY);
+  }
+}
   // random chance for prey to run away
   // this will overwrite the prey velocity generated above.
- if(random()>=1-preyIntel&&abs(dist(playerX, playerY, preyX, preyY))<visionRange){
+  // prey has a random chance of knowing to run away
+  // the likeliness of this event increases with intellect
+  // the following if statement checks if the prey will run away,
+  // and also if player is within vision range
+ if(random()>=1-preyIntel&&playerInVisionRange){
    console.log("prey is running away");
+   // preyX-playerX=0 would break the division that follows so rule it out.
 if(preyX-playerX!=0&&preyY-playerY!=0){
-  preyVX=(preyX-playerX)/abs(preyX-playerX)*0.5*preyMaxSpeed;
-  preyVY=(preyY-playerY)/abs(preyY-playerY)*0.5*preyMaxSpeed;
-// if prey has leveled up add that teleporty thingy
-
-  if(preyIntel>=preyLevelUp&&millis()>captureTimer&&captureTimerStarted){
+  // send the prey away from the player
+  preyVX=(preyX-playerX)/abs(preyX-playerX)*preyMaxSpeed;
+  preyVY=(preyY-playerY)/abs(preyY-playerY)*preyMaxSpeed;
+// if prey teleport timer has reached its end
+  if(millis()>portTimer&&portTimerStarted){
+    // pick a random position for the prey
     preyX=random(width);
     preyY=random(height);
+    // trigger SFX
     triggerTremFX();
     console.log("ported");
+    // if prey has moved in range of player
     while(dist(preyX, preyY, playerX, playerY)<visionRange){
+      // move to another place
       preyX=random(width);
       preyY=random(height);
     }
 
   }
 }
-
   }
 
 
-
+  // finally, move the prey!
   // Update prey position based on velocity
   preyX += preyVX;
   preyY += preyVY;
@@ -437,30 +601,35 @@ if(preyX-playerX!=0&&preyY-playerY!=0){
   }
 }
 
+
 // drawPrey()
 //
 // Draw the prey as an ellipse with alpha based on health
 function drawPrey() {
   fill(preyFill,preyHealth);
-    if(captureTimer&&captureTimerStarted){
+    if(portTimer&&portTimerStarted){
       fill(225, 25, 25);
     }
   ellipse(preyX,preyY,preyRadius*2);
-  stroke(255);
-  noFill();
+  noStroke();
+  fill(255, 25);
   ellipse(preyX, preyY, visionRange*2);
   noStroke();
   fill(255);
   text("brains: "+round(preyIntel*100), preyX, preyY+preyRadius*3);
-  if(captureTimer&&captureTimerStarted){
+  if(portTimer&&portTimerStarted){
     fill(255);
-    var timerleft=round(abs(millis()-captureTimer)/300);
+    var timerleft=round(abs(millis()-portTimer)/300);
     text(timerleft, preyX, preyY);
   }
 
 
 }
-
+//Draw obstacle
+function drawObstacle(){
+  fill(0);
+  rect(obsX, obsY, obsW, obsH);
+}
 // drawPlayer()
 //
 // Draw the player as an ellipse with alpha based on health
@@ -491,8 +660,25 @@ function drawUI(){
 fill(255);
 textSize(15);
 textAlign(LEFT);
-text("score: "+preyEaten, 10, 20);
+var scoreText="score: "+preyEaten+", enemy vision: "+round(visionRange)+", enemy brains: "+round(preyIntel*100);
+if(sprintOn){
+  scoreText="score: "+preyEaten+", enemy vision: "+round(visionRange)+", enemy brains: "+round(preyIntel*100)+" ..SPRINT ACTIVE!";
 
+}
+text(scoreText, 10, 20);
+
+}
+function levelUp(){
+  newObstacle();
+  rootPlus();
+}
+
+function newObstacle(){
+  obsW=random(10, 200+obsIncrease);
+  obsH=200+obsIncrease-obsW;
+  obsX=random(10, width-10-obsW);
+  obsY=random(10, height-10-obsH);
+  obsIncrease+=obsIncrement;
 }
 
 function loadInstruments(){
@@ -661,8 +847,10 @@ if(syn1Loop===phraseLength){syn1Loop=0; phraseReps+=1;}
 if(phraseReps>section1length+section2length-1){
   phraseReps=0;
   // ON RESET SET NEW RANDOM SECTION SIZE
-  section1length=random(0, 6);
-  section2length=random(6);
+  // silent section
+  section1length=random(1,2);
+  // playing section
+  section2length=random(1,6);
 }
 // IF SYN1 IS OFF, RETURN
 if(phraseReps<section1length){
@@ -722,6 +910,10 @@ function rootPlus(){
 function resetEverything(){
   setupPrey();
   setupPlayer();
+  newObstacle();
   gameOver=false;
+  obsIncrease=0;
+  visionRange=100;
+  intel=0;
 
 }

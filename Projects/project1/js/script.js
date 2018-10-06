@@ -1191,6 +1191,7 @@ function resetEverything(){
   timerLength=2000;
   intel=0;
   preyMaxSpeed=3.5;
+  preyMaxHealth=50;
   playerRadius=75;
   preyRadius=100;
 }

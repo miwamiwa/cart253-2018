@@ -513,7 +513,7 @@ function checkEating() {
     // indicate a timer was started
     portTimerStarted=true;
     timerLength-=10;
-    timerLength=constrain(timerLength, 1000, 2000);
+    timerLength=constrain(timerLength, 800, 2000);
   }
   } else {
     // if player is out of range
@@ -556,7 +556,7 @@ function checkEating() {
     } else {
       // chance to increase vision range
       visionRange+=visionRangeIncrement;
-      visionRange=constrain(visionRange, 0, width/3);
+      visionRange=constrain(visionRange, 0, 0.4*width);
     }
     }
   }
@@ -1121,9 +1121,9 @@ function rootPlus(){
 function resetEverything(){
   setupPrey();
   setupPlayer();
+  obsIncrease=0;
   newObstacle();
   gameOver=false;
-  obsIncrease=0;
   visionRange=100;
   wiggleReset=0;
   wiggleDist=0;

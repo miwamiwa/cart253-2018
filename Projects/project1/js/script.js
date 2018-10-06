@@ -208,7 +208,7 @@ var lossFactor=0.5;
 // health bonus awarded for leveling up
 var healthBonus=0.5;
 // Rate of health loss while player is sprinting
-var sprintLossFactor=1;
+var sprintLossFactor=5;
 // Player fill color
 var playerFill = 50;
 
@@ -797,7 +797,19 @@ function showGameOver() {
   gameOverText += "You ate " + preyEaten + " prey\n";
   gameOverText += "before you died."
   text(gameOverText,width/2,height/2);
-
+  playerX=width/2;
+  playerY=150;
+  preyX=width/2;
+  preyY=height-150;
+  playerRadius=200;
+  generateWiggle();
+  handleInput();
+  drawPlayer();
+  preyVX=0;
+  preyVY=0;
+  drawPrey();
+  playerVX=0;
+  playerVY=0;
 }
 
 // displays informational text on top of the screen
@@ -1130,4 +1142,6 @@ function resetEverything(){
   wiggleDist2=0;
   intel=0;
   preyMaxSpeed=3.5;
+  playerRadius=75;
+  preyRadius=100;
 }

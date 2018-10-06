@@ -1188,6 +1188,7 @@ function resetEverything(){
   wiggleReset=0;
   wiggleDist=0;
   wiggleDist2=0;
+  timerLength=2000;
   intel=0;
   preyMaxSpeed=3.5;
   playerRadius=75;

@@ -164,12 +164,12 @@ var gameOver = false;
 // Player position, size, velocity
 var playerX;
 var playerY;
-var playerRadius = 25;
+var playerRadius = 75;
 var playerVX = 0;
 var playerVY = 0;
 // normal and sprinting player speed
-var normalSpeed = 2;
-var sprintSpeed =4;
+var normalSpeed = 3;
+var sprintSpeed =5;
 // initial speed
 var playerMaxSpeed = normalSpeed;
 
@@ -186,7 +186,7 @@ var playerFill = 50;
 // Prey position, size, velocity
 var preyX;
 var preyY;
-var preyRadius = 25;
+var preyRadius = 100;
 var preyVX;
 var preyVY;
 var preyMaxSpeed = 4;
@@ -197,6 +197,12 @@ var preyMaxHealth = 100;
 var normalPreyFill = 200;
 var preyFill=normalPreyFill;
 var specialPreyFill=100;
+
+//wiggle animation VARIABLES
+var wiggleReset=0;
+var wiggleDist=0;
+var wiggleDist2=0;
+var maxWiggle=20;
 
 // Amount of health obtained per frame of "eating" the prey
 var eatHealth = 10;
@@ -248,16 +254,23 @@ var obsIncrement=50;
 //
 // Sets up the basic elements of the game
 function setup() {
-  createCanvas(500,500);
+  createCanvas(700,600);
   noStroke();
-
+  setupDisplays();
   loadInstruments();
   setupPrey();
   setupPlayer();
   newObstacle();
 
 }
-
+// initializes display and color settings
+function setupDisplays(){
+  ellipseMode(CENTER);
+  rectMode(CORNER);
+  //color
+  preyFill=color(25, 200, 75);
+  playerFill=color(25, 45, 215);
+}
 // setupPrey()
 //
 // Initialises prey's position, velocity, and health
@@ -296,7 +309,7 @@ function draw() {
 
   if (!gameOver) {
     handleInput();
-
+    generateWiggle();
     movePlayer();
     movePrey();
 
@@ -311,6 +324,21 @@ function draw() {
   else {
     showGameOver();
   }
+}
+
+// generateWiggle()
+// creates the "wiggle" oscillation
+function generateWiggle(){
+  // if frame is below reset marker increment the wiggle
+  if(frame<=wiggleReset+maxWiggle){
+    wiggleDist2+=1;
+  } else {
+// if reset marker is reached reset the wiggle motion
+     wiggleReset=frame;
+     wiggleDist2=0;
+   }
+     // apply sin fuction for a smoothe motion
+  wiggleDist=sin(PI*wiggleDist2/maxWiggle)*20;
 }
 
 // handleInput()
@@ -383,19 +411,19 @@ function movePlayer() {
   // if all the conditions are met movement is prevented.
 
   //if close to left obstacle wall can't move right.
-  if(playerX+playerVX<obsX && playerX+playerVX>obsX-playerRadius && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX>0){
+  if(playerX-playerVX<obsX && playerX+playerVX>obsX-playerRadius/3 && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX>0){
   playerVX=0;
 }
 //if close to right obstacle wall can't move left.
-if(playerX+playerVX>obsX+obsW && playerX+playerVX<obsX+obsW+playerRadius && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX<0){
+else if(playerX+playerVX>obsX+obsW && playerX+playerVX<obsX+obsW+playerRadius/3 && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX<0){
 playerVX=0;
 }
 // if close to top wall cant move down
-if(playerY+playerVY<obsY && playerY+playerVY>obsY-playerRadius && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY>0){
+else if(playerY+playerVY<obsY && playerY+playerVY>obsY-playerRadius/3 && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY>0){
 playerVY=0;
 }
 //if close to bottom obstacle wall can't move up
-if(playerY+playerVY>obsY+obsH && playerY+playerVY<obsY+obsH+playerRadius && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY<0){
+else if(playerY+playerVY>obsY+obsH && playerY+playerVY<obsY+obsH+playerRadius/3 && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY<0){
 playerVY=0;
 }
 
@@ -465,7 +493,7 @@ function checkEating() {
 }
   // now check for eating
   // Check if it's an overlap
-  if (d < playerRadius + preyRadius) {
+  if (d < (playerRadius + preyRadius)/2) {
     // Increase the player health
     playerHealth = constrain(playerHealth + eatHealth,0,playerMaxHealth);
     // Reduce the prey health
@@ -606,41 +634,121 @@ if(preyX-playerX!=0&&preyY-playerY!=0){
 //
 // Draw the prey as an ellipse with alpha based on health
 function drawPrey() {
-  fill(preyFill,preyHealth);
-    if(portTimer&&portTimerStarted){
-      fill(225, 25, 25);
-    }
-  ellipse(preyX,preyY,preyRadius*2);
-  noStroke();
-  fill(255, 25);
-  ellipse(preyX, preyY, visionRange*2);
-  noStroke();
+  //PREY
+  //draw vision range
+  fill(225, 125);
+  ellipse(preyX, preyY, preyRadius+visionRange, preyRadius+visionRange);
+  // draw white backdrop
   fill(255);
-  text("brains: "+round(preyIntel*100), preyX, preyY+preyRadius*3);
+  ellipse(preyX, preyY, 1.2*preyRadius, 1.2*preyRadius);
+  //draw health bar
+  fill(200, 85, 15);
+  arc(preyX, preyY, 1.15*preyRadius, 1.15*preyRadius, 0, preyHealth/preyMaxHealth*1.99*PI);
+  // encasehealth bar
+  fill(255);
+  ellipse(preyX, preyY, 1.05*preyRadius, 1.05*preyRadius);
+  // pick backdrop color
+  fill(preyFill);
+  // if teleport timer active
   if(portTimer&&portTimerStarted){
     fill(255);
     var timerleft=round(abs(millis()-portTimer)/300);
-    text(timerleft, preyX, preyY);
+    textSize(visionRange/2-10);
+    // display countdown
+    text(timerleft, preyX, preyY+preyRadius);
+    // change prey color
+    fill(225, 25, 25);
   }
+  // display color backdrop
+  ellipse(preyX, preyY, preyRadius, preyRadius);
+  // draw body
+  fill(255, 204, 137);
+  rect(preyX, preyY-0.15*preyRadius, -0.45*preyRadius, 0.3*preyRadius);
+  arc(preyX-0.225*preyRadius, preyY-0.14*preyRadius, 0.5*preyRadius, 0.1*preyRadius, PI, 0);
+  arc(preyX, preyY, preyRadius, preyRadius,0.85*PI, 1.1*PI);
+  ellipse(preyX, preyY, preyRadius/4, preyRadius/2);
+  ellipse(preyX-0.1*preyRadius, preyY, 0.2*preyRadius, 0.45*preyRadius);
+  rect(preyX-0.02*preyRadius, preyY, preyRadius/16, 0.4*preyRadius);
+  rect(preyX-0.12*preyRadius, preyY, 3*preyRadius/64, 0.4*preyRadius);
+  arc(preyX-0.02*preyRadius, preyY+0.40*preyRadius, preyRadius/16, preyRadius/16, PI, 1.5*PI);
+  arc(preyX-0.12*preyRadius, preyY+0.4*preyRadius, preyRadius/16, preyRadius/16, PI, 1.5*PI);
+  //wiggling tail
+  triangle(preyX-preyRadius/16, preyY-preyRadius/8, preyX+preyRadius/16, preyY-preyRadius/8, preyX+wiggleDist, preyY-3*preyRadius/8);
 
 
 }
+
 //Draw obstacle
 function drawObstacle(){
+  stroke(255);
+  strokeWeight(10);
   fill(0);
   rect(obsX, obsY, obsW, obsH);
+  noStroke();
 }
+
 // drawPlayer()
 //
 // Draw the player as an ellipse with alpha based on health
 function drawPlayer() {
   // fill(playerFill,playerHealth);
 
+
+  //PLAYER - HEAD
+  //white backdrop
+  fill(255);
+  ellipse(playerX, playerY, 1.2*playerRadius, 1.2*playerRadius);
+  // health bar
+  fill(200, 85, 15);
+  arc(playerX, playerY, 1.15*playerRadius, 1.15*playerRadius, 0, playerHealth/playerMaxHealth*1.99**PI);
+  // encasing health bar
+  fill(255);
+  ellipse(playerX, playerY, 1.05*playerRadius, 1.05*playerRadius);
+  // pick backdrop color
   fill(playerFill);
-  if(sprintOn){fill(180, 180, 10);}
-  ellipse(playerX,playerY,playerRadius*2);
-  fill(playerFill/2);
-  arc(playerX, playerY, playerRadius*2, playerRadius*2, -HALF_PI, map(playerHealth, playerMaxHealth, 0, -HALF_PI, PI+HALF_PI));
+  // if sprint is on change color
+    if(sprintOn){fill(180, 180, 10);}
+    //display color backdrop
+  ellipse(playerX, playerY, playerRadius, playerRadius);
+  //draw head
+  fill(255, 204, 137);
+  noStroke();
+  var triWidth=playerRadius/8;
+  var triHeight=playerRadius/8;
+  quad(playerX, playerY, playerX+triWidth/4, playerY-triHeight,playerX+3*triWidth/4, playerY-triHeight, playerX+triWidth, playerY);
+  quad(playerX+triWidth, playerY, playerX+1.25*triWidth, playerY-triHeight, playerX+1.75*triWidth, playerY-triHeight, playerX+2*triWidth, playerY);
+  //draw wiggling ears
+  // the ears wiggle repending on left/right and up/down motion
+  if(playerVX>0){
+    // if player moving right wiggle first ear
+    triangle( playerX+triWidth/4, playerY-triHeight, playerX+triWidth/8, playerY-1.75*triHeight,playerX+3*triWidth/4, playerY-triHeight )
+
+  } else if (playerVX<0){
+    // if player moving left wiggle first ear
+    triangle( playerX+triWidth/4, playerY-triHeight, playerX+0.85*triWidth, playerY-1.75*triHeight,playerX+3*triWidth/4, playerY-triHeight )
+
+  } else {
+    // if player not moving on horizontal axis dont wiggle
+    triangle( playerX+triWidth/4, playerY-triHeight, playerX+triWidth/2, playerY-2*triHeight,playerX+3*triWidth/4, playerY-triHeight );
+  }
+  if(playerVY>0){ // if player moves down wiggle ear
+    triangle( playerX+5*triWidth/4, playerY-triHeight, playerX+1.125*triWidth, playerY-1.75*triHeight,playerX+7*triWidth/4, playerY-triHeight )
+
+  } else if (playerVY<0){ //if player moves up wiggle ear
+    triangle( playerX+5*triWidth/4, playerY-triHeight, playerX+1.85*triWidth, playerY-1.75*triHeight,playerX+7*triWidth/4, playerY-triHeight )
+
+  } else { // if player not moving on vertical axis dont wiggle
+    triangle( playerX+5*triWidth/4, playerY-triHeight, playerX+1.375*triWidth, playerY-2*triHeight,playerX+7*triWidth/4, playerY-triHeight );
+  }
+  //draw the rest of the face
+  arc(playerX+playerRadius/4, playerY, playerRadius/2, playerRadius/8, PI, 0);
+  rect(playerX, playerY, 3*playerRadius/8, playerRadius/4);
+  arc(playerX, playerY, playerRadius, playerRadius, 0, 0.3*PI)
+  quad(playerX, playerY, playerX, playerY+3*playerRadius/16, playerX-0.35*playerRadius, playerY+3*playerRadius/16-wiggleDist/3, playerX-0.35*playerRadius, playerY+playerRadius/8-wiggleDist/3);
+  quad(playerX+playerRadius/4-wiggleDist, playerY+0.2*playerRadius, playerX-0.30*playerRadius, playerY+playerRadius/4+wiggleDist/2, playerX-0.3*playerRadius, playerY+0.3*playerRadius+wiggleDist/2, playerX+0.275*playerRadius+wiggleDist/2, playerY+0.35*playerRadius-wiggleDist/2);
+// draw eyeball
+  fill(25);
+  ellipse(playerX+playerRadius/8, playerY+playerRadius/16, playerRadius/16, playerRadius/16);
 
 }
 
@@ -655,6 +763,7 @@ function showGameOver() {
   gameOverText += "You ate " + preyEaten + " prey\n";
   gameOverText += "before you died."
   text(gameOverText,width/2,height/2);
+
 }
 
 // displays informational text on top of the screen
@@ -974,6 +1083,9 @@ function resetEverything(){
   gameOver=false;
   obsIncrease=0;
   visionRange=100;
+  wiggleReset=0;
+  wiggleDist=0;
+  wiggleDist2=0;
   intel=0;
 
 }

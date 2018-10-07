@@ -1,17 +1,10 @@
 /******************************************************
-((()))
-Game - Chaser
-Pippin Barr
-A simple game of cat and mouse.
-Physics-based movement, keyboard controls, health/stamina,
-sprinting, random movement, screen wrap.
-((()))
-((()))
-((()))
+
 Game - Tail chaser
 Samuel Paré-Chouinard
 
 Hello! here's my rendition of the chaser game.
+
 Some context:
 You are a dog. your tail is trying to escape your control and you fear it might
 disappear forever. you are fated by this primordial stress to chase until the
@@ -20,7 +13,7 @@ end of time. enter the cycle of a dog's life.
 
 ---- two major game mechanics:
 
-- the enemy gets "smarter" progressively. upon capture either the range of his field of vision or his
+- the enemy gets "smarter" progressively. upon capture, either the range of his field of vision or his
 intellect will increase. Higher intellect will lead him to run away more readily when
 the player enters his field of vision. And at a certain level of intellect, the enemy
 teleports away if the player stays too long in close range.
@@ -30,26 +23,31 @@ gets a new random shape every 10 captures.
 
 ---- music:
 - For this project I decided to explore the p5.sound.js library and see if I could use
-some basic elements to generate background music (bgm). what we have here is a sequence
-of notes played at different rhythms in two voices; one is a loop and the other comes
-in and out with random rhythms. The third voice is a noise drum: each drum hit is
-filtered with a new random frequency, fills are added to random offbeats and accents
-are randomly placed to pace the constant pulse.
-- the first three voices are transposed up by a half step every time the player "levels up"
-(meaning a new random obstacle is generated).
+some basic elements to generate background music.
+
+what we have here is a sequence of notes played at different rhythms in two voices:
+- one is a loop
+- the other comes in and out with random rhythms.
+- the third voice is a pulsating noise drum: each drum hit is
+filtered with a new random frequency, fills are added to random
+offbeats and accents are randomly placed to vary the constant
+pulse. together that makes somewhat expressive drum lines.
+- the first two voices are transposed up by a half step every 10 captures to
+illustrate that the game is moving along.
 - i also added a fourth voice for SFX, which plays three different kinds of sound which
-i've tied to in game events (capture, enemy teleport and game over)
+i've tied to in-game events (capture, enemy teleport and game over)
+- sprinting also affects the sound of the looping voice
 - time is calculated in frames most of the time
 
----- tuning:
+---- game tuning:
 - Game mechanics are tuned so that the game starts easy, then interesting things are introduced
 gradually, then the difficulty almost plateaus (though not fully, there are still small changes at the end)
 and the player simply has less time to execute his tactics.
-- different PREY MOTIONS (random, running away, and teleporting) are introduced gradually,
+- different prey motions (random, running away, and teleporting) are introduced gradually,
 and their likeliness increases over time. At the beginning the prey doesn't see you from afar,
 doesn't decide to run or teleport. things change as score increases.
-- game TACTICS eventually change from running straight to the prey to having to direct it
-to the side of the screen and use the border wrapping to ambush it.
+- best game tactic eventually changes from running straight to the prey to having to pushing the prey to
+the side of the screen to then ambush it through a border
 - prey maximum speed, prey intellect (likeliness to run away), prey teleport countdown speed all increase over time
 making the game harder. they all reach a limit eventually. the limit is conceived so that a capture without
 any tactics is made not completely impossible but very unlikely.
@@ -58,14 +56,14 @@ to lessen the health bonus received on capture. the player also receives a healt
 (10 captures), which also decreases over time. once about 50 points are reached, the main difficulty
 is being efficient as you continue to gain even smaller health bonuses
 - the size of obstacles increases over time to break the monotony and add more difficulty. this
-increase has no limit but it's unlikely that the player reaches an obstacle size that is out of proportion.
-
-
+increase has no limit but it's unlikely that the player reaches an obstacle size that is out of proportion (though possible).
 
 
 ******************************************************/
+
 // music variables
 // four synth objects, one for each oscillator used for bgm (syn1,syn2 and syn3) and sfx (syn4)
+
 var syn1={ //syn1: random rhythmic phrases
   // envelope gain
   attackLevel: 0.8,
@@ -94,15 +92,14 @@ var syn2={ //syn2: looped synth sound
   releaseTime: 0.1,
   env:0,
   thisSynth:0,
-    filter:0,
-    fFreq:500,
-    // a parameter to store the delay object
-    delay:0,
-    // delay parameters
-    delayLength: 0.16,
-    delayFB: 0.3,
-    delayFilter: 400,
-
+  filter:0,
+  fFreq:500,
+  // a parameter to store the delay object
+  delay:0,
+  // delay parameters
+  delayLength: 0.16,
+  delayFB: 0.3,
+  delayFilter: 400,
 }
 var syn3={ //noise drum
   // same basic parameters as syn1
@@ -114,20 +111,20 @@ var syn3={ //noise drum
   releaseTime: 0.2,
   env:0,
   thisSynth:0,
-    filter:0,
-    fFreq:400,
-    // values used to constrain random filter frequency
-    filterMin:1000,
-    filterMax:4500,
-    // a parameter to trigger drums on and off
-    drumsOn:true,
-    // parameters for trigger timing
-    trig:0,
-    nextTrig:200,
-    // drums "on" duration
-    trigOn:500,
-    // drums "off" duration
-    trigOff:200
+  filter:0,
+  fFreq:400,
+  // values used to constrain random filter frequency
+  filterMin:1000,
+  filterMax:4500,
+  // a parameter to trigger drums on and off
+  drumsOn:true,
+  // parameters for trigger timing
+  trig:0,
+  nextTrig:200,
+  // drums "on" duration
+  trigOn:500,
+  // drums "off" duration
+  trigOff:200
 }
 var syn4={ //FX synth
   attackLevel: 0.4,
@@ -254,7 +251,7 @@ var preyIntel=0.1;
 
 // increment by which prey skills increase upon capture
 var preyIntelIncrement=0.04;
-var visionRangeIncrement=12;
+var visionRangeIncrement=3;
 
 // level of prey intel at which prey levels up
 var preyLevelUp=0.30;
@@ -305,6 +302,7 @@ function setup() {
   newObstacle();
 
 }
+
 // initializes display and color settings
 function setupDisplays(){
   ellipseMode(CENTER);
@@ -313,6 +311,7 @@ function setupDisplays(){
   preyFill=color(25, 200, 75);
   playerFill=color(25, 45, 215);
 }
+
 // setupPrey()
 //
 // Initialises prey's position, velocity, and health
@@ -354,10 +353,8 @@ function draw() {
     generateWiggle();
     movePlayer();
     movePrey();
-
     updateHealth();
     checkEating();
-
     drawPrey();
     drawPlayer();
     drawObstacle();
@@ -370,15 +367,14 @@ function draw() {
 
 function drawBg(){
   background(bgRed, bgGreen, bgBlue);
-      fill(bgRed+20, bgGreen+20, bgBlue+20);
+  fill(bgRed+20, bgGreen+20, bgBlue+20);
   for(var i=0; i<10; i++){
-
     ellipse(bgEllipseX[i], bgEllipseY[i], bgEllipseSize[i], bgEllipseSize[i]);
   }
 }
 
 // generateWiggle()
-// creates the "wiggle" oscillation
+// creates the "wiggle" oscillation which animates the avatars
 function generateWiggle(){
   // if frame is below reset marker increment the wiggle
   if(frame<=wiggleReset+maxWiggle){
@@ -388,7 +384,7 @@ function generateWiggle(){
      wiggleReset=frame;
      wiggleDist2=0;
    }
-     // apply sin fuction for a smoothe motion
+     // apply sin function for smoothe motion
   wiggleDist=sin(PI*wiggleDist2/maxWiggle)*20;
 }
 
@@ -455,25 +451,26 @@ function handleInput() {
 function movePlayer() {
   // Update position
 
-  // first we check if the player is close to an obstacle wall
-  // in that case he can't move into the obstacle
-  // the first four elements of the if statements check proximity to the wall,
-  // and the last element checks for movement towards the wall
-  // if all the conditions are met movement is prevented.
+  // first we check if the player is close to an obstacle wall:
+  // in that case he shouldn't be able to move into the obstacle.
+  // the first four elements of the following if statements check proximity to the wall
+  // (more specifically it checks for player's presence within a thin rectangle beside the wall),
+  // and the last element checks for movement towards the wall.
+  // if all the conditions are met, movement command is prevented.
 
-  //if close to left obstacle wall can't move right.
+  //if close to left obstacle wall, can't move right.
   if(playerX-playerVX<obsX && playerX+playerVX>obsX-playerRadius/3 && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX>0){
   playerVX=0;
 }
-//if close to right obstacle wall can't move left.
+//if close to right obstacle wall, can't move left.
 else if(playerX+playerVX>obsX+obsW && playerX+playerVX<obsX+obsW+playerRadius/3 && playerY>obsY-10 && playerY<obsY+obsH+10 && playerVX<0){
 playerVX=0;
 }
-// if close to top wall cant move down
+// if close to top wall, can't move down
 else if(playerY+playerVY<obsY && playerY+playerVY>obsY-playerRadius/3 && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY>0){
 playerVY=0;
 }
-//if close to bottom obstacle wall can't move up
+//if close to bottom obstacle wall, can't move up
 else if(playerY+playerVY>obsY+obsH && playerY+playerVY<obsY+obsH+playerRadius/3 && playerX>obsX-10 && playerX<obsX+obsW+10 && playerVY<0){
 playerVY=0;
 }
@@ -579,22 +576,30 @@ function checkEating() {
     } else {
       // chance to increase vision range
       visionRange+=visionRangeIncrement;
-      visionRange=constrain(visionRange, 0, 0.4*width);
+      visionRange=constrain(visionRange, 0, 0.35*width);
     }
     }
   }
 }
 
-//
+// newBg()
+// generates a new background color and random ellipse locations
 function newBg(){
+  // start with a rather random red value
   bgRed=random(25, 220);
+  // 50% chance that green value is its inverse
   if(random()>0.5){
     bgGreen=220-bgRed;
+    // in that case set blue to a random low value
     bgBlue=random(25, 60);
   } else {
+    // or let blue be the inverse
     bgBlue=220-bgRed;
+    // then green will be a random low value
     bgGreen=random(25, 60);
+    // this way we have a somewhat constrained color palet.
   }
+  // generate random ellipse X and Y pos, and size.
   for (var i=0; i<10; i++){
   bgEllipseX[i]=random(width);
   bgEllipseY[i]=random(height);
@@ -711,7 +716,7 @@ function drawPrey() {
   //PREY
   //draw vision range
   fill(225, 125);
-  ellipse(preyX, preyY, preyRadius+visionRange, preyRadius+visionRange);
+  ellipse(preyX, preyY, visionRange*2, visionRange*2);
   // draw white backdrop
   fill(255);
   ellipse(preyX, preyY, 1.2*preyRadius, 1.2*preyRadius);
@@ -794,11 +799,11 @@ function drawPlayer() {
   //draw wiggling ears
   // the ears wiggle repending on left/right and up/down motion
   if(playerVX>0){
-    // if player moving right wiggle first ear
+    // if player moving right wiggle first ear one way
     triangle( playerX+triWidth/4, playerY-triHeight, playerX+triWidth/8, playerY-1.75*triHeight,playerX+3*triWidth/4, playerY-triHeight )
 
   } else if (playerVX<0){
-    // if player moving left wiggle first ear
+    // if player moving left wiggle first ear the other way
     triangle( playerX+triWidth/4, playerY-triHeight, playerX+0.85*triWidth, playerY-1.75*triHeight,playerX+3*triWidth/4, playerY-triHeight )
 
   } else {

@@ -61,10 +61,12 @@ increase has no limit but it's unlikely that the player reaches an obstacle size
 
 ******************************************************/
 
-// music variables
-// four synth objects, one for each oscillator used for bgm (syn1,syn2 and syn3) and sfx (syn4)
+// SYNTHESIZOR OBJECTS
 
 var syn1={ //syn1: random rhythmic phrases
+  // declare type of synth, and type of filter
+  synthType: 'square',
+  filtAtt: "BP",
   // envelope gain
   attackLevel: 0.8,
   releaseLevel: 0,
@@ -80,9 +82,14 @@ var syn1={ //syn1: random rhythmic phrases
   // a parameter to store the filter object
   filter:0,
   // filter frequency
-  fFreq:400
+  fFreq:400,
+  // state no delay
+  delayFX:false
 }
 var syn2={ //syn2: looped synth sound
+  // declare type of synth, and type of filter
+  synthType: 'square',
+  filtAtt: "LP",
   // same basic parameters as syn1
   attackLevel: 0.1,
   releaseLevel: 0,
@@ -97,11 +104,15 @@ var syn2={ //syn2: looped synth sound
   // a parameter to store the delay object
   delay:0,
   // delay parameters
+  delayFX: true,
   delayLength: 0.16,
   delayFB: 0.3,
   delayFilter: 400,
 }
 var syn3={ //noise drum
+  // declare type of synth, and type of filter
+  synthType: 'pink',
+  filtAtt: "BP",
   // same basic parameters as syn1
   attackLevel: 0.7,
   releaseLevel: 0,
@@ -124,9 +135,14 @@ var syn3={ //noise drum
   // drums "on" duration
   trigOn:500,
   // drums "off" duration
-  trigOff:200
+  trigOff:200,
+  // state no delay
+  delayFX:false
 }
 var syn4={ //FX synth
+  // declare type of synth, and type of filter
+  synthType: 'sine',
+  filtAtt: "LP",
   attackLevel: 0.4,
   releaseLevel: 0,
   attackTime: 0.001,
@@ -149,46 +165,63 @@ var syn4={ //FX synth
   // sfx starting frequency
   baseFreq: 650,
   // parameter used to increment the frequency for cool effects
-  FXinc:0
+  FXinc:0,
+  // state no delay
+  delayFX:false
 }
 
-// syn1 goes on and off, and so it is divided in phrases.
-// of course because syn1 has random rhythm, each phrase has a different length
+// THINGS THAT DEAL WITH TIME
 
-// note transposition factor.
-var oct=-12;
-// number of phrase repetitions
-var phraseReps=0;
-// length of syn1 phrase (to which i will assign array.length)
-var phraseLength=0;
-// contents of initial phrase
-var thisPhrase=[oct+0, oct+4, oct+3, oct+0, oct+8, oct+7, oct+0, oct+5];
+// master clock (time is measured in frames)
+var frame=0;
+// syn2 needs a var to keep track of loop position
+var syn2Loop=0;
+// syn1 needs a var to keep track of loop position
+var syn1Loop=0;
+// nextNote is time until the next syn1 note is triggered
+var nextNote=10;
 // section length is the number of phrases it contains
 // section 1 is syn1 off and section 2 is syn1 on
 var section1length=4;
 var section2length=4;
-// syn2 needs a var to keep track of loop position
-var syn2Loop=0;
+// length of syn1 phrase (to which i will assign array.length)
+var phraseLength=0;
+// number of phrase repetitions
+var phraseReps=0;
 
-// master clock (time is measured in frames)
-var frame=0;
+
+// THINGS THAT DEAL WITH PITCH
+
+// note transposition factor.
+var oct=-12;
+// contents of initial phrase
+var thisPhrase=[oct+0, oct+4, oct+3, oct+0, oct+8, oct+7, oct+0, oct+5];
 // starting root (midi value)
 var startRoot=45;
 // a variable to keep track of the new transposed root.
 var currentRoot=startRoot;
-// nextNote is time until the next syn1 note is triggered
-var nextNote=10;
-// syn1loop is used to measure position within the syn1 phrase
-var syn1Loop=0;
+
+
 
 //GAME VARIABLES
+
+// SETUP VALUES (declared separately as they will be manipulated then reset)
+var initVisionRange=100;
+var initPreyMaxSpeed=3.5;
+var initPreyMaxHealth=50;
+var initHealthBonus=0.5;
+var initPlayerRadius=75;
+var initPreyRadius=100;
+var initTimerLength=2000;
+
 // Track whether the game is over
 var gameOver = false;
 
+// PLAYER
 // Player position, size, velocity
 var playerX;
 var playerY;
-var playerRadius = 75;
+var playerRadius = initPlayerRadius;
 var playerVX = 0;
 var playerVY = 0;
 // normal and sprinting player speed
@@ -196,39 +229,43 @@ var normalSpeed = 3;
 var sprintSpeed =5;
 // initial speed
 var playerMaxSpeed = normalSpeed;
-
 // Player health
 var playerHealth;
 var playerMaxHealth = 1000;
 // Rate of health loss
 var lossFactor=0.5;
 // health bonus awarded for leveling up
-var healthBonus=0.5;
+var healthBonus=initHealthBonus;
 // Rate of health loss while player is sprinting
 var sprintLossFactor=1;
 // Player fill color
 var playerFill = 50;
 
+// PREY
 // Prey position, size, velocity
 var preyX;
 var preyY;
-var preyRadius = 100;
+var preyRadius = initPreyRadius;
 var preyVX;
 var preyVY;
-var preyMaxSpeed = 3.5;
+var preyMaxSpeed = initPreyMaxSpeed;
 // Prey health
 var preyHealth;
-var preyMaxHealth = 50;
+var preyMaxHealth = initPreyMaxHealth;
 // Prey fill color
 var normalPreyFill = 200;
 var preyFill=normalPreyFill;
 var specialPreyFill=100;
 
-//wiggle animation VARIABLES
-var wiggleReset=0;
+// "WIGGLE":
+// distance wiggled
 var wiggleDist=0;
-var wiggleDist2=0;
+// variable used to increment the wiggle effect
+var wiggleIncrement=0;
+// point at which the wiggling part starts to move back
 var maxWiggle=20;
+// a variable to trigger the wiggle reset
+var wiggleReset=0;
 
 // Amount of health obtained per frame of "eating" the prey
 var eatHealth = 5;
@@ -244,7 +281,7 @@ var noiseInc=0.1;
 var sprintOn=false;
 
 // distance at which the prey might see you
-var visionRange=100;
+var visionRange=initVisionRange;
 
 // how smart the prey is
 var preyIntel=0.1;
@@ -259,7 +296,7 @@ var preyLevelUp=0.30;
 // teleport timer trigger
 var portTimer=0;
 // teleport timer length (ms)
-var timerLength=2000;
+var timerLength=initTimerLength;
 // used to trigger timer only once
 var portTimerStarted=false;
 // used to trigger nothing really but i might use it
@@ -282,7 +319,8 @@ var bgBlue=100;
 var bgEllipseSize=[10];
 var bgEllipseX=[10];
 var bgEllipseY=[10];
-
+// a variable to convert root note to root frequency
+  var rootFreq=0;
 
 
 // setup()
@@ -296,7 +334,13 @@ function setup() {
   newBg();
   noStroke();
   setupDisplays();
-  loadInstruments();
+  phraseLength=thisPhrase.length;
+  rootFreq=midiToFreq(currentRoot);
+  // replaced the rest of the function with these
+  loadAnInstrument(syn1);
+  loadAnInstrument(syn2);
+  loadAnInstrument(syn3);
+  loadAnInstrument(syn4);
   setupPrey();
   setupPlayer();
   newObstacle();
@@ -378,14 +422,14 @@ function drawBg(){
 function generateWiggle(){
   // if frame is below reset marker increment the wiggle
   if(frame<=wiggleReset+maxWiggle){
-    wiggleDist2+=1;
+    wiggleIncrement+=1;
   } else {
 // if reset marker is reached reset the wiggle motion
      wiggleReset=frame;
-     wiggleDist2=0;
+     wiggleIncrement=0;
    }
      // apply sin function for smoothe motion
-  wiggleDist=sin(PI*wiggleDist2/maxWiggle)*20;
+  wiggleDist=sin(PI*wiggleIncrement/maxWiggle)*20;
 }
 
 // handleInput()
@@ -911,157 +955,88 @@ function newObstacle(){
   obsIncrease+=obsIncrement;
 }
 
-// handles this mess of sound object configurations that goes into setup()
-// loads oscillators, envelopes, filters, delay and plugs everything in
-function loadInstruments(){
-  // length of initial musical phrase
-  phraseLength=thisPhrase.length;
-  // load envelopes
-  syn1.env = new p5.Env();
-  syn2.env = new p5.Env();
-  syn3.env = new p5.Env();
-  syn4.env = new p5.Env();
-  // set envelope parameters
-  syn1.env.setADSR(syn1.attackTime, syn1.decayTime, syn1.susPercent, syn1.releaseTime);
-  syn1.env.setRange(syn1.attackLevel, syn1.releaseLevel);
-  syn2.env.setADSR(syn2.attackTime, syn2.decayTime, syn2.susPercent, syn2.releaseTime);
-  syn2.env.setRange(syn2.attackLevel, syn2.releaseLevel);
-  syn3.env.setADSR(syn3.attackTime, syn3.decayTime, syn3.susPercent, syn3.releaseTime);
-  syn3.env.setRange(syn3.attackLevel, syn3.releaseLevel);
-  syn4.env.setADSR(syn4.attackTime, syn4.decayTime, syn4.susPercent, syn4.releaseTime);
-  syn4.env.setRange(syn4.attackLevel, syn4.releaseLevel);
-  //load filters
-  syn1.filter = new p5.BandPass();
-  syn2.filter = new p5.LowPass();
-  syn3.filter = new p5.BandPass();
-    syn4.filter = new p5.LowPass();
-    // set filter parameters
-  syn2.filter.freq(syn2.fFreq);
-  syn3.filter.freq(syn3.fFreq);
-    syn4.filter.freq(syn4.fFreq);
-  // var used to initialise synth frequncy
-  var rootFreq=midiToFreq(currentRoot);
-  // setup syn1
-  syn1.thisSynth=new p5.Oscillator('square');
-  syn1.thisSynth.amp(syn1.env);
-  syn1.thisSynth.disconnect();
-  syn1.thisSynth.connect(syn1.filter);
-  syn1.thisSynth.start();
-  syn1.thisSynth.freq(rootFreq);
-  //setup syn2
-  syn2.thisSynth = new p5.Oscillator('square');
-  syn2.thisSynth.amp(syn2.env);
-  syn2.thisSynth.disconnect();
-  syn2.thisSynth.connect(syn2.filter);
-  syn2.thisSynth.start();
-  syn2.thisSynth.freq(rootFreq);
-  syn2.delay = new p5.Delay();
-  syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
-  //setup syn3
-  syn3.thisSynth = new p5.Noise('pink');
-  syn3.thisSynth.amp(syn3.env);
-  syn3.thisSynth.disconnect();
-  syn3.thisSynth.connect(syn3.filter);
-  syn3.thisSynth.start();
-  //setup syn4
-  syn4.thisSynth=new p5.Oscillator();
-  syn4.thisSynth.amp(syn4.env);
-  syn4.thisSynth.disconnect();
-  syn4.thisSynth.connect(syn4.filter);
-  syn4.thisSynth.start();
-  syn4.thisSynth.freq(rootFreq);
+
+// loadAnInstrument();
+// This function is meant to load any of the four instruments used
+// it is meant to replace the overarching "loadInstruments()" function which
+// i had originally written, which loaded everything individually and resulted
+// in almost 4x the text.
+function loadAnInstrument(synx){
+  // for any instrument namedm synx (syn1, syn2, syn3 or syn4)
+  // load envelope
+  synx.env=new p5.Env();
+  // setup envelope parameters
+  synx.env.setADSR(synx.attackTime, synx.decayTime, synx.susPercent, synx.releaseTime);
+  synx.env.setRange(synx.attackLevel, synx.releaseLevel);
+  // check which filter to use
+  if(synx.filtAtt==="BP"){
+    // if the filter attribute says BP load a band pass filter
+    synx.filter= new p5.BandPass();
+  }
+   // if the filter attribute says LP load a low pass filter
+  if(synx.filtAtt==="LP"){
+    synx.filter=new p5.LowPass();
+  }
+  // set initial filter frequency
+  synx.filter.freq(synx.fFreq);
+ // now load the type of oscillator used. syn3 is the only one which uses
+ // something else than the standard oscillator, so this exception is dealt with first:
+ // if the synth type is "pink" then we have a noise synth.
+  if(synx.synthType==='pink'){
+    synx.thisSynth=new p5.Noise(synx.synthType);
+    // if anything else (square or sine) then we have an oscillator
+  } else {
+  synx.thisSynth=new p5.Oscillator(synx.synthType);
+  }
+  // plug-in the amp, which will be monitored using the envelope (env) object
+  synx.thisSynth.amp(synx.env);
+  // disconnect this sound from audio output
+  synx.thisSynth.disconnect();
+  // reconnect it with the filter this time
+  synx.thisSynth.connect(synx.filter);
+  // start audio
+  synx.thisSynth.start();
+  // set the initial frequency. do not set if this is the noise drum.
+  if(synx.synthType!='pink'){synx.thisSynth.freq(rootFreq);
+  }
+  // if delayFX is true, then there is also a delay object to load
+  if(synx.delayFX){
+    synx.delay = new p5.Delay();
+    synx.delay.process(synx.thisSynth, synx.delayLength, synx.delayFB, synx.delayFilter);
+  }
 }
 
+
+
 // handleMusic()
-// triggers bgm and sfx events based on the frame count
+// a home for the the music handling functions
+
 function handleMusic(){
 
-  // DRUM TRIGGERS
-  // THIS TRIGGERS DRUM PART ON AND OFF
+  handleDrums();
+  handleSynth1();
+  handleSynth2();
+  handleFX();
 
-  // if we pass syn3's trigger value
-  if(frame>syn3.trig){
-    // toggle drum on/off sections
-    syn3.drumsOn=!syn3.drumsOn;
-    // if syn3 is on
-    if(syn3.drumsOn){
-      // set duration of this drum break
-      syn3.nextTrig=syn3.trigOn;
-    }else{
-      // if sin3 is off set duration of the silence
-      syn3.nextTrig=syn3.trigOff;
-    }
-    // set the next section trigger
-    syn3.trig=frame+syn3.nextTrig;
-  }
-  // THIS TRIGGERS DRUM NOTES
-  if(syn3.drumsOn){
-    // STEADY 10 FRAME PULSATION
-    if(frame%10==0){
-    // SET RANDOM FILTER Value
-      syn3.filter.freq(random(syn3.filterMin, syn3.filterMax));
-      // ON BEAT PLAY EITHER LONG NOTES (ACCENTS) OR REGULAR NOTES
-      if(random()<0.6){
-        //LONG
-        syn3.env.setADSR(syn3.attackTime,0.9, 0.8, 1);
-        syn3.env.setRange(syn3.attackLevel+0.1, syn3.releaseLevel);
-        // play syn3
-        syn3.env.play();
-        //REGULAR
-        syn3.env.setADSR(syn3.attackTime, syn3.decayTime, syn3.susPercent, syn3.releaseTime);
-        syn3.env.setRange(syn3.attackLevel, syn3.releaseLevel);
-      } else{
-        // play syn3
-        syn3.env.play();}
-  }
-  if(random()>0.6){
-    if(frame%5===0){
-      // PLAY FILLS ON THE OFFBEAT SOMETIMES
-      //play syn3
-      syn3.env.play();
-    }
-  }
-  }
+}
 
-  // SYN2 LOOP
-  if(frame%10===0){
-    // PLAY SYN2 FOLLOWING SAME 10 FRAME PULSE
-    // pick out the current note from the Phrase (list)
-    var newNote =midiToFreq(currentRoot+thisPhrase[syn2Loop]-oct);
-    // set frequency
-    syn2.thisSynth.freq(newNote);
-    // play syn2
-     syn2.env.play();
-     // INCREMENT LOOP
-       syn2Loop+=1;
-       // RESET LOOP
-         if(syn2Loop===phraseLength+5){syn2Loop=0;}
-  }
-
-  // SYN1 TRIGGERS
-    if(frame===nextNote){
-      // RANDOMLY ALTERNATE RHYTHM
-      if(random()>0.5){
-        nextNote=frame+30;
-      } else { nextNote=frame+10;
-      }
-      // TRIGGER NOTE FUNCTION
-     playEnv();
-  }
-
-  //FX TRIGGERS
+function handleFX(){
+  // FX TRIGGERS
+  // there are three FX triggers. they are fired by switching a boolean on,
+  // which in turn starts a timer and switches the boolean off. this way I
+  // am sure the sound FX are fired only once when they are supposed to.
 
   // if upFX is triggered
 
   if(syn4.upFX){
     // for the duration of the FX timer
     if(frame<syn4.FXtimer){
-      // increment the effect
+      // use FXinc(rement) to keep track of time during the FX
       syn4.FXinc+=1;
       // increase frequency by increment
       syn4.thisSynth.freq(syn4.baseFreq+5*syn4.FXinc);
       // play syn4
-      syn4.env.play();
+    //  syn4.env.play();
     } else {
       // if timer is over stop syn4
       syn4.upFX=false;
@@ -1074,7 +1049,7 @@ function handleMusic(){
       // increment frequency downward
       syn4.thisSynth.freq(syn4.baseFreq-5*syn4.FXinc);
       //play syn4
-      syn4.env.play();
+      // syn4.env.play();
     } else {
       // stop syn4
       syn4.downFX=false;
@@ -1082,9 +1057,13 @@ function handleMusic(){
   }
   if(syn4.tremFX){
     // trigger tremolo effect
+    // FYI "tremolo" means rapidly alternating two separate pitches
+    // this is not exactly a tremolo since the pitches change over time but hey
     if(frame<syn4.FXtimer){
+      // start incrementing the increment variable
       syn4.FXinc+=1;
-      // alternate incrementing up and down
+      // alternate between adding and subtracting the increment.
+      // change pitch only when the increment is a multiple of 4 (or 8)
       if(syn4.FXinc%8===0){
         syn4.thisSynth.freq(syn4.baseFreq+5*syn4.FXinc);
       } else if(syn4.FXinc%4===0) {
@@ -1098,32 +1077,111 @@ function handleMusic(){
     }
   }
 }
+function handleSynth2(){
 
-function playEnv(){
-  // TRIGGERS SYN1 ON AND OFF
-  //INCREMENT LOOP
-syn1Loop+=1;
-// COUNT SECTIONS
-if(syn1Loop===phraseLength){syn1Loop=0; phraseReps+=1;}
-// RESET SECTIONS LOOP
-if(phraseReps>section1length+section2length-1){
-  phraseReps=0;
-  // ON RESET SET NEW RANDOM SECTION SIZE
-  // silent section
-  section1length=random(1,2);
-  // playing section
-  section2length=random(1,6);
+    // SYN2 LOOP
+    if(frame%10===0){
+      // PLAY SYN2 FOLLOWING SAME 10 FRAME PULSE
+      // pick out the current note from the Phrase (list)
+      var newNote =midiToFreq(currentRoot+thisPhrase[syn2Loop]-oct);
+      // set frequency
+      syn2.thisSynth.freq(newNote);
+      // play syn2
+       syn2.env.play();
+       // INCREMENT LOOP
+         syn2Loop+=1;
+         // RESET LOOP
+           if(syn2Loop===phraseLength+5){syn2Loop=0;}
+    }
 }
-// IF SYN1 IS OFF, RETURN
-if(phraseReps<section1length){
-  return;
+
+function handleSynth1(){
+  // SYN1 TRIGGERS
+    if(frame===nextNote){
+      // RANDOMLY ALTERNATE RHYTHM
+      if(random()>0.5){
+        nextNote=frame+30;
+      } else { nextNote=frame+10;
+      }
+      // TRIGGER NOTE FUNCTION
+
+      // TRIGGERS SYN1 ON AND OFF
+      //INCREMENT LOOP
+    syn1Loop+=1;
+    // COUNT SECTIONS
+    if(syn1Loop===phraseLength){syn1Loop=0; phraseReps+=1;}
+    // RESET SECTIONS LOOP
+    if(phraseReps>section1length+section2length-1){
+      phraseReps=0;
+      // ON RESET SET NEW RANDOM SECTION SIZE
+      // silent section
+      section1length=random(1,2);
+      // playing section
+      section2length=random(1,6);
+    }
+    // IF SYN1 IS OFF, RETURN
+    if(phraseReps<section1length){
+      return;
+      }
+      // OR ELSE PLAY NOTES
+      var newNote = midiToFreq(currentRoot+thisPhrase[syn1Loop]);
+    syn1.thisSynth.freq(newNote);
+    // play syn1
+    syn1.env.play();
   }
-  // OR ELSE PLAY NOTES
-  var newNote = midiToFreq(currentRoot+thisPhrase[syn1Loop]);
-syn1.thisSynth.freq(newNote);
-// play syn1
-syn1.env.play();
 }
+
+function handleDrums(){
+
+     // DRUM TRIGGERS
+    /////////// THIS TRIGGERS DRUM PART ON AND OFF
+
+    // if we pass syn3's trigger value
+    if(frame>syn3.trig){
+      // toggle drum on/off sections
+      syn3.drumsOn=!syn3.drumsOn;
+      // if syn3 is on
+      if(syn3.drumsOn){
+        // set duration of this drum break
+        syn3.nextTrig=syn3.trigOn;
+      }else{
+        // if sin3 is off set duration of the silence
+        syn3.nextTrig=syn3.trigOff;
+      }
+      // set the next section trigger
+      syn3.trig=frame+syn3.nextTrig;
+    }
+
+    /////////////// THIS TRIGGERS INDIVIDUAL DRUM NOTES
+    if(syn3.drumsOn){
+      // STEADY 10 FRAME PULSATION
+      if(frame%10==0){
+      // SET RANDOM FILTER Value
+        syn3.filter.freq(random(syn3.filterMin, syn3.filterMax));
+        // ON BEAT PLAY EITHER LONG NOTES (ACCENTS) OR REGULAR NOTES
+        if(random()<0.6){
+          //LONG
+          syn3.env.setADSR(syn3.attackTime,0.9, 0.8, 1);
+          syn3.env.setRange(syn3.attackLevel+0.1, syn3.releaseLevel);
+          // play syn3
+          syn3.env.play();
+          //REGULAR
+          syn3.env.setADSR(syn3.attackTime, syn3.decayTime, syn3.susPercent, syn3.releaseTime);
+          syn3.env.setRange(syn3.attackLevel, syn3.releaseLevel);
+        } else{
+          // play syn3
+          syn3.env.play();}
+    }
+    if(random()>0.6){
+      if(frame%5===0){
+        // PLAY FILLS ON THE OFFBEAT SOMETIMES
+        //play syn3
+        syn3.env.play();
+      }
+    }
+    }
+}
+
 
 //KEY TRIGGERS
 // these were used to trigger sounds for test purposes,
@@ -1149,12 +1207,14 @@ function keyPressed(){
 function triggerUpFX(){
   syn4.FXinc=0;
   syn4.FXtimer=frame+syn4.FXlength;
+  syn4.env.play();
 syn4.upFX=true;
 
 }
 function triggerDownFX(){
   syn4.FXinc=0;
   syn4.FXtimer=frame+syn4.FXlength;
+    syn4.env.play();
 syn4.downFX=true;
 }
 function triggerTremFX(){
@@ -1189,15 +1249,16 @@ function resetEverything(){
   obsIncrease=0;
   newObstacle();
   gameOver=false;
-  visionRange=100;
+  visionRange=initVisionRange;
+  preyMaxSpeed=initPreyMaxSpeed;
+  preyMaxHealth=initPreyMaxHealth;
+  healthBonus=inithealthBonus;
+  playerRadius=initPlayerRadius;
+  preyRadius=initPreyRadius;
+  timerLength=initTimerLength;
+  intel=0;
   wiggleReset=0;
   wiggleDist=0;
-  wiggleDist2=0;
-  timerLength=2000;
-  intel=0;
-  preyMaxSpeed=3.5;
-  preyMaxHealth=50;
-  healthBonus=0.5;
-  playerRadius=75;
-  preyRadius=100;
+  wiggleIncrement=0;
+
 }

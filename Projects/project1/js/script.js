@@ -11,23 +11,34 @@ disappear forever. you are fated by this primordial stress to chase until the
 end of time. enter the cycle of a dog's life.
 
 
----- two major game mechanics:
+---- game mechanics:
+The idea is to have a few different game mechanics that will make the game harder
+over time but also force the player to rethink his tactic. The first level of difficulty
+is reached when the prey starts to run away consistantly. A second level of difficulty
+arises when the prey starts to teleport, forcing the player to make even quicker moves.
 
-- the enemy gets "smarter" progressively. upon capture, either the range of his field of vision or his
-intellect will increase. Higher intellect will lead him to run away more readily when
-the player enters his field of vision. And at a certain level of intellect, the enemy
-teleports away if the player stays too long in close range.
-- a random obstacle blocks your way but not your enemy's. the obstacle increases in size and
-gets a new random shape every 10 captures.
+The main mechanics:
+- there is a random obstacle which changes location every 10 captures.
+- you also get a health bonus every 10 captures
+- the maximum possible obstacle size will increase gradually.
+- capturing your target causes EITHER its Intellect skill to increase OR Vision Range
+- vision range will increase over a long period of time. It will hit a maximum value eventually.
+- first the prey slowly figures out how to run away when you enter its vision range. Initially
+it thinks about running away 0% of the time.
+- it will get better until it decides to run 90% of the time you are inside its vision range.
+- at a certain point (70 intel) its intellect will increase more slowly, at which point the prey
+learns how to teleport away once it decides you've been too close for too long.
+- the time you have before it teleports will slowly decrease.
+- health bonuses all decrease over time, eventually bringing the most experienced doggo to its knees.
 
 
 ---- music:
 - For this project I decided to explore the p5.sound.js library and see if I could use
-some basic elements to generate background music.
+some basic elements to generate ever changing music, and create some sound effects as well.
 
-what we have here is a sequence of notes played at different rhythms in two voices:
-- one is a loop
-- the other comes in and out with random rhythms.
+The music is made of three voices.
+- one loops a given pattern
+- the second voice plays the same pattern with random rhythms
 - the third voice is a pulsating noise drum: each drum hit is
 filtered with a new random frequency, fills are added to random
 offbeats and accents are randomly placed to vary the constant
@@ -36,32 +47,16 @@ pulse. together that makes somewhat expressive drum lines.
 illustrate that the game is moving along.
 - i also added a fourth voice for SFX, which plays three different kinds of sound which
 i've tied to in-game events (capture, enemy teleport and game over)
-- sprinting also affects the sound of the looping voice
-- time is calculated in frames most of the time
+- sprinting also affects the sound of the looping voice (by manipulating the delay effect)
+- time is calculated in frames (some exceptions)
 
----- game tuning:
-- Game mechanics are tuned so that the game starts easy, then interesting things are introduced
-gradually, then the difficulty almost plateaus (though not fully, there are still small changes at the end)
-and the player simply has less time to execute his tactics.
-- different prey motions (random, running away, and teleporting) are introduced gradually,
-and their likeliness increases over time. At the beginning the prey doesn't see you from afar,
-doesn't decide to run or teleport. things change as score increases.
-- best game tactic eventually changes from running straight to the prey to having to pushing the prey to
-the side of the screen to then ambush it through a border
-- prey maximum speed, prey intellect (likeliness to run away), prey teleport countdown speed all increase over time
-making the game harder. they all reach a limit eventually. the limit is conceived so that a capture without
-any tactics is made not completely impossible but very unlikely.
-- player health: player absorbs health from the prey. the prey's maximum health will decrease over time
-to lessen the health bonus received on capture. the player also receives a health bonus for leveling up
-(10 captures), which also decreases over time. once about 50 points are reached, the main difficulty
-is being efficient as you continue to gain even smaller health bonuses
-- the size of obstacles increases over time to break the monotony and add more difficulty. this
-increase has no limit but it's unlikely that the player reaches an obstacle size that is out of proportion (though possible).
 
 
 ******************************************************/
 
-// SYNTHESIZOR OBJECTS
+// MUSIC VARIABLES
+
+// SYN1 SYN2 SYN3 and SYN4 are OBJECTS CONTAINING PARAMETERS FOR OUR SYNTHS
 
 var syn1={ //syn1: random rhythmic phrases
   // declare type of synth, and type of filter
@@ -200,6 +195,8 @@ var thisPhrase=[oct+0, oct+4, oct+3, oct+0, oct+8, oct+7, oct+0, oct+5];
 var startRoot=45;
 // a variable to keep track of the new transposed root.
 var currentRoot=startRoot;
+// a variable to convert root note to root frequency
+var rootFreq=0;
 
 
 
@@ -213,11 +210,10 @@ var initHealthBonus=0.5;
 var initPlayerRadius=75;
 var initPreyRadius=100;
 var initTimerLength=2000;
-
-// Track whether the game is over
-var gameOver = false;
+var initPreyIntelIncrement=0.08;
 
 // PLAYER
+
 // Player position, size, velocity
 var playerX;
 var playerY;
@@ -240,8 +236,11 @@ var healthBonus=initHealthBonus;
 var sprintLossFactor=1;
 // Player fill color
 var playerFill = 50;
+// var that toggles sprint on and off
+var sprintOn=false;
 
 // PREY
+
 // Prey position, size, velocity
 var preyX;
 var preyY;
@@ -256,8 +255,17 @@ var preyMaxHealth = initPreyMaxHealth;
 var normalPreyFill = 200;
 var preyFill=normalPreyFill;
 var specialPreyFill=100;
+// position within a Perlin noise sequence
+var noisePos=0;
+// rate of change of Perlin noise position
+var noiseInc=0.01;
+// distance at which the prey might see you
+var visionRange=initVisionRange;
+// how smart the prey is
+var preyIntel=0.1;
 
-// "WIGGLE":
+// "WIGGLE" (the tail and jaw wiggle animations)
+
 // distance wiggled
 var wiggleDist=0;
 // variable used to increment the wiggle effect
@@ -267,31 +275,26 @@ var maxWiggle=20;
 // a variable to trigger the wiggle reset
 var wiggleReset=0;
 
+// EATING AND LEVELS (PACE OF GAME)
+
+// Track whether the game is over
+var gameOver = false;
 // Amount of health obtained per frame of "eating" the prey
 var eatHealth = 5;
 // Number of prey eaten during the game
 var preyEaten = 0;
-
-// position within a Perlin noise sequence
-var noisePos=0;
-// rate of change of Perlin noise position
-var noiseInc=0.1;
-
-// var that toggles sprint on and off
-var sprintOn=false;
-
-// distance at which the prey might see you
-var visionRange=initVisionRange;
-
-// how smart the prey is
-var preyIntel=0.1;
-
 // increment by which prey skills increase upon capture
-var preyIntelIncrement=0.04;
+var preyIntelIncrement=initPreyIntelIncrement;
+var preyIntelPlateau=0.7;
+var preyMaxIntel=0.9;
+var preyIntelFinalIncrement=0.02;
 var visionRangeIncrement=3;
-
 // level of prey intel at which prey levels up
-var preyLevelUp=0.30;
+var preyLevelUp=preyIntelPlateau;
+// number of captures needed to level up
+var nextLevel=10;
+
+// PREY TELEPORTING
 
 // teleport timer trigger
 var portTimer=0;
@@ -299,10 +302,11 @@ var portTimer=0;
 var timerLength=initTimerLength;
 // used to trigger timer only once
 var portTimerStarted=false;
-// used to trigger nothing really but i might use it
+// this avoids me re-writing a dist() function somewhere but tbh i only used it once and could use it more
 var playerInVisionRange=false;
-// number of captures needed to level up
-var nextLevel=10;
+
+// OBSTACLE
+
 // obstacle rectangle configuration
 var obsX=100;
 var obsY=100;
@@ -311,6 +315,9 @@ var obsH=100;
 // variables used to increase size of obstacle
 var obsIncrease=0;
 var obsIncrement=50;
+
+// BACKGROUND STUFF
+
 // background color
 var bgRed=200;
 var bgGreen=100;
@@ -319,8 +326,7 @@ var bgBlue=100;
 var bgEllipseSize=[10];
 var bgEllipseX=[10];
 var bgEllipseY=[10];
-// a variable to convert root note to root frequency
-  var rootFreq=0;
+
 
 
 // setup()
@@ -328,15 +334,11 @@ var bgEllipseY=[10];
 // Sets up the basic elements of the game
 function setup() {
 
-  textFont("Courier");
-  textStyle(BOLD);
+
   createCanvas(700,600);
+
   newBg();
-  noStroke();
   setupDisplays();
-  phraseLength=thisPhrase.length;
-  rootFreq=midiToFreq(currentRoot);
-  // replaced the rest of the function with these
   loadAnInstrument(syn1);
   loadAnInstrument(syn2);
   loadAnInstrument(syn3);
@@ -347,10 +349,17 @@ function setup() {
 
 }
 
+// setupdisplays()
 // initializes display and color settings
+// or really just keep stuff outside of setup()
 function setupDisplays(){
+  rootFreq=midiToFreq(currentRoot);
+  textFont("Courier");
+  textStyle(BOLD);
+  phraseLength=thisPhrase.length;
   ellipseMode(CENTER);
   rectMode(CORNER);
+  noStroke();
   //color
   preyFill=color(25, 200, 75);
   playerFill=color(25, 45, 215);
@@ -384,6 +393,8 @@ function setupPlayer() {
 // updates positions of prey and player,
 // checks health (dying), checks eating (overlaps)
 // displays the two agents.
+// displays the text above the screen
+// displays the obstacle
 // When the game is over, shows the game over screen.
 
 function draw() {
@@ -409,12 +420,40 @@ function draw() {
   }
 }
 
+// drawBg()
+// draws background and ellipses using values set or reset in newBg()
 function drawBg(){
+  //
   background(bgRed, bgGreen, bgBlue);
   fill(bgRed+20, bgGreen+20, bgBlue+20);
   for(var i=0; i<10; i++){
     ellipse(bgEllipseX[i], bgEllipseY[i], bgEllipseSize[i], bgEllipseSize[i]);
   }
+}
+
+// newBg()
+// generates a new background color and random ellipse locations
+function newBg(){
+  // start with a rather random red value
+  bgRed=random(25, 220);
+  // 50% chance that green value is its inverse
+  if(random()>0.5){
+    bgGreen=220-bgRed;
+    // in that case set blue to a random low value
+    bgBlue=random(25, 60);
+  } else {
+    // or let blue be the inverse
+    bgBlue=220-bgRed;
+    // then green will be a random low value
+    bgGreen=random(25, 60);
+    // this way we have a somewhat constrained color palet.
+  }
+  // generate random ellipse X and Y pos, and size.
+  for (var i=0; i<10; i++){
+  bgEllipseX[i]=random(width);
+  bgEllipseY[i]=random(height);
+  bgEllipseSize[i]=random(width/2);
+}
 }
 
 // generateWiggle()
@@ -435,6 +474,8 @@ function generateWiggle(){
 // handleInput()
 //
 // Checks arrow keys and adjusts player velocity accordingly
+// checks for sprint and sends the player sprinting
+// fire delay effect when sprinting
 function handleInput() {
   // check for shift key press
   if(keyIsDown(SHIFT)){
@@ -613,10 +654,14 @@ function checkEating() {
       // trigger FX
       triggerUpFX();
       // update prey vision skill or vision range
-      if(random()>0.65){
+      if(random()>0.55){
         // chance to increase intellect skill
+        if(preyIntel>preyIntelPlateau){
+          preyIntelIncrement=preyIntelFinalIncrement;
+        }
       preyIntel+=preyIntelIncrement;
-      preyIntel=constrain(preyIntel, 0, 0.7);
+      preyIntel=constrain(preyIntel, 0, preyMaxIntel);
+
     } else {
       // chance to increase vision range
       visionRange+=visionRangeIncrement;
@@ -626,30 +671,6 @@ function checkEating() {
   }
 }
 
-// newBg()
-// generates a new background color and random ellipse locations
-function newBg(){
-  // start with a rather random red value
-  bgRed=random(25, 220);
-  // 50% chance that green value is its inverse
-  if(random()>0.5){
-    bgGreen=220-bgRed;
-    // in that case set blue to a random low value
-    bgBlue=random(25, 60);
-  } else {
-    // or let blue be the inverse
-    bgBlue=220-bgRed;
-    // then green will be a random low value
-    bgGreen=random(25, 60);
-    // this way we have a somewhat constrained color palet.
-  }
-  // generate random ellipse X and Y pos, and size.
-  for (var i=0; i<10; i++){
-  bgEllipseX[i]=random(width);
-  bgEllipseY[i]=random(height);
-  bgEllipseSize[i]=random(width/2);
-}
-}
 
 // movePrey()
 //
@@ -725,12 +746,9 @@ if(preyX-playerX!=0&&preyY-playerY!=0){
       preyX=random(width);
       preyY=random(height);
     }
-
   }
 }
   }
-
-
   // finally, move the prey!
   // Update prey position based on velocity
   preyX += preyVX;
@@ -755,7 +773,9 @@ if(preyX-playerX!=0&&preyY-playerY!=0){
 
 // drawPrey()
 //
-// Draw the prey as an ellipse with alpha based on health
+// Draw the dog body
+// wiggle the tail
+// draw the health bar
 function drawPrey() {
   //PREY
   //draw vision range
@@ -811,8 +831,9 @@ function drawObstacle(){
 }
 
 // drawPlayer()
-//
-// Draw the player as an ellipse with alpha based on health
+// draw the dog head
+// draw the wiggling jaw
+// draw the health bar
 function drawPlayer() {
   // fill(playerFill,playerHealth);
 
@@ -878,6 +899,7 @@ function drawPlayer() {
 // showGameOver()
 //
 // Display text about the game being over!
+// make a fun end game display
 function showGameOver() {
   textSize(20);
   textAlign(CENTER,CENTER);
@@ -927,6 +949,7 @@ text(scoreText, 10, 20);
 }
 
 // this function bunches together functions to fire upon leveling up (capturing 10)
+// updates health bonus received upon eating, etc.
 function levelUp(){
   //give player some health
   playerHealth+=healthBonus*playerMaxHealth;
@@ -1069,7 +1092,8 @@ function handleFX(){
       } else if(syn4.FXinc%4===0) {
         syn4.thisSynth.freq(syn4.baseFreq-5*syn4.FXinc);
       }
-      // play syn4
+      // play syn4. syn4 will actually get played again every 4 frames in this case.
+      // but it sounds nice that way okay
       syn4.env.play();
     } else {
     //  stop syn4
@@ -1204,23 +1228,34 @@ function keyPressed(){
 
 // THE FOLLOWING THREE functions
 // are used to prepare (reset) syn4 before firing the SFX
+// the env.play() method is fired here rather than inside the handleFX() function,
+// because handleFX repeats with a slight difference everytime, i don't actually want
+// to fire play multiple amplitude envelopes, just change the frequency within ONE envelope.
+// this does not apply to the tremolo effect though. i want that one to be longer.
 function triggerUpFX(){
+  // reset increment
   syn4.FXinc=0;
+  // set timer to current frame value + length of timer
   syn4.FXtimer=frame+syn4.FXlength;
+  // start playing the envelope
   syn4.env.play();
-syn4.upFX=true;
+  // indicate that we've started this sound.
+  syn4.upFX=true;
 
 }
+// see triggerupfx description
 function triggerDownFX(){
   syn4.FXinc=0;
   syn4.FXtimer=frame+syn4.FXlength;
-    syn4.env.play();
-syn4.downFX=true;
+  syn4.env.play();
+  syn4.downFX=true;
 }
+// see triggerupfx description
 function triggerTremFX(){
   syn4.FXinc=0;
   syn4.FXtimer=frame+syn4.FXlength;
-syn4.tremFX=true;
+  // env.play() is not fired here. it is located in the handleFX function.
+  syn4.tremFX=true;
 }
 
 // MOVE ROOT ONE HALF STEP UP
@@ -1252,11 +1287,12 @@ function resetEverything(){
   visionRange=initVisionRange;
   preyMaxSpeed=initPreyMaxSpeed;
   preyMaxHealth=initPreyMaxHealth;
-  healthBonus=inithealthBonus;
+  healthBonus=initHealthBonus;
   playerRadius=initPlayerRadius;
   preyRadius=initPreyRadius;
   timerLength=initTimerLength;
-  intel=0;
+  preyIntelIncrement=initPreyIntelIncrement;
+  preyIntel=0;
   wiggleReset=0;
   wiggleDist=0;
   wiggleIncrement=0;

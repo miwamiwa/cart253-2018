@@ -13,9 +13,11 @@ end of time. enter the cycle of a dog's life.
 
 ---- game mechanics:
 The idea is to have a few different game mechanics that will make the game harder
-over time but also force the player to rethink his tactic. The first level of difficulty
+over time but also force the player to change his tactic. The first level of difficulty
 is reached when the prey starts to run away consistantly. A second level of difficulty
-arises when the prey starts to teleport, forcing the player to make even quicker moves.
+arises when the prey starts to teleport. At first you are just moving right to the prey
+in order to capture it; late in the game your only good bet is to drive the prey towards a border
+and then use the border wrapping to capture it quickly from the opposide side.
 
 The main mechanics:
 - there is a random obstacle which changes location every 10 captures.
@@ -29,12 +31,13 @@ it thinks about running away 0% of the time.
 - at a certain point (70 intel) its intellect will increase more slowly, at which point the prey
 learns how to teleport away once it decides you've been too close for too long.
 - the time you have before it teleports will slowly decrease.
+- prey speed increases slightly with each capture, making it more difficult to trap the prey late in the game, but not at first.
 - health bonuses all decrease over time, eventually bringing the most experienced doggo to its knees.
 
 
 ---- music:
 - For this project I decided to explore the p5.sound.js library and see if I could use
-some basic elements to generate ever changing music, and create some sound effects as well.
+some basic elements to generate constantly changing music, and create some sound effects as well.
 
 The music is made of three voices.
 - one loops a given pattern
@@ -409,7 +412,7 @@ function draw() {
     movePlayer();
     movePrey();
     updateHealth();
-    checkEating();
+    checkRange();
     drawPrey();
     drawPlayer();
     drawObstacle();
@@ -597,11 +600,14 @@ function updateHealth() {
   }
 }
 
-// checkEating()
+
+// checkRange()
+// formerly known as checkEating()
 // Check if player overlaps with vision range and trigger prey's teleport timer
 // (the actual prey position will be updated in move prey)
 // Check if the player overlaps the prey and updates health of both
-function checkEating() {
+function checkRange() {
+
   // Get distance of player to prey
   var d = dist(playerX,playerY,preyX,preyY);
   // first we see if prey should teleport out
@@ -674,20 +680,13 @@ function checkEating() {
 
 // movePrey()
 //
-// Moves the prey based on random velocity changes
+// Moves the prey based on perlin noise function
+// constrain movement of prey away from the borders unless the player is in vision range
+// move prey away from player if player is in vision range and depending on intel skill
+// if teleport timer is over, teleport the prey
+// handle border wrapping
 function movePrey() {
-  // Change the prey's velocity at random intervals
-  // random() will be < 0.05 5% of the time, so the prey
-  // will change direction on 5% of frames
-  /*
-    // Set velocity based on random values to get a new direction
-    // and speed of movement
-    // Use map() to convert from the 0-1 range of the random() function
-    // to the appropriate range of velocities for the prey
 
-    constrain movement of prey away from the borders unless the player is nearby
-
-  */
   // move up Perlin noise position by increment
   noisePos=noisePos+noiseInc;
   noiseSeed(0);
@@ -720,11 +719,8 @@ function movePrey() {
   }
 }
   // random chance for prey to run away
-  // this will overwrite the prey velocity generated above.
-  // prey has a random chance of knowing to run away
-  // the likeliness of this event increases with intellect
-  // the following if statement checks if the prey will run away,
-  // and also if player is within vision range
+  // chance increases with intel skill (that's this part: if random()>1-preyIntel )
+  // player must be in vision range
  if(random()>=1-preyIntel&&playerInVisionRange){
    console.log("prey is running away");
    // preyX-playerX=0 would break the division that follows so rule it out.

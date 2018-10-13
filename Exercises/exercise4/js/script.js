@@ -24,7 +24,7 @@ var ball = {
 // PADDLES
 
 // How far in from the walls the paddles should be drawn on x
-var paddleInset = 50;
+var paddleInset = 150;
 
 // LEFT PADDLE
 
@@ -58,7 +58,7 @@ var rightPaddle = {
   vy: 0,
   speed: 5,
   upKeyCode: 38, // The key code for the UP ARROW
-  downKeyCode: 40 // The key code for the DOWN ARROW
+  downKeyCode: 40, // The key code for the DOWN ARROW
   //NEW
   score: 0,
   //END NEW
@@ -81,7 +81,10 @@ function preload() {
 // and velocities.
 function setup() {
   // Create canvas and set drawing modes
-  createCanvas(640,480);
+  //NEW
+  // made canvas a bit wider
+  createCanvas(840,480);
+  //END NEW
   rectMode(CENTER);
   noStroke();
   fill(fgColor);
@@ -141,10 +144,16 @@ function draw() {
   // Handle the ball going off screen
   handleBallOffScreen();
 
+  //NEW
+  // Display the score under the other displayed elements
+  displayScore();
+  //END NEW
+
   // Display the paddles and ball
   displayPaddle(leftPaddle);
   displayPaddle(rightPaddle);
   displayBall();
+
 }
 
 
@@ -285,6 +294,10 @@ function handleBallOffScreen() {
 //
 // Draws ball on screen based on its properties
 function displayBall() {
+  //NEW
+  // set fill as being different from score fill
+  fill(255);
+  //END NEW
   rect(ball.x,ball.y,ball.size,ball.size);
 }
 
@@ -292,5 +305,37 @@ function displayBall() {
 //
 // Draws the specified paddle on screen based on its properties
 function displayPaddle(paddle) {
+  //NEW
+  // set fill as being different from score fill
+  fill(255);
+  //END NEW
   rect(paddle.x,paddle.y,paddle.w,paddle.h);
 }
+//NEW
+function displayScore(){
+  // display score as rows of balls.
+  // set fill for this entire function
+  fill(185);
+  // divide score into rows (set row length)
+  var row=4;
+  // set a smaller ball size for score display
+  var ballSize=ball.size/2;
+  // check left paddle's score
+  for(var i=0; i<leftPaddle.score; i++){
+    var row=4;
+    var leftScoreRow = floor(i/row);
+    var leftScoreX = ballSize+1.5*i*ballSize-leftScoreRow*(1.5*row*ballSize);
+    var leftScoreY = ballSize+leftScoreRow*1.5*ballSize;
+    rect(leftScoreX, leftScoreY,ballSize,ballSize);
+  }
+  // check right paddle's score
+  for(var i=0; i<rightPaddle.score; i++){
+
+    var rightScoreRow = floor(i/row);
+    var rightScoreX = width-(ballSize+1.5*i*ballSize-rightScoreRow*(1.5*row*ballSize));
+    var rightScoreY = ballSize+rightScoreRow*1.5*ballSize;
+    rect(rightScoreX, rightScoreY,ballSize,ballSize);
+  }
+
+}
+//END NEW

@@ -20,6 +20,14 @@ var ball = {
   vy: 0,
   speed: 5
 }
+var cat = {
+  x: 0,
+  y: 0,
+  size: 20,
+  vx: 0,
+  vy: 0,
+  speed: 5
+}
 
 // PADDLES
 
@@ -43,11 +51,17 @@ var leftPaddle = {
     //NEW
   leftKeyCode: 65, // The key code for A
   rightKeyCode: 68, // The key code for D
+    fireKeyCode: 49, // The key code for 1
   score: 0,
   // side: 0 is left, 1 is right.
   // this value is used to constrain horizontal movement to the
   // correct half of the screen.
   side:0,
+  bulletx:0,
+  bullety:0,
+  bulletsize:20,
+  bulletvx:10,
+  bulletOn: false,
   //END NEW
 }
 
@@ -68,11 +82,17 @@ var rightPaddle = {
     //NEW
   leftKeyCode:37, // The key code for left arrow
   rightKeyCode: 39, // The key code for right arrow
+      fireKeyCode: 48, // The key code for 0
   score: 0,
   // side: 0 is left, 1 is right.
   // this value is used to constrain horizontal movement to the
   // correct half of the screen.
   side: 1,
+  bulletx:0,
+  bullety:0,
+  bulletsize:20,
+    bulletvx:10,
+    bulletOn: false,
   //END NEW
 }
 
@@ -90,6 +110,9 @@ var sillyInc=0;
 var sillyFact=0.05;
 var ballIsSilly=false;
 var sillyChance=0.5;
+
+// a variable to constrain the game over cat within borders
+var catConstrain=50;
 
 // preload()
 //
@@ -129,6 +152,10 @@ function setupPaddles() {
   // Initialise the right paddle
   rightPaddle.x = width - paddleInset;
   rightPaddle.y = height/2;
+
+  //set bullet to OFF
+  leftPaddle.bulletOn=false;
+  rightPaddle.bulletOn=false;
 }
 
 // setupBall()
@@ -184,7 +211,7 @@ function draw() {
 
   //NEW
   if(gameIsOver){
-    displayGameOver();
+    runGameOver();
   }
   //END NEW
 
@@ -236,12 +263,17 @@ function handleInput(paddle) {
     paddle.vx = paddle.speed;
         console.log("moving left");
   }
-  //END NEW
   else {
     // Otherwise stop moving
     paddle.vy = 0;
     paddle.vx = 0;
   }
+   if (gameIsOver===true&&keyIsDown(paddle.fireKeyCode)){
+     paddle.bulletOn=true;
+     paddle.bulletx=paddle.x;
+     paddle.bullety=paddle.y;
+   }
+     //END NEW
 }
 
 // updatePosition(object)
@@ -322,7 +354,7 @@ function handleBallPaddleCollision(paddle) {
         console.log("ball hit paddle: not silly.");
       }
       //END NEW
-      
+
       ball.vx = -ball.vx;
 
       //NEW
@@ -450,7 +482,8 @@ if(direction==="left"){
 // gameOver()
 // stops the game once we reach the end condition
 function gameOver(){
-
+// set cat to middle of the screen
+setupCat();
   // stop the ball
 ball.vx=0;
 ball.vy=0;
@@ -484,12 +517,36 @@ function keyPressed(){
   }
 }
 
-// displayGameOver()
-// a function to cover up the game play and display game over information.
-function displayGameOver(){
+// runGameOver()
+// this is used to run the "game over" game
+// hides away the regular play screen and displays other game mechanics
+// which involves shooting water at a cat (the cat stole your ball, dude)
+function runGameOver(){
+  // draw new background to hide the regular game screen
   background(0);
+  // show score so we can keep in mind who won
   displayScore();
+  // now load cat
+  moveCat();
+  displayCat();
+  // paddles are still here as they will shoot "water"
+  // handle input will allow shooting since "gameIsOver" is now true
+  handleInput(leftPaddle);
+  handleInput(rightPaddle);
+  // display paddles
+  displayPaddle(leftPaddle);
+  displayPaddle(rightPaddle);
+  // handle bullet motion and display
+  moveBullet(leftPaddle);
+  moveBullet(rightPaddle);
+  displayBullet(leftPaddle);
+  displayBullet(rightPaddle);
+  // check collision with cat
+  handleCatCollision(leftPaddle);
+  handleCatCollision(rightPaddle);
+  // display game over text.
   fill(fgColor);
+  //check who won and display text accordingly
   if(leftPaddle.score>rightPaddle.score) {
   text("game over! left player wins", width/2, height/2);
 } else if (leftPaddle.score<rightPaddle.score) {
@@ -497,8 +554,11 @@ function displayGameOver(){
 }else {
   text("game over! it's a tie!", width/2, height/2);
 }
+
 }
 
+// updateSillyMovement()
+// manages the random motion of ball
 function updateSillyMovement(){
   // increment noise
   sillyInc+=sillyFact;
@@ -512,5 +572,85 @@ function updateSillyMovement(){
         sillyInc+=sillyFact;
         ball.vy=map(noise(sillyInc), 0, 1, 0, -ball.speed);
     }
+}
+
+// setupcat()
+// loads the cat position for game over game
+function setupCat(){
+  cat.x=width/2;
+  cat.y=height/2;
+}
+
+// movecat()
+// updates cat position following random motion
+function moveCat(){
+  //move cat with random velocity
+  cat.vx=random(-cat.speed, cat.speed);
+  cat.vy=random(-cat.speed, cat.speed);
+  // constrain to stay on screen
+  if(cat.x<catConstrain){cat.vx=abs(cat.vx);}
+    if(cat.x>width-catConstrain){cat.vx=-abs(cat.vx);}
+    if(cat.y<catConstrain){cat.vy=abs(cat.vy);}
+      if(cat.y>height-catConstrain){cat.vy=-abs(cat.vy);}
+      // update cat position
+  cat.x+=cat.vx;
+  cat.y+=cat.vy;
+}
+
+// displaycat()
+// display game over cat
+function displayCat(){
+  fill(fgColor);
+  ellipse(cat.x, cat.y, cat.size, cat.size);
+}
+
+// handleCatCollision()
+// based on handleBallCollision()
+// resets the game if you manage to hit the cat
+function handleCatCollision(paddle) {
+// simplify the upcoming if statement by calculating variables prior
+  var catTop = cat.y - cat.size/2;
+  var catBottom = cat.y + cat.size/2;
+  var catLeft = cat.x - cat.size/2;
+  var catRight = cat.x + cat.size/2;
+
+// check for bullet proximity to cat and reset game
+  if(paddle.bulletx>catLeft&&paddle.bulletx<catRight&&paddle.bullety>catTop&&paddle.bullety<catBottom) {
+    playAgain();
+    // make sure bullets are turned off when game is reset
+    paddle.bulletOn=false;
+  }
+}
+
+//movebullet()
+//update specific bullet position
+function moveBullet(paddle){
+  //turn bullet on
+  if(paddle.bulletOn===true){
+    //use paddle.side to determine in which direction to shoot the bullet
+    //in this case it's the left paddle's bullet:
+  if(paddle.side===0){
+    // update speed
+    paddle.bulletx+=paddle.bulletvx;
+    // turn off once we reach the side
+    if(paddle.bulletx>width){
+      paddle.bulletOn=false;
+    }
+  } else {
+    // do the same for the other paddle's bullet
+    paddle.bulletx-=paddle.bulletvx;
+    if(paddle.bulletx<0){
+      paddle.bulletOn=false;
+    }
+  }
+}
+}
+// displayBullet()
+// displays our bullet
+function displayBullet(paddle){
+    if(paddle.bulletOn===true){
+  fill(10, 10, 230);
+  ellipse(paddle.bulletx, paddle.bullety, paddle.bulletsize, paddle.bulletsize/2);
+}
 }
 //END NEW

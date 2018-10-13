@@ -314,10 +314,7 @@ function handleBallPaddleCollision(paddle) {
     // Then check if it is touching the paddle horizontally
     if (ballLeft < paddleRight && ballRight > paddleLeft) {
       // Then the ball is touching the paddle so reverse its vx
-      ball.vx = -ball.vx;
-      // Play our bouncing sound effect by rewinding and then playing
-      beepSFX.currentTime = 0;
-      beepSFX.play();
+
       //NEW
       // cancel any random ball movement
       if(ballIsSilly){
@@ -325,6 +322,18 @@ function handleBallPaddleCollision(paddle) {
         console.log("ball hit paddle: not silly.");
       }
       //END NEW
+      
+      ball.vx = -ball.vx;
+
+      //NEW
+      // update angle at which ball is sent back
+      ball.vy = map(paddle.y-ball.y, -paddle.h/2, paddle.h/2, ball.speed, -ball.speed);
+      //END NEW
+
+      // Play our bouncing sound effect by rewinding and then playing
+      beepSFX.currentTime = 0;
+      beepSFX.play();
+
     }
   }
 }
@@ -491,9 +500,11 @@ function displayGameOver(){
 }
 
 function updateSillyMovement(){
+  // increment noise
   sillyInc+=sillyFact;
+  // apply to velocity
   ball.vy=map(noise(sillyInc), 0, 1, -ball.speed, +ball.speed);
-
+// prevent the ball from heading straight back into the wall
   if(ball.y<10*ball.speed&&ball.vy<0){
       sillyInc+=sillyFact;
       ball.vy=map(noise(sillyInc), 0, 1, 0, +ball.speed);
@@ -501,7 +512,5 @@ function updateSillyMovement(){
         sillyInc+=sillyFact;
         ball.vy=map(noise(sillyInc), 0, 1, 0, -ball.speed);
     }
-
-
 }
 //END NEW

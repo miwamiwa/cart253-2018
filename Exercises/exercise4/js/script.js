@@ -43,8 +43,10 @@ var leftPaddle = {
     //NEW
   leftKeyCode: 65, // The key code for A
   rightKeyCode: 68, // The key code for D
-
   score: 0,
+  // side: 0 is left, 1 is right.
+  // this value is used to constrain horizontal movement to the
+  // correct half of the screen.
   side:0,
   //END NEW
 }
@@ -66,8 +68,10 @@ var rightPaddle = {
     //NEW
   leftKeyCode:37, // The key code for left arrow
   rightKeyCode: 39, // The key code for right arrow
-
   score: 0,
+  // side: 0 is left, 1 is right.
+  // this value is used to constrain horizontal movement to the
+  // correct half of the screen.
   side: 1,
   //END NEW
 }
@@ -79,6 +83,13 @@ var beepSFX;
 var gameOverChance=0.5;
 // a variable to indicate that game is over
 var gameIsOver=false;
+
+// a variable to save perlin noise increment
+var sillyInc=0;
+// a variable to change perlin noise position
+var sillyFact=0.05;
+var ballIsSilly=false;
+var sillyChance=0.5;
 
 // preload()
 //
@@ -148,6 +159,9 @@ function draw() {
   // for all three objects!
   updatePosition(leftPaddle);
   updatePosition(rightPaddle);
+  if(ballIsSilly){
+    updateSillyMovement();
+  }
   updatePosition(ball);
 
   // Handle collisions
@@ -207,12 +221,16 @@ function handleInput(paddle) {
     paddle.vy = paddle.speed;
   }
   //NEW
+  // check for horizontal movement
+  // i am constraining horizontal movement using paddleInset on BOTH sides.
+
+  // if leftKeyCode is being pressed and paddle is within set limits
   else if (keyIsDown(paddle.leftKeyCode)&&paddle.x>paddle.side*width/2+paddleInset) {
     // Move left
     paddle.vx = -paddle.speed;
     console.log("moving left");
   }
-  // Otherwise if the .downKeyCode is being pressed
+   // if rightKeyCode is being pressed and paddle is within set limits
   else if (keyIsDown(paddle.rightKeyCode)&&paddle.x<width/2+paddle.side*width/2-paddleInset) {
     // Move right
     paddle.vx = paddle.speed;
@@ -244,6 +262,7 @@ function updatePosition(object) {
 // and is so reverses its vy
 function handleBallWallCollision() {
 
+
   // Calculate edges of ball for clearer if statement below
   var ballTop = ball.y - ball.size/2;
   var ballBottom = ball.y + ball.size/2;
@@ -257,6 +276,18 @@ function handleBallWallCollision() {
     // Play our bouncing sound effect by rewinding and then playing
     beepSFX.currentTime = 0;
     beepSFX.play();
+
+      //NEW
+      // cancel any random ball movement
+      if(ballIsSilly){
+        ballIsSilly=false;
+            console.log("ball hit wall: not silly.");
+      }
+      if(random()<sillyChance){
+        ballIsSilly=true;
+            console.log("ball is silly");
+      }
+      //END NEW
   }
 }
 
@@ -287,6 +318,13 @@ function handleBallPaddleCollision(paddle) {
       // Play our bouncing sound effect by rewinding and then playing
       beepSFX.currentTime = 0;
       beepSFX.play();
+      //NEW
+      // cancel any random ball movement
+      if(ballIsSilly){
+        ballIsSilly=false;
+        console.log("ball hit paddle: not silly.");
+      }
+      //END NEW
     }
   }
 }
@@ -380,6 +418,8 @@ function displayScore(){
 }
 
 function reset(direction){
+  // turn silly off
+  ballIsSilly=false;
   // get a new random speed based on initial ball speed parameter
   ball.vy=random(1, 2*ball.speed);
   // set new direction for ball
@@ -401,6 +441,7 @@ if(direction==="left"){
 // gameOver()
 // stops the game once we reach the end condition
 function gameOver(){
+
   // stop the ball
 ball.vx=0;
 ball.vy=0;
@@ -447,5 +488,20 @@ function displayGameOver(){
 }else {
   text("game over! it's a tie!", width/2, height/2);
 }
+}
+
+function updateSillyMovement(){
+  sillyInc+=sillyFact;
+  ball.vy=map(noise(sillyInc), 0, 1, -ball.speed, +ball.speed);
+
+  if(ball.y<10*ball.speed&&ball.vy<0){
+      sillyInc+=sillyFact;
+      ball.vy=map(noise(sillyInc), 0, 1, 0, +ball.speed);
+  } else   if(ball.y>height-10*ball.speed&&ball.vy>0){
+        sillyInc+=sillyFact;
+        ball.vy=map(noise(sillyInc), 0, 1, 0, -ball.speed);
+    }
+
+
 }
 //END NEW

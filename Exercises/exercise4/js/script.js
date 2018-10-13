@@ -1,8 +1,18 @@
-// Pong
-// by Pippin Barr
-//
-// A primitive implementation of Pong with no scoring system
-// just the ability to play the game with the keyboard.
+/*
+kame-pong by samuel paré-chouinard
+this is my version of the pong game:
+
+meet kamehameha, my roommate's cat.
+in this version, she tries to mess with your game.
+she will send the ball wobbling away if it gets too close to the side,
+and she has a chance of eating the ball if it goes out of bounds, bringing the game to an end.
+gently spray kame with a bit of water and she will return the ball and leave the playing field.
+
+left player moves with WASD and shoots with 1
+right player moves with arrow keys and shoots with 0
+shooting is enabled when game over starts. shoot the cat to restart
+or press enter at anytime to restart
+*/
 
 // Game colors
 var bgColor = 0;
@@ -100,7 +110,9 @@ var cat = {
   size: 40,
   vx: 0,
   vy: 0,
-  speed: 5
+  speed: 5,
+  rand:0,
+  inc:0.01,
 }
 var armStartPos=0;
 var arm={
@@ -138,6 +150,8 @@ var head={
 }
 // a variable to control chance that game is over
 var gameOverChance=0.5;
+// a boolean to allow chance of game over only once per ball out
+var gameOverChanceOn=false;
 // a variable to indicate that game is over
 var gameIsOver=false;
 
@@ -150,8 +164,9 @@ var sillyChance=0.5;
 
 // a variable to constrain the game over cat within borders
 var catConstrain=50;
-// a variable to save x pos of ball when it hits a wall
-var ballWallX=0;
+
+// set a smaller ball size for score display
+var scoreSize=10;
 //END NEW
 
 // preload()
@@ -278,6 +293,8 @@ function draw() {
     runGameOver();
     console.log("gmover")
   }
+
+  displayControls();
   //END NEW
 
 }
@@ -353,8 +370,9 @@ function updatePosition(object) {
   object.y += object.vy;
 
   // add chance that the game ends here
-  if(ball.x<paddleInset-50||ball.x>width-paddleInset+50&&gameOverChance===false){
-    gameOverChance=true;
+  if((ball.x<paddleInset-50||ball.x>width-paddleInset+50)&&gameOverChanceOn===false){
+    gameOverChanceOn=true;
+    console.log("chance");
   if(random()<gameOverChance){
     if(ball.vx<0){
       head.xs=abs(head.xs);
@@ -367,7 +385,6 @@ function updatePosition(object) {
     head.y=ball.y-570*head.ys;
     head.x=width;
     head.dispTimer=millis()+head.timerLength;
-
       leftPaddle.score+=1;
   }
     // stop the ball
@@ -394,17 +411,18 @@ function handleBallWallCollision() {
   // (cat interferes with the game by swatting the ball)
   if(ballTop<5&&ball.vy<0){
     moveArmTop();
-    ballWallX=ball.x;
+
     if(random()<sillyChance){
       ballIsSilly=true;
+
       console.log("ball is silly");
     }
   }
   if(ballBottom>height-5&&ball.vy>0){
     moveArmBottom();
-    ballWallX=ball.x;
     if(random()<sillyChance){
       ballIsSilly=true;
+
       console.log("ball is silly");
     }
   }
@@ -539,27 +557,26 @@ function displayScore(){
   fill(fgColor-100);
   // divide score into rows (set row length)
   var row=4;
-  // set a smaller ball size for score display
-  var ballSize=ball.size/2;
+
   // check left paddle's score
   for(var i=0; i<leftPaddle.score; i++){
     // for each point, display a ball.
     // determine which row this ball falls into
     var leftScoreRow = floor(i/row);
     // determine x pos depending on score and row size
-    var leftScoreX = ballSize+1.5*i*ballSize-leftScoreRow*(1.5*row*ballSize);
+    var leftScoreX = scoreSize+1.5*i*scoreSize-leftScoreRow*(1.5*row*scoreSize);
     // determine y pos depending on score and row size
-    var leftScoreY = ballSize+leftScoreRow*1.5*ballSize;
+    var leftScoreY = scoreSize+leftScoreRow*1.5*scoreSize;
     // display ball
-    rect(leftScoreX, leftScoreY,ballSize,ballSize);
+    rect(leftScoreX, leftScoreY,scoreSize,scoreSize);
   }
   // check right paddle's score,
   // and do the same.
   for(var i=0; i<rightPaddle.score; i++){
     var rightScoreRow = floor(i/row);
-    var rightScoreX = width-(ballSize+1.5*i*ballSize-rightScoreRow*(1.5*row*ballSize));
-    var rightScoreY = ballSize+rightScoreRow*1.5*ballSize;
-    rect(rightScoreX, rightScoreY,ballSize,ballSize);
+    var rightScoreX = width-(scoreSize+1.5*i*scoreSize-rightScoreRow*(1.5*row*scoreSize));
+    var rightScoreY = scoreSize+rightScoreRow*1.5*scoreSize;
+    rect(rightScoreX, rightScoreY,scoreSize,scoreSize);
   }
 
 }
@@ -578,7 +595,7 @@ if(direction==="left"){
   // place ball at the center of the screen
   ball.x = width/2;
   ball.y = height/2;
-  gameOverChance=false;
+  gameOverChanceOn=false;
 }
 
 // gameOver()
@@ -626,6 +643,8 @@ function keyPressed(){
 // hides away the regular play screen and displays other game mechanics
 // which involves shooting water at a cat (the cat stole your ball, dude)
 function runGameOver(){
+  ball.vx=0;
+  ball.vy=0;
   // draw new background to hide the regular game screen
   background(0);
   // show score so we can keep in mind who won
@@ -653,11 +672,11 @@ function runGameOver(){
   fill(fgColor);
   //check who won and display text accordingly
   if(leftPaddle.score>rightPaddle.score) {
-  text("game over! left player wins", width/2, height/2);
+  text("game over. left player wins. spray cat to reclaim the ball and field. \nleft player: press 1 to shoot. right player: press 0 to shoot.", width/2, height/2);
 } else if (leftPaddle.score<rightPaddle.score) {
-  text("game over! right player wins", width/2, height/2);
+  text("game over. right player wins. spray cat to reclaim the ball and field. \nleft player: press 1 to shoot. right player: press 0 to shoot.", width/2, height/2);
 }else {
-  text("game over! it's a tie!", width/2, height/2);
+  text("game over. it's a tie. spray cat to reclaim the ball and field. \nleft player: press 1 to shoot. right player: press 0 to shoot.", width/2, height/2);
 }
 
 }
@@ -689,15 +708,12 @@ function setupCat(){
 // movecat()
 // updates cat position following random motion
 function moveCat(){
-  head.eye=true;
-  head.gobble=true;
-  head.x=cat.x-cat.size/2;
-  head.y=cat.y-470*head.xs;
-  head.xs=0.1;
-  head.ys=0.1;
   //move cat with random velocity
-  cat.vx=random(-cat.speed, cat.speed);
-  cat.vy=random(-cat.speed, cat.speed);
+  cat.rand+=cat.inc;
+  noiseSeed(0);
+  cat.vx=map(noise(cat.rand), 0, 1, -cat.speed, cat.speed);
+  noiseSeed(1);
+cat.vy=map(noise(cat.rand), 0, 1, -cat.speed, cat.speed);
   // constrain to stay on screen
   if(cat.x<catConstrain){cat.vx=abs(cat.vx);}
     if(cat.x>width-catConstrain){cat.vx=-abs(cat.vx);}
@@ -706,6 +722,12 @@ function moveCat(){
       // update cat position
   cat.x+=cat.vx;
   cat.y+=cat.vy;
+  head.eye=true;
+  head.gobble=true;
+  head.x=cat.x-cat.size/2;
+  head.y=cat.y-470*head.xs;
+  head.xs=0.1;
+  head.ys=0.1;
 }
 
 // displaycat()
@@ -726,7 +748,7 @@ function handleCatCollision(paddle) {
   var catRight = cat.x + cat.size/2;
 
 // check for bullet proximity to cat and reset game
-  if(paddle.bulletx>catLeft&&paddle.bulletx<catRight&&paddle.bullety>catTop&&paddle.bullety<catBottom) {
+  if(paddle.bulletx>catLeft&&paddle.bulletx<catRight&&paddle.bullety>catTop&&paddle.bullety<catBottom&&paddle.bulletOn) {
     playAgain();
     // make sure bullets are turned off when game is reset
     paddle.bulletOn=false;
@@ -842,7 +864,7 @@ function moveArm(){
           arm.moveDone=true;
         }
       }
-
+    arm.x=ball.x;
     arm.y=armStartPos+arm.vy;
 }
 
@@ -863,7 +885,7 @@ function displayArm(){
     ellipse(arm.x, arm.y-arm.h-arm.paw, 1*arm.paw, 1*arm.paw);
     ellipse(arm.x-arm.paw, arm.y-arm.h, 1*arm.paw, 1*arm.paw);
     noFill();
-    stroke(0);
+    stroke(215);
     strokeWeight(5);
     if(arm.paw>0){
     arc(arm.x-1.1*arm.paw, arm.y-arm.h+2*arm.paw, 30, 50, 1.25*PI, 1.5*PI);
@@ -881,7 +903,7 @@ function moveArmTop(){
     arm.vy=0;
     arm.move1=false;
     arm.move3=false;
-    arm.x=ballWallX;
+
     // paw facing down
     arm.paw=-abs(arm.paw);
     arm.h=-abs(arm.h);
@@ -898,7 +920,7 @@ function moveArmBottom(){
     arm.vy=0;
     arm.move1=false;
     arm.move3=false;
-    arm.x=ballWallX;
+
     // paw facing up
     arm.paw=abs(arm.paw);
     arm.h=abs(arm.h);
@@ -909,5 +931,9 @@ function moveArmBottom(){
      arm.moveDone=false;
   }
 }
-
+function displayControls(){
+  noStroke();
+  fill(fgColor);
+  text("left player: WASD. right player: Arrow keys.", width/2, height-15);
+}
 //END NEW

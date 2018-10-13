@@ -20,14 +20,7 @@ var ball = {
   vy: 0,
   speed: 5
 }
-var cat = {
-  x: 0,
-  y: 0,
-  size: 20,
-  vx: 0,
-  vy: 0,
-  speed: 5
-}
+
 
 // PADDLES
 
@@ -99,6 +92,50 @@ var rightPaddle = {
 // A variable to hold the beep sound we will play on bouncing
 var beepSFX;
 
+
+//NEW
+var cat = {
+  x: 0,
+  y: 0,
+  size: 40,
+  vx: 0,
+  vy: 0,
+  speed: 5
+}
+var armStartPos=0;
+var arm={
+  x:200,
+  y:armStartPos,
+  h:100,
+  w:80,
+  paw:22,
+  thick:42,
+ rad:40,
+ rad2:15,
+ move1:false,
+ move2:false,
+ move3: false,
+ move4: false,
+ moveDone:true,
+ vy:0,
+ speed:7,
+ extend:180,
+}
+var head={
+  x:500,
+  y:200,
+  ys:0.3,
+  xs:0.3,
+  eye:false,
+  gobble:false,
+  jaw:20,
+  earInc:0,
+  maxMvmt:20,
+  jawInc:20,
+  eye:0,
+  dispTimer: 0,
+  timerLength:1500,
+}
 // a variable to control chance that game is over
 var gameOverChance=0.5;
 // a variable to indicate that game is over
@@ -113,6 +150,9 @@ var sillyChance=0.5;
 
 // a variable to constrain the game over cat within borders
 var catConstrain=50;
+// a variable to save x pos of ball when it hits a wall
+var ballWallX=0;
+//END NEW
 
 // preload()
 //
@@ -139,6 +179,7 @@ function setup() {
 
   setupPaddles();
   setupBall();
+  setupArm();
 }
 
 // setupPaddles()
@@ -167,7 +208,13 @@ function setupBall() {
   ball.vx = ball.speed;
   ball.vy = ball.speed;
 }
-
+//NEW
+function setupArm(){
+  armStartPos=height+200;
+   arm.y=armStartPos;
+   arm.move1=false;
+}
+//END NEW
 // draw()
 //
 // Calls the appropriate functions to run the game
@@ -186,9 +233,11 @@ function draw() {
   // for all three objects!
   updatePosition(leftPaddle);
   updatePosition(rightPaddle);
+  //NEW
   if(ballIsSilly){
     updateSillyMovement();
   }
+  //END NEW
   updatePosition(ball);
 
   // Handle collisions
@@ -210,8 +259,24 @@ function draw() {
   displayBall();
 
   //NEW
+  if(arm.move1||arm.move2||arm.move3||arm.move4){
+  moveArm();
+  displayArm();
+}
+
+      if(millis()>head.dispTimer&&head.dispTimer!=0&&gameIsOver===false){
+        gameOver();
+      }
+  // draw cat head
+  if (millis()<head.dispTimer){
+  drawCatHead();
+  head.gobble=true;
+  head.eye=true;
+}
+  // run the game over sequence
   if(gameIsOver){
     runGameOver();
+    console.log("gmover")
   }
   //END NEW
 
@@ -286,6 +351,30 @@ function handleInput(paddle) {
 function updatePosition(object) {
   object.x += object.vx;
   object.y += object.vy;
+
+  // add chance that the game ends here
+  if(ball.x<paddleInset-50||ball.x>width-paddleInset+50&&gameOverChance===false){
+    gameOverChance=true;
+  if(random()<gameOverChance){
+    if(ball.vx<0){
+      head.xs=abs(head.xs);
+    head.y=ball.y-570*head.ys;
+    head.x=0;
+    head.dispTimer=millis()+head.timerLength;
+    rightPaddle.score+=1;
+  } else if (ball.vx>0){
+    head.xs=-abs(head.xs);
+    head.y=ball.y-570*head.ys;
+    head.x=width;
+    head.dispTimer=millis()+head.timerLength;
+
+      leftPaddle.score+=1;
+  }
+    // stop the ball
+  ball.vx=0;
+  ball.vy=0;
+  }
+}
 }
 
 // handleBallWallCollision()
@@ -301,6 +390,25 @@ function handleBallWallCollision() {
   var ballLeft = ball.x - ball.size/2;
   var ballRight = ball.x + ball.size/2;
 
+  // check chance of something silly happening
+  // (cat interferes with the game by swatting the ball)
+  if(ballTop<5&&ball.vy<0){
+    moveArmTop();
+    ballWallX=ball.x;
+    if(random()<sillyChance){
+      ballIsSilly=true;
+      console.log("ball is silly");
+    }
+  }
+  if(ballBottom>height-5&&ball.vy>0){
+    moveArmBottom();
+    ballWallX=ball.x;
+    if(random()<sillyChance){
+      ballIsSilly=true;
+      console.log("ball is silly");
+    }
+  }
+
   // Check for ball colliding with top and bottom
   if (ballTop < 0 || ballBottom > height) {
     // If it touched the top or bottom, reverse its vy
@@ -313,12 +421,8 @@ function handleBallWallCollision() {
       // cancel any random ball movement
       if(ballIsSilly){
         ballIsSilly=false;
-            console.log("ball hit wall: not silly.");
       }
-      if(random()<sillyChance){
-        ballIsSilly=true;
-            console.log("ball is silly");
-      }
+
       //END NEW
   }
 }
@@ -384,7 +488,8 @@ function handleBallOffScreen() {
   // Reset it to middle
   // Save its location in the ball.out parameter.
   if (ballRight < 0 ) {
-    // If it went off left side, reset it to the centre
+    // If it went off left side
+
     ball.x = width/2;
     ball.y = height/2;
     reset("right");
@@ -412,6 +517,7 @@ function displayBall() {
   //NEW
   // set fill as being different from score fill
   fill(fgColor);
+  if(millis()<head.dispTimer){fill(bgColor);}
   //END NEW
   rect(ball.x,ball.y,ball.size,ball.size);
 }
@@ -472,24 +578,19 @@ if(direction==="left"){
   // place ball at the center of the screen
   ball.x = width/2;
   ball.y = height/2;
-
-  // add chance that the game ends here
-  if(random()<gameOverChance){
-    gameOver();
-  }
+  gameOverChance=false;
 }
 
 // gameOver()
 // stops the game once we reach the end condition
 function gameOver(){
+
 // set cat to middle of the screen
 setupCat();
-  // stop the ball
-ball.vx=0;
-ball.vy=0;
-// place it in the middle so that it doesn't interact
+// place ball in the middle so that it doesn't interact
 ball.x=width/2;
 ball.y=height/2;
+
 // indicate that game is over. this will fire the game over screen in draw.
 gameIsOver=true;
 }
@@ -499,6 +600,9 @@ gameIsOver=true;
 function playAgain(){
   // indicate that game is no longer over (removes the game over screen display)
 gameIsOver=false;
+head.dispTimer=0;
+head.xs=0.3;
+head.ys=0.3;
 // reset ball and paddles to initial settings
 setupBall();
 setupPaddles();
@@ -528,7 +632,8 @@ function runGameOver(){
   displayScore();
   // now load cat
   moveCat();
-  displayCat();
+  //displayCat();
+  drawCatHead();
   // paddles are still here as they will shoot "water"
   // handle input will allow shooting since "gameIsOver" is now true
   handleInput(leftPaddle);
@@ -584,6 +689,12 @@ function setupCat(){
 // movecat()
 // updates cat position following random motion
 function moveCat(){
+  head.eye=true;
+  head.gobble=true;
+  head.x=cat.x-cat.size/2;
+  head.y=cat.y-470*head.xs;
+  head.xs=0.1;
+  head.ys=0.1;
   //move cat with random velocity
   cat.vx=random(-cat.speed, cat.speed);
   cat.vy=random(-cat.speed, cat.speed);
@@ -653,4 +764,150 @@ function displayBullet(paddle){
   ellipse(paddle.bulletx, paddle.bullety, paddle.bulletsize, paddle.bulletsize/2);
 }
 }
+function drawCatHead(){
+
+  if(head.gobble){
+    fireGobble();
+  }
+  if(head.eye){
+    growEye();
+  }
+  head.earInc+=1;
+  if(head.earInc===20){head.earInc=0;}
+    ear=cos(map(head.earInc, 0, 20, 0, TWO_PI))*3;
+  fill(152);
+  strokeWeight(0);
+// lower lip
+triangle(head.x+565*head.xs, head.y+(611+head.jaw)*head.ys, head.x+466*head.xs, head.y+563*head.ys, head.x+386*head.xs, head.y+646*head.ys);
+triangle(head.x+466*head.xs, head.y+563*head.ys, head.x+588*head.xs, head.y+(572+head.jaw)*head.ys, head.x+565*head.xs, head.y+(611+head.jaw)*head.ys);
+//upper lip
+triangle(head.x+466*head.xs, head.y+563*head.ys, head.x+588*head.xs, head.y+(572-head.jaw)*head.ys, head.x+638*head.xs, head.y+464*head.ys);
+
+triangle(head.x+638*head.xs, head.y+464*head.ys, head.x+598*head.xs, head.y+414*head.ys, head.x+466*head.xs, head.y+563*head.ys);
+triangle(head.x+466*head.xs, head.y+563*head.ys, head.x+539*head.xs, head.y+318*head.ys, head.x+598*head.xs, head.y+414*head.ys);
+triangle(head.x+539*head.xs, head.y+318*head.ys, head.x+370*head.xs, head.y+204*head.ys, head.x+466*head.xs, head.y+563*head.ys);
+triangle(head.x+370*head.xs, head.y+204*head.ys, head.x+125*head.xs, head.y+226*head.ys, head.x+466*head.xs, head.y+563*head.ys);
+triangle(head.x+386*head.xs, head.y+646*head.ys, head.x+39*head.xs, head.y+591*head.ys, head.x+363*head.xs, head.y+664*head.ys);
+triangle(head.x+125*head.xs, head.y+226*head.ys, head.x+4*head.xs, head.y+325*head.ys, head.x+39*head.xs, head.y+591*head.ys);
+triangle(head.x+125*head.xs, head.y+226*head.ys, head.x+466*head.xs, head.y+563*head.ys, head.x+39*head.xs, head.y+591*head.ys);
+triangle(head.x+386*head.xs, head.y+646*head.ys, head.x+466*head.xs, head.y+563*head.ys, head.x+39*head.xs, head.y+591*head.ys);
+fill(50);
+triangle(head.x+370*head.xs, head.y+204*head.ys, head.x+421*head.xs-ear, head.y+57*head.ys, head.x+125*head.xs, head.y+226*head.ys);
+triangle(head.x+263*head.xs, head.y+322*head.ys, head.x+345*head.xs+ear, head.y+27*head.ys, head.x+125*head.xs, head.y+226*head.ys);
+triangle(head.x+345*head.xs+ear, head.y+27*head.ys, head.x+370*head.xs, head.y+204*head.ys, head.x+263*head.xs, head.y+322*head.ys);
+fill(80);
+triangle(head.x+460*head.xs, head.y+372*head.ys, head.x+512*head.xs, head.y+427*head.ys, head.x+508*head.xs, head.y+341*head.ys);
+fill(0);
+ellipse(head.x+505*head.xs, head.y+380*head.ys, 20*head.ys, (40+head.eye)*head.ys);
+}
+function fireGobble(){
+  head.jawInc-=1;
+  if(head.jawInc===0){head.jawInc=head.maxMvmt; head.gobble=false;}
+  head.jaw=cos(map(head.jawInc, 0, head.maxMvmt, 0, TWO_PI));
+  head.jaw=map(head.jaw, -1, 1, 0, 20);
+}
+function growEye(){
+  head.eye+=1;
+  if(head.eye===head.maxMvmt){head.eye=false;}
+  if(head.eye===head.maxMvmt+1){head.eye=0;}
+}
+function moveArm(){
+  if(arm.move1){
+      arm.vy-=arm.speed;
+      console.log("move1");
+        if(arm.vy<=-arm.extend){ arm.move1=false; arm.move2=true;
+
+        }
+    }
+    if(arm.move2){
+      arm.vy+=arm.speed;
+      console.log("move2");
+      if(arm.vy>=0){
+        arm.move2=false;
+        arm.moveDone=true;
+      }
+    }
+    if(arm.move3){
+        arm.vy-=arm.speed;
+        console.log("move3");
+          if(arm.vy>=-arm.extend){ arm.move3=false; arm.move4=true;
+
+          }
+      }
+      if(arm.move4){
+        arm.vy+=arm.speed;
+        console.log("move4");
+        if(arm.vy<=0){
+          arm.move4=false;
+          arm.moveDone=true;
+        }
+      }
+
+    arm.y=armStartPos+arm.vy;
+}
+
+function displayArm(){
+
+    noFill()
+    stroke(165);
+    strokeWeight(arm.thick);
+    arc(arm.x, arm.y, arm.w, 2*arm.h, 1.5*PI, 0.25*PI);
+    fill(185);
+    noStroke();
+    ellipse(arm.x-arm.paw/2, arm.y-arm.h+arm.paw, 1.6*arm.paw, 1.6*arm.paw);
+    ellipse(arm.x, arm.y-arm.h-arm.paw, 1.6*arm.paw, 1.6*arm.paw);
+    ellipse(arm.x-arm.paw, arm.y-arm.h, 1.6*arm.paw, 1.6*arm.paw);
+    fill(145);
+    noStroke();
+    ellipse(arm.x-arm.paw/2, arm.y-arm.h+arm.paw, 1*arm.paw, 1*arm.paw);
+    ellipse(arm.x, arm.y-arm.h-arm.paw, 1*arm.paw, 1*arm.paw);
+    ellipse(arm.x-arm.paw, arm.y-arm.h, 1*arm.paw, 1*arm.paw);
+    noFill();
+    stroke(0);
+    strokeWeight(5);
+    if(arm.paw>0){
+    arc(arm.x-1.1*arm.paw, arm.y-arm.h+2*arm.paw, 30, 50, 1.25*PI, 1.5*PI);
+    arc(arm.x-0.6*arm.paw, arm.y-arm.h-0.3*arm.paw, 60, 50, 1.20*PI, 1.5*PI);
+    arc(arm.x-1.6*arm.paw, arm.y-arm.h+arm.paw, 50, 50, 1.25*PI, 1.5*PI);
+  } else {
+    arc(arm.x-1.1*arm.paw, arm.y-arm.h+2*arm.paw, 30, 50, 0.25*PI, 0.5*PI);
+    arc(arm.x-0.6*arm.paw, arm.y-arm.h-0.3*arm.paw, 60, 50, 0.2*PI, 0.5*PI);
+    arc(arm.x-1.6*arm.paw, arm.y-arm.h+arm.paw, 50, 50, 0.25*PI, 0.5*PI);
+  }
+}
+
+function moveArmTop(){
+  if(arm.moveDone){
+    arm.vy=0;
+    arm.move1=false;
+    arm.move3=false;
+    arm.x=ballWallX;
+    // paw facing down
+    arm.paw=-abs(arm.paw);
+    arm.h=-abs(arm.h);
+    arm.speed=-abs(arm.speed);
+    arm.extend=-abs(arm.extend);
+    armStartPos=-200;
+    arm.move3=true;
+    arm.moveDone=false;
+
+  }
+}
+function moveArmBottom(){
+  if(arm.moveDone){
+    arm.vy=0;
+    arm.move1=false;
+    arm.move3=false;
+    arm.x=ballWallX;
+    // paw facing up
+    arm.paw=abs(arm.paw);
+    arm.h=abs(arm.h);
+    arm.speed=abs(arm.speed);
+    arm.extend=abs(arm.extend);
+     armStartPos=height+200;
+     arm.move1=true;
+     arm.moveDone=false;
+  }
+}
+
 //END NEW

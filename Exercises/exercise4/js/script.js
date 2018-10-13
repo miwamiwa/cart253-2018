@@ -274,6 +274,7 @@ function handleBallOffScreen() {
     // If it went off left side, reset it to the centre
     ball.x = width/2;
     ball.y = height/2;
+    reset("right");
     // Update right paddle score
     rightPaddle.score+=1;
     // NOTE that we don't change its velocity here so it just
@@ -284,6 +285,7 @@ function handleBallOffScreen() {
     // If it went off right side, reset it to the centre
     ball.x = width/2;
     ball.y = height/2;
+    reset("left");
     // update left paddle score
     leftPaddle.score+=1;
   }
@@ -322,20 +324,38 @@ function displayScore(){
   var ballSize=ball.size/2;
   // check left paddle's score
   for(var i=0; i<leftPaddle.score; i++){
-    var row=4;
+    // for each point, display a ball.
+    // determine which row this ball falls into
     var leftScoreRow = floor(i/row);
+    // determine x pos depending on score and row size
     var leftScoreX = ballSize+1.5*i*ballSize-leftScoreRow*(1.5*row*ballSize);
+    // determine y pos depending on score and row size
     var leftScoreY = ballSize+leftScoreRow*1.5*ballSize;
+    // display ball
     rect(leftScoreX, leftScoreY,ballSize,ballSize);
   }
-  // check right paddle's score
+  // check right paddle's score,
+  // and do the same.
   for(var i=0; i<rightPaddle.score; i++){
-
     var rightScoreRow = floor(i/row);
     var rightScoreX = width-(ballSize+1.5*i*ballSize-rightScoreRow*(1.5*row*ballSize));
     var rightScoreY = ballSize+rightScoreRow*1.5*ballSize;
     rect(rightScoreX, rightScoreY,ballSize,ballSize);
   }
 
+}
+
+function reset(direction){
+  // get a new random speed based on initial ball speed parameter
+  ball.vy=random(1, 2*ball.speed);
+  // set new direction for ball
+if(direction==="left"){
+  ball.vx=-abs(ball.vx);
+} else if(direction==="right"){
+  ball.vx=abs(ball.vx);
+}
+  // place ball at the center of the screen
+  ball.x = width/2;
+  ball.y = height/2;
 }
 //END NEW

@@ -67,6 +67,11 @@ var rightPaddle = {
 // A variable to hold the beep sound we will play on bouncing
 var beepSFX;
 
+// a variable to control chance that game is over
+var gameOverChance=0.5;
+// a variable to indicate that game is over
+var gameIsOver=false;
+
 // preload()
 //
 // Loads the beep audio for the sound of bouncing
@@ -84,6 +89,7 @@ function setup() {
   //NEW
   // made canvas a bit wider
   createCanvas(840,480);
+  textAlign(CENTER);
   //END NEW
   rectMode(CENTER);
   noStroke();
@@ -153,6 +159,12 @@ function draw() {
   displayPaddle(leftPaddle);
   displayPaddle(rightPaddle);
   displayBall();
+
+  //NEW
+  if(gameIsOver){
+    displayGameOver();
+  }
+  //END NEW
 
 }
 
@@ -298,7 +310,7 @@ function handleBallOffScreen() {
 function displayBall() {
   //NEW
   // set fill as being different from score fill
-  fill(255);
+  fill(fgColor);
   //END NEW
   rect(ball.x,ball.y,ball.size,ball.size);
 }
@@ -309,7 +321,7 @@ function displayBall() {
 function displayPaddle(paddle) {
   //NEW
   // set fill as being different from score fill
-  fill(255);
+  fill(fgColor);
   //END NEW
   rect(paddle.x,paddle.y,paddle.w,paddle.h);
 }
@@ -317,7 +329,7 @@ function displayPaddle(paddle) {
 function displayScore(){
   // display score as rows of balls.
   // set fill for this entire function
-  fill(185);
+  fill(fgColor-100);
   // divide score into rows (set row length)
   var row=4;
   // set a smaller ball size for score display
@@ -357,5 +369,61 @@ if(direction==="left"){
   // place ball at the center of the screen
   ball.x = width/2;
   ball.y = height/2;
+
+  // add chance that the game ends here
+  if(random()<gameOverChance){
+    gameOver();
+  }
+}
+
+// gameOver()
+// stops the game once we reach the end condition
+function gameOver(){
+  // stop the ball
+ball.vx=0;
+ball.vy=0;
+// place it in the middle so that it doesn't interact
+ball.x=width/2;
+ball.y=height/2;
+// indicate that game is over. this will fire the game over screen in draw.
+gameIsOver=true;
+}
+
+// playAgain()
+// a function to reset the game
+function playAgain(){
+  // indicate that game is no longer over (removes the game over screen display)
+gameIsOver=false;
+// reset ball and paddles to initial settings
+setupBall();
+setupPaddles();
+// reset score.
+leftPaddle.score=0;
+rightPaddle.score=0;
+}
+
+// keyPressed()
+// using this to trigger the game reset (for now at least)
+function keyPressed(){
+  // if key pressed is ENTER key
+  if(keyCode===RETURN){
+    // reset game
+    playAgain();
+  }
+}
+
+// displayGameOver()
+// a function to cover up the game play and display game over information.
+function displayGameOver(){
+  background(0);
+  displayScore();
+  fill(fgColor);
+  if(leftPaddle.score>rightPaddle.score) {
+  text("game over! left player wins", width/2, height/2);
+} else if (leftPaddle.score<rightPaddle.score) {
+  text("game over! right player wins", width/2, height/2);
+}else {
+  text("game over! it's a tie!", width/2, height/2);
+}
 }
 //END NEW

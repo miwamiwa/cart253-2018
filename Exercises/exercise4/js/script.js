@@ -40,8 +40,12 @@ var leftPaddle = {
   speed: 5,
   upKeyCode: 87, // The key code for W
   downKeyCode: 83, // The key code for S
-  //NEW
+    //NEW
+  leftKeyCode: 65, // The key code for A
+  rightKeyCode: 68, // The key code for D
+
   score: 0,
+  side:0,
   //END NEW
 }
 
@@ -59,8 +63,12 @@ var rightPaddle = {
   speed: 5,
   upKeyCode: 38, // The key code for the UP ARROW
   downKeyCode: 40, // The key code for the DOWN ARROW
-  //NEW
+    //NEW
+  leftKeyCode:37, // The key code for left arrow
+  rightKeyCode: 39, // The key code for right arrow
+
   score: 0,
+  side: 1,
   //END NEW
 }
 
@@ -198,9 +206,23 @@ function handleInput(paddle) {
     // Move down
     paddle.vy = paddle.speed;
   }
+  //NEW
+  else if (keyIsDown(paddle.leftKeyCode)&&paddle.x>paddle.side*width/2+paddleInset) {
+    // Move left
+    paddle.vx = -paddle.speed;
+    console.log("moving left");
+  }
+  // Otherwise if the .downKeyCode is being pressed
+  else if (keyIsDown(paddle.rightKeyCode)&&paddle.x<width/2+paddle.side*width/2-paddleInset) {
+    // Move right
+    paddle.vx = paddle.speed;
+        console.log("moving left");
+  }
+  //END NEW
   else {
     // Otherwise stop moving
     paddle.vy = 0;
+    paddle.vx = 0;
   }
 }
 

@@ -51,7 +51,7 @@ var leftPaddle = {
   speed: 5,
   upKeyCode: 87, // The key code for W
   downKeyCode: 83, // The key code for S
-    //NEW
+    ///////////// NEW /////////////
   leftKeyCode: 65, // The key code for A
   rightKeyCode: 68, // The key code for D
     fireKeyCode: 49, // The key code for 1
@@ -65,7 +65,7 @@ var leftPaddle = {
   bulletsize:20,
   bulletvx:10,
   bulletOn: false,
-  //END NEW
+  ///////////// END NEW /////////////
 }
 
 // RIGHT PADDLE
@@ -82,7 +82,7 @@ var rightPaddle = {
   speed: 5,
   upKeyCode: 38, // The key code for the UP ARROW
   downKeyCode: 40, // The key code for the DOWN ARROW
-    //NEW
+    ///////////// NEW /////////////
   leftKeyCode:37, // The key code for left arrow
   rightKeyCode: 39, // The key code for right arrow
       fireKeyCode: 48, // The key code for 0
@@ -96,14 +96,97 @@ var rightPaddle = {
   bulletsize:20,
     bulletvx:10,
     bulletOn: false,
-  //END NEW
+  ///////////// END NEW /////////////
 }
 
 // A variable to hold the beep sound we will play on bouncing
 var beepSFX;
 
 
-//NEW
+///////////// NEW /////////////
+var syn2={ //syn2: looped synth sound
+  // declare type of synth, and type of filter
+  synthType: 'square',
+  filtAtt: "LP",
+  // same basic parameters as syn1
+  attackLevel: 0.4,
+  releaseLevel: 0,
+  attackTime: 0.1,
+  decayTime: 0.1,
+  susPercent: 0.2,
+  releaseTime: 0.5,
+  env:0,
+  thisSynth:0,
+  filter:0,
+  fFreq:500,
+  // a parameter to store the delay object
+  delay:0,
+  // delay parameters
+  delayFX: false,
+  delayLength: 0.16,
+  delayFB: 0.3,
+  delayFilter: 400,
+}
+var syn1={ //syn2: looped synth sound
+  // declare type of synth, and type of filter
+  synthType: 'sine',
+  filtAtt: "LP",
+  // same basic parameters as syn1
+  attackLevel: 0.2,
+  releaseLevel: 0,
+  attackTime: 0.01,
+  decayTime: 0.2,
+  susPercent: 0.42,
+  releaseTime: 0.9,
+  env:0,
+  thisSynth:0,
+  filter:0,
+  fFreq:500,
+  // a parameter to store the delay object
+  delay:0,
+  // delay parameters
+  delayFX: false,
+  delayLength: 0.16,
+  delayFB: 0.3,
+  delayFilter: 400,
+}
+var syn3={ //syn2: looped synth sound
+  // declare type of synth, and type of filter
+  synthType: 'square',
+  filtAtt: "LP",
+  // same basic parameters as syn1
+  attackLevel: 0.7,
+  releaseLevel: 0,
+  attackTime: 0.01,
+  decayTime: 0.2,
+  susPercent: 0.2,
+  releaseTime: 0.5,
+  env:0,
+  thisSynth:0,
+  filter:0,
+  fFreq:800,
+  // a parameter to store the delay object
+  delay:0,
+  // delay parameters
+  delayFX: true,
+  delayLength: 0.33,
+  delayFB: 0.2,
+  delayFilter: 1500,
+}
+
+
+var thisPhrase=[0, 0, 0, 0, 0, 2, 4, 5, 0, 0, 0, 0, 0, 5, 4, 2];
+var thatPhrase=[9, 4, 9, 2, 9, 9, 4, 2];
+var    phrase3=[0, 0, 2, 2, 5, 5, 5, 2];
+var musicInc=0;
+var musicSpeed=1;
+var syn1Loop=0;
+var rootFreq=60;
+var syn2Loop=0;
+var syn3Loop=0;
+var phraseLength=8;
+var phrase2Length=8;
+var phrase3Length=8;
 var cat = {
   x: 0,
   y: 0,
@@ -167,7 +250,7 @@ var catConstrain=50;
 
 // set a smaller ball size for score display
 var scoreSize=10;
-//END NEW
+///////////// END NEW /////////////
 
 // preload()
 //
@@ -183,15 +266,15 @@ function preload() {
 // and velocities.
 function setup() {
   // Create canvas and set drawing modes
-  //NEW
+  ///////////// NEW /////////////
   // made canvas a bit wider
   createCanvas(840,480);
   textAlign(CENTER);
-  //END NEW
+  ///////////// END NEW /////////////
   rectMode(CENTER);
   noStroke();
   fill(fgColor);
-
+  setupInstruments();
   setupPaddles();
   setupBall();
   setupArm();
@@ -223,20 +306,28 @@ function setupBall() {
   ball.vx = ball.speed;
   ball.vy = ball.speed;
 }
-//NEW
+///////////// NEW /////////////
+function setupInstruments(){
+  phraseLength=thisPhrase.length;
+    phrase2Length=thatPhrase.length;
+      phrase3Length=phrase3.length;
+  loadAnInstrument(syn2);
+  loadAnInstrument(syn1);
+  loadAnInstrument(syn3);
+}
 function setupArm(){
   armStartPos=height+200;
    arm.y=armStartPos;
    arm.move1=false;
 }
-//END NEW
+///////////// END NEW /////////////
 // draw()
 //
 // Calls the appropriate functions to run the game
 function draw() {
   // Fill the background
   background(bgColor);
-
+  handleMusic();
   // Handle input
   // Notice how we're using the SAME FUNCTION to handle the input
   // for the two paddles!
@@ -248,11 +339,11 @@ function draw() {
   // for all three objects!
   updatePosition(leftPaddle);
   updatePosition(rightPaddle);
-  //NEW
+  ///////////// NEW /////////////
   if(ballIsSilly){
     updateSillyMovement();
   }
-  //END NEW
+  ///////////// END NEW /////////////
   updatePosition(ball);
 
   // Handle collisions
@@ -263,17 +354,17 @@ function draw() {
   // Handle the ball going off screen
   handleBallOffScreen();
 
-  //NEW
+  ///////////// NEW /////////////
   // Display the score under the other displayed elements
   displayScore();
-  //END NEW
+  ///////////// END NEW /////////////
 
   // Display the paddles and ball
   displayPaddle(leftPaddle);
   displayPaddle(rightPaddle);
   displayBall();
 
-  //NEW
+  ///////////// NEW /////////////
   if(arm.move1||arm.move2||arm.move3||arm.move4){
   moveArm();
   displayArm();
@@ -295,7 +386,7 @@ function draw() {
   }
 
   displayControls();
-  //END NEW
+  ///////////// END NEW /////////////
 
 }
 
@@ -329,7 +420,7 @@ function handleInput(paddle) {
     // Move down
     paddle.vy = paddle.speed;
   }
-  //NEW
+  ///////////// NEW /////////////
   // check for horizontal movement
   // i am constraining horizontal movement using paddleInset on BOTH sides.
 
@@ -355,7 +446,7 @@ function handleInput(paddle) {
      paddle.bulletx=paddle.x;
      paddle.bullety=paddle.y;
    }
-     //END NEW
+     ///////////// END NEW /////////////
 }
 
 // updatePosition(object)
@@ -368,7 +459,7 @@ function handleInput(paddle) {
 function updatePosition(object) {
   object.x += object.vx;
   object.y += object.vy;
-
+///////////// NEW /////////////
   // add chance that the game ends here
   if((ball.x<paddleInset-50||ball.x>width-paddleInset+50)&&gameOverChanceOn===false){
     gameOverChanceOn=true;
@@ -392,6 +483,7 @@ function updatePosition(object) {
   ball.vy=0;
   }
 }
+///////////// END NEW /////////////
 }
 
 // handleBallWallCollision()
@@ -407,14 +499,13 @@ function handleBallWallCollision() {
   var ballLeft = ball.x - ball.size/2;
   var ballRight = ball.x + ball.size/2;
 
+///////////// NEW /////////////
   // check chance of something silly happening
   // (cat interferes with the game by swatting the ball)
   if(ballTop<5&&ball.vy<0){
     moveArmTop();
-
     if(random()<sillyChance){
       ballIsSilly=true;
-
       console.log("ball is silly");
     }
   }
@@ -426,6 +517,7 @@ function handleBallWallCollision() {
       console.log("ball is silly");
     }
   }
+///////////// END NEW /////////////
 
   // Check for ball colliding with top and bottom
   if (ballTop < 0 || ballBottom > height) {
@@ -435,13 +527,13 @@ function handleBallWallCollision() {
     beepSFX.currentTime = 0;
     beepSFX.play();
 
-      //NEW
+      ///////////// NEW /////////////
       // cancel any random ball movement
       if(ballIsSilly){
         ballIsSilly=false;
       }
 
-      //END NEW
+      ///////////// END NEW /////////////
   }
 }
 
@@ -469,20 +561,20 @@ function handleBallPaddleCollision(paddle) {
     if (ballLeft < paddleRight && ballRight > paddleLeft) {
       // Then the ball is touching the paddle so reverse its vx
 
-      //NEW
+      ///////////// NEW /////////////
       // cancel any random ball movement
       if(ballIsSilly){
         ballIsSilly=false;
         console.log("ball hit paddle: not silly.");
       }
-      //END NEW
+      ///////////// END NEW /////////////
 
       ball.vx = -ball.vx;
 
-      //NEW
+      ///////////// NEW /////////////
       // update angle at which ball is sent back
       ball.vy = map(paddle.y-ball.y, -paddle.h/2, paddle.h/2, ball.speed, -ball.speed);
-      //END NEW
+      ///////////// END NEW /////////////
 
       // Play our bouncing sound effect by rewinding and then playing
       beepSFX.currentTime = 0;
@@ -501,7 +593,7 @@ function handleBallOffScreen() {
   // Calculate edges of ball for clearer if statement below
   var ballLeft = ball.x - ball.size/2;
   var ballRight = ball.x + ball.size/2;
- //NEW
+ ///////////// NEW /////////////
   // Check for ball going off one side or the other.
   // Reset it to middle
   // Save its location in the ball.out parameter.
@@ -525,18 +617,18 @@ function handleBallOffScreen() {
     // update left paddle score
     leftPaddle.score+=1;
   }
-  //END NEW
+  ///////////// END NEW /////////////
 }
 
 // displayBall()
 //
 // Draws ball on screen based on its properties
 function displayBall() {
-  //NEW
+  ///////////// NEW /////////////
   // set fill as being different from score fill
   fill(fgColor);
   if(millis()<head.dispTimer){fill(bgColor);}
-  //END NEW
+  ///////////// END NEW /////////////
   rect(ball.x,ball.y,ball.size,ball.size);
 }
 
@@ -544,13 +636,13 @@ function displayBall() {
 //
 // Draws the specified paddle on screen based on its properties
 function displayPaddle(paddle) {
-  //NEW
+  ///////////// NEW /////////////
   // set fill as being different from score fill
   fill(fgColor);
-  //END NEW
+  ///////////// END NEW /////////////
   rect(paddle.x,paddle.y,paddle.w,paddle.h);
 }
-//NEW
+///////////// NEW /////////////
 function displayScore(){
   // display score as rows of balls.
   // set fill for this entire function
@@ -616,6 +708,7 @@ gameIsOver=true;
 // a function to reset the game
 function playAgain(){
   // indicate that game is no longer over (removes the game over screen display)
+  musicSpeed=1;
 gameIsOver=false;
 head.dispTimer=0;
 head.xs=0.3;
@@ -643,6 +736,9 @@ function keyPressed(){
 // hides away the regular play screen and displays other game mechanics
 // which involves shooting water at a cat (the cat stole your ball, dude)
 function runGameOver(){
+  if(musicInc%2!=0){musicInc+=1;}
+  musicSpeed=2;
+
   ball.vx=0;
   ball.vy=0;
   // draw new background to hide the regular game screen
@@ -936,4 +1032,97 @@ function displayControls(){
   fill(fgColor);
   text("left player: WASD. right player: Arrow keys.", width/2, height-15);
 }
-//END NEW
+
+function handleMusic(){
+  musicInc+=musicSpeed;
+if(musicInc%40===0){
+      var newNote3 =midiToFreq(rootFreq-24+phrase3[syn3Loop]);
+      // set frequency
+      syn3.thisSynth.freq(newNote3);
+      // play syn2
+       syn3.env.play();
+          syn3Loop+=1;
+          if(syn3Loop===phrase3Length){
+            syn3Loop=0;
+          }
+}
+if(musicInc%80===0){
+  var newNote2 =midiToFreq(rootFreq+12+thatPhrase[syn1Loop]);
+  // set frequency
+  syn1.thisSynth.freq(newNote2);
+  // play syn2
+   syn1.env.play();
+      syn1Loop+=1;
+   if(syn1Loop===phrase2Length){
+     syn1Loop=0;
+   }
+}
+      if(musicInc%20===0){
+        console.log(musicInc)
+        var newNote =midiToFreq(rootFreq+thisPhrase[syn2Loop]);
+
+
+        // set frequency
+        syn2.thisSynth.freq(newNote);
+        // play syn2
+         syn2.env.play();
+
+
+         // INCREMENT LOOP
+               console.log("yo")
+           syn2Loop+=1;
+
+
+           // RESET LOOP
+           if(syn2Loop===phraseLength){
+             syn2Loop=0;
+           }
+      }
+}
+
+function loadAnInstrument(synx){
+  // for any instrument namedm synx (syn1, syn2, syn3 or syn4)
+  // load envelope
+  synx.env=new p5.Env();
+  // setup envelope parameters
+  synx.env.setADSR(synx.attackTime, synx.decayTime, synx.susPercent, synx.releaseTime);
+  synx.env.setRange(synx.attackLevel, synx.releaseLevel);
+  // check which filter to use
+  if(synx.filtAtt==="BP"){
+    // if the filter attribute says BP load a band pass filter
+    synx.filter= new p5.BandPass();
+  }
+   // if the filter attribute says LP load a low pass filter
+  if(synx.filtAtt==="LP"){
+    synx.filter=new p5.LowPass();
+  }
+  // set initial filter frequency
+  synx.filter.freq(synx.fFreq);
+ // now load the type of oscillator used. syn3 is the only one which uses
+ // something else than the standard oscillator, so this exception is dealt with first:
+ // if the synth type is "pink" then we have a noise synth.
+  if(synx.synthType==='pink'){
+    synx.thisSynth=new p5.Noise(synx.synthType);
+    // if anything else (square or sine) then we have an oscillator
+  } else {
+  synx.thisSynth=new p5.Oscillator(synx.synthType);
+  }
+  // plug-in the amp, which will be monitored using the envelope (env) object
+  synx.thisSynth.amp(synx.env);
+  // disconnect this sound from audio output
+  synx.thisSynth.disconnect();
+  // reconnect it with the filter this time
+  synx.thisSynth.connect(synx.filter);
+  // start audio
+  synx.thisSynth.start();
+  // set the initial frequency. do not set if this is the noise drum.
+  if(synx.synthType!='pink'){synx.thisSynth.freq(rootFreq);
+  }
+  // if delayFX is true, then there is also a delay object to load
+  if(synx.delayFX){
+    synx.delay = new p5.Delay();
+    synx.delay.process(synx.thisSynth, synx.delayLength, synx.delayFB, synx.delayFilter);
+  }
+}
+
+///////////// END NEW /////////////

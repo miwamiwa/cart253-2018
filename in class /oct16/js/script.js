@@ -11,7 +11,10 @@ author, and this description to match your project!
 // preload()
 //
 // Description of preload
+var balls=100;
 var ball;
+var ball2;
+var ballArray=[balls];
 function preload() {
 
 }
@@ -22,13 +25,18 @@ function preload() {
 // Description of setup
 
 function setup() {
-createCanvas(400, 400);
-
-ball= new Ball();
-
-
+createCanvas(600, 400);
+loadballs();
 
 }
+ function loadballs(){
+   ball= new Ball(30, -20, 4, 10);
+   ball2= new Ball(20, 10, 5, 8);
+
+   for(var i=1; i<balls; i++){
+     ballArray[i]=new Ball(i*5, i, i, i);
+   }
+ }
 
 
 // draw()
@@ -36,10 +44,10 @@ ball= new Ball();
 // Description of draw()
 
 function draw() {
-  background(100);
-  ball.update();
-  ball.display();
-  if(ball.x>width || ball.y>height){
-    ball.reset();
+  background(0);
+
+  for(var i=1; i<balls; i++){
+    ballArray[i].update();
+    ballArray[i].display();
   }
 }

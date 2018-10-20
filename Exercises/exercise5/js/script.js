@@ -39,102 +39,7 @@ var bigHead;
 // the music related code in here is mostly copy-pasted from project 1.
 // this time around the composition is not random, the following three
 // synths read through set parts at set rhythms.
-var syn1={
-  // declare type of synth, and type of filter
-  synthType: 'sine',
-  filtAtt: "LP",
-  // envelope setup
-  attackLevel: 0.2,
-  releaseLevel: 0,
-  attackTime: 0.01,
-  decayTime: 0.2,
-  susPercent: 0.42,
-  releaseTime: 0.9,
-  // next 4 parameters hold p5.sound.js objects
-  env:0,
-  thisSynth:0,
-  filter:0,
-  delay:0,
-  // filter frequency
-  fFreq:500,
-  // delay parameters
-  delayFX: false,
-  delayLength: 0.16,
-  delayFB: 0.3,
-  delayFilter: 400,
-  // phrase and loop
-  phrase: 0,
-  loop: 0,
-  // loop rate
-  rate: 80,
-  // note values
-  notes:[0],
-  oct:0,
-}
-var syn2={ //same as syn1
-  synthType: 'square',
-  filtAtt: "LP",
-  //envelope
-  attackLevel: 0.4,
-  releaseLevel: 0,
-  attackTime: 0.1,
-  decayTime: 0.1,
-  susPercent: 0.2,
-  releaseTime: 0.5,
-  //p5 objects
-  delay:0,
-  env:0,
-  thisSynth:0,
-  filter:0,
-  //filter frequency
-  fFreq:500,
-  //delay
-  delayFX: false,
-  delayLength: 0.16,
-  delayFB: 0.3,
-  delayFilter: 400,
-  // phrase and loop
-  phrase: 0,
-  loop: 0,
-  // loop rate
-  rate: 20,
-  // note values
-  notes:[0],
-  oct:0,
-}
 
-var syn3={ // same as syn1
-  synthType: 'square',
-  filtAtt: "LP",
-  // envelope
-  attackLevel: 0.7,
-  releaseLevel: 0,
-  attackTime: 0.01,
-  decayTime: 0.2,
-  susPercent: 0.2,
-  releaseTime: 0.5,
-  // p5 objects
-  env:0,
-  thisSynth:0,
-  filter:0,
-  delay:0,
-  //filter frequency
-  fFreq:800,
-  // delay parameters
-  delayFX: true,
-  delayLength: 0.33,
-  delayFB: 0.2,
-  delayFilter: 1500,
-  // phrase and loop
-  phrase: 0,
-  loop: 0,
-  // loop rate
-  rate: 40,
-  // note values
-  notes:[0],
-  // octave at which the synth plays
-  oct:0,
-}
 
 // root key midi value
 var rootNote=60;
@@ -190,6 +95,8 @@ var catConstrain=50;
 // set a smaller ball size for score display
 var scoreSize=10;
 var kittyarm;
+var synth1, synth2, synth3;
+
 ///////////// END NEW /////////////
 
 // preload()
@@ -207,6 +114,9 @@ function preload() {
 function setup() {
   bigHead = new CatHead();
   kittyarm = new CatArm();
+  synth1 = new Synth('sine');
+  synth2 = new Synth('square');
+  synth3 = new Synth('square');
   // Create canvas and set drawing modes
   ///////////// NEW /////////////
   // made canvas a bit wider
@@ -235,17 +145,42 @@ function setupPaddles(){
 // set phrase length,
 // load each instrument and start sound.
 function setupInstruments(){
-  // set at which octave each voice will play
-  syn1.oct=12;
-  syn3.oct=-24;
-  syn2.oct=0;
-  // assign phrasesto each synth
-  syn2.notes=phrase1;
-  syn1.notes=phrase2;
-  syn3.notes=phrase3;
-  loadAnInstrument(syn2);
-  loadAnInstrument(syn1);
-  loadAnInstrument(syn3);
+
+  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
+  synth1.setEnvelope(0.01, 0.4, 0.9, 0.4, 0.52, 0);
+  // function(filterType, frequency)
+  synth1.setFilter("LP", 500);
+  // function(delayIsOn, length, feedback, filterFrequency)
+  synth1.setDelay(false, 0, 0, 0)
+  // function(noteList, octave, loopLength)
+  synth1.setNotes(phrase2, 12, 80);
+  // load it
+  synth1.loadInstrument();
+
+  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
+  synth2.setEnvelope(0.1, 0.1, 0.5, 0.4, 0.2, 0);
+  // function(filterType, frequency)
+  synth2.setFilter("LP", 500);
+  // function(delayIsOn, length, feedback, filterFrequency)
+  synth2.setDelay(false, 0, 0, 0)
+  // function(noteList, octave, loopLength)
+  synth2.setNotes(phrase1, 0, 20);
+  // load it
+  synth2.loadInstrument();
+
+
+  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
+  synth3.setEnvelope(0.01, 0.2, 0.5, 0.4, 0.2, 0);
+  // function(filterType, frequency)
+  synth3.setFilter("LP", 800);
+  // function(delayIsOn, length, feedback, filterFrequency)
+  synth3.setDelay(true, 0.165, 0.3, 1500);
+  // function(noteList, octave, loopLength)
+  synth3.setNotes(phrase3, -24, 40);
+  // load it
+  synth3.loadInstrument();
+
+
 }
 
 
@@ -259,9 +194,9 @@ function draw() {
   ///////////// NEW /////////////
   // load music first
   musicInc+=musicSpeed;
-  handleMusic(syn1);
-  handleMusic(syn2);
-  handleMusic(syn3);
+synth1.playMusic();
+synth2.playMusic();
+synth3.playMusic();
   ///////////// END NEW /////////////
 
   // Handle input
@@ -518,93 +453,3 @@ function displayControls(){
   fill(fgColor);
   text("left player: WASD. right player: Arrow keys.", width/2, height-15);
 }
-
-// MUSIC FUNCTIONS
-
-// handleMusic()
-//
-// fires notes of a given synth according to loop position and phrase length
-//
-// this is based on what i had in project1, but
-// all the synths are bunched up in one function now!!!
-// i wasn't going to edit the music functions i grabbed from project1 at first, but
-// this is quite nice. instead of using a steady pusle to fire each voice,
-// i could also make synx.rate an array of values representing time until next note.
-// with an array for time, and an array for pitches, the next music piece with set
-// notes will be easy as pie.
-// perhaps i could generate the note values with another code and a midi keyboard??
-// like on p5? or processing? something? probably.
-
-function handleMusic(synx){
-
-// musicInc is incremented by musicSpeed in draw()
-// if musicInc reaches the synth's pulse rate
-if(musicInc%synx.rate===0){
-      // convert midi to frequency
-      var newNote =midiToFreq(rootNote+synx.oct+synx.notes[synx.loop]);
-      // set frequency
-      synx.thisSynth.freq(newNote);
-      // play synth
-       synx.env.play();
-       // increment appropriate loop
-       synx.loop+=1;
-       // if loop has reached maximum limit reset loop
-       if(synx.loop===synx.phrase){
-         synx.loop=0;
-          }
-  }
-}
-
-// this is a straight copy-paste from my project1, except for the first line.
-// loadAnInstrument();
-//
-// sets up a given instrument with appropriate oscillator, envelope, filter and delay.
-// starts audio (but not envelope)
-function loadAnInstrument(synx){
-  // set phrase length
-  synx.phrase=synx.notes.length;
-  // for any instrument namedm synx (syn1, syn2, syn3 or syn4)
-  // load envelope
-  synx.env=new p5.Env();
-  // setup envelope parameters
-  synx.env.setADSR(synx.attackTime, synx.decayTime, synx.susPercent, synx.releaseTime);
-  synx.env.setRange(synx.attackLevel, synx.releaseLevel);
-  // check which filter to use
-  if(synx.filtAtt==="BP"){
-    // if the filter attribute says BP load a band pass filter
-    synx.filter= new p5.BandPass();
-  }
-   // if the filter attribute says LP load a low pass filter
-  if(synx.filtAtt==="LP"){
-    synx.filter=new p5.LowPass();
-  }
-  // set initial filter frequency
-  synx.filter.freq(synx.fFreq);
- // now load the type of oscillator used. syn3 is the only one which uses
- // something else than the standard oscillator, so this exception is dealt with first:
- // if the synth type is "pink" then we have a noise synth.
-  if(synx.synthType==='pink'){
-    synx.thisSynth=new p5.Noise(synx.synthType);
-    // if anything else (square or sine) then we have an oscillator
-  } else {
-  synx.thisSynth=new p5.Oscillator(synx.synthType);
-  }
-  // plug-in the amp, which will be monitored using the envelope (env) object
-  synx.thisSynth.amp(synx.env);
-  // disconnect this sound from audio output
-  synx.thisSynth.disconnect();
-  // reconnect it with the filter this time
-  synx.thisSynth.connect(synx.filter);
-  // start audio
-  synx.thisSynth.start();
-  // set the initial frequency. do not set if this is the noise drum.
-  if(synx.synthType!='pink'){synx.thisSynth.freq(rootNote);
-  }
-  // if delayFX is true, then there is also a delay object to load
-  if(synx.delayFX){
-    synx.delay = new p5.Delay();
-    synx.delay.process(synx.thisSynth, synx.delayLength, synx.delayFB, synx.delayFilter);
-  }
-}
-
-///////////// END NEW /////////////

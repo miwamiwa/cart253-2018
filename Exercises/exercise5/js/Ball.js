@@ -80,7 +80,7 @@ Ball.prototype.checkWallCollision = function(){
       // chance that cat actually hits the this
       if(random()<sillyChance){
         // generate random motion
-        thisIsSilly=true;
+        ballIsSilly=true;
       }
     }
     // if this is close to bottom
@@ -89,7 +89,7 @@ Ball.prototype.checkWallCollision = function(){
       kittyarm.movebottom();
       // check if the this is hit
       if(random()<sillyChance){
-        thisIsSilly=true;
+        ballIsSilly=true;
       }
     }
 
@@ -106,8 +106,8 @@ Ball.prototype.checkWallCollision = function(){
         ///////////// NEW /////////////
 
         // cancel any random this movement (if this has with either side)
-        if(thisIsSilly){
-          thisIsSilly=false;
+        if(ballIsSilly){
+          ballIsSilly=false;
         }
 
         ///////////// END NEW /////////////
@@ -150,7 +150,7 @@ Ball.prototype.display = function(){
 Ball.prototype.reset = function(direction){
 
   // turn silly this off
-  thisIsSilly=false;
+  ballIsSilly=false;
   // get a new random speed based on initial this speed parameter
   this.vy=random(1, 2*this.speed);
   // set new direction for this
@@ -166,4 +166,17 @@ if(direction==="left"){
   this.y = height/2;
   // reset gameover chance
   gameOverChanceOn=false;
+}
+Ball.prototype.sillyMovement = function(){
+  // increment noise
+  sillyInc+=sillyFact;
+  // apply to velocity
+  this.vy=map(noise(sillyInc), 0, 1, -this.speed, +this.speed);
+// prevent the ball from bigHeading straight back into the wall
+// if ball is still close to the wall
+  if(this.y<10*this.speed&&this.vy<0){
+      this.vy=abs(this.vy);
+  } else   if(this.y>height-10*this.speed&&this.vy>0){
+        this.vy=-abs(this.vy);
+    }
 }

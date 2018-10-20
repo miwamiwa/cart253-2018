@@ -76,7 +76,7 @@ Ball.prototype.checkWallCollision = function(){
     // if this is close to top
     if(thisTop<5&&this.vy<0){
       // start appropriate leg movement
-      moveLegTop();
+      kittyarm.movetop();
       // chance that cat actually hits the this
       if(random()<sillyChance){
         // generate random motion
@@ -86,7 +86,7 @@ Ball.prototype.checkWallCollision = function(){
     // if this is close to bottom
     if(thisBottom>height-5&&this.vy>0){
       // start appropriate leg movement
-      movelegBottom();
+      kittyarm.movebottom();
       // check if the this is hit
       if(random()<sillyChance){
         thisIsSilly=true;

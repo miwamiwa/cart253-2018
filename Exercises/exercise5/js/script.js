@@ -166,42 +166,6 @@ var cat = {
   inc:0.01,
 }
 
-// starting position for the leg (once canvas is loaded it is set to under the screen)
-var legStartPos=0;
-
-// this is the cat leg that swipes at the ball when it reaches the side walls
-var leg={
-  //position
-x:200,
-  y:legStartPos,
-  // height and width (used to scale the image)
-  h:100,
-  w:80,
-  // paw width
-  paw:22,
-  // leg thickness
-  thick:42,
- // finger radius
- rad:40,
- // finger inner radius
- rad2:15,
- // movement triggers
- // move from bottom of screen upward
- move1:false,
- //and back again
- move2:false,
- // move from top of the screen downward
- move3: false,
- // and back again
- move4: false,
- // finished moving trigger
- moveDone:true,
- // velocity
- vy:0,
- speed:7,
- // how long to extend the leg
- extend:180,
-}
 
 // GAME SETTINGS
 // a variable to control chance that game is over
@@ -225,6 +189,7 @@ var catConstrain=50;
 
 // set a smaller ball size for score display
 var scoreSize=10;
+var kittyarm;
 ///////////// END NEW /////////////
 
 // preload()
@@ -241,6 +206,7 @@ function preload() {
 // and velocities.
 function setup() {
   bigHead = new CatHead();
+  kittyarm = new CatArm();
   // Create canvas and set drawing modes
   ///////////// NEW /////////////
   // made canvas a bit wider
@@ -248,31 +214,22 @@ function setup() {
   textAlign(CENTER);
   // new setup functions
   setupInstruments();
-  setupleg();
+  kittyarm.setup();
   ///////////// END NEW /////////////
   rectMode(CENTER);
   noStroke();
   fill(fgColor);
-  setupPaddles();
   setupBall();
-
+  setupPaddles();
 }
 
-// setupPaddles()
-//
-// Sets the positions of the two paddles
-function setupPaddles() {
-leftPaddle= new Paddle(0, 87, 83, 65, 68, 49);
-rightPaddle= new Paddle(1, 38, 40, 37, 39, 48);
+function setupBall(){
+  ball=new Ball();
 }
-
-// setupBall()
-//
-// Sets the position and velocity of the ball
-function setupBall() {
-ball=new Ball();
+function setupPaddles(){
+  leftPaddle= new Paddle(0, 87, 83, 65, 68, 49);
+  rightPaddle= new Paddle(1, 38, 40, 37, 39, 48);
 }
-
 ///////////// NEW /////////////
 // setupInstruments();
 // set phrase length,
@@ -291,13 +248,6 @@ function setupInstruments(){
   loadAnInstrument(syn3);
 }
 
-//setupleg();
-//
-// sets leg position now that canvas is drawn
-function setupleg(){
-  legStartPos=height+200;
-   leg.y=legStartPos;
-}
 
 ///////////// END NEW /////////////
 // draw()
@@ -355,9 +305,9 @@ ball.display();
   // CAT leg
   // if any of the leg's triggers are active,
   // update leg position and draw leg.
-  if(leg.move1||leg.move2||leg.move3||leg.move4){
-  moveleg();
-  displayLeg();
+  if(kittyarm.move1||kittyarm.move2||kittyarm.move3||kittyarm.move4){
+  kittyarm.move();
+  kittyarm.display();
 }
   // CAT HEAD: GAME OVER
   // if cat bigHead timer is active, draw cat bigHead
@@ -465,7 +415,7 @@ function runGameOver(){
   displayScore();
 
   // now load cat
-  
+
   bigHead.move();
   bigHead.display();
 
@@ -559,154 +509,6 @@ function setupCat(){
   // since the bigHead is scalable, scale it down
   bigHead.xs=0.1;
   bigHead.ys=0.1;
-}
-
-// moveleg()
-//
-// sets appropriate direction for leg motion
-function moveleg(){
-  // if move1 is active
-  if(leg.move1){
-    // move leg up
-      leg.vy-=leg.speed;
-      // once leg has reached maximum extension,
-      // turn this trigger off and turn next one on.
-        if(leg.vy<=-leg.extend){
-           leg.move1=false;
-           leg.move2=true;
-        }
-    }
-    // if move2 is active
-    if(leg.move2){
-      // move leg down
-      leg.vy+=leg.speed;
-      // once motion has reached its end
-      // stop all leg motion
-      if(leg.vy>=0){
-        leg.move2=false;
-        leg.moveDone=true;
-      }
-    }
-
-    // move3 is active
-    if(leg.move3){
-      // move leg down
-        leg.vy+=leg.speed;
-        // motion finished:
-      // stop move3 and start move4
-          if(leg.vy>=-leg.extend){
-            leg.move3=false;
-            leg.move4=true;
-          }
-      }
-      // move4 is active
-      if(leg.move4){
-        // move leg up
-        leg.vy-=leg.speed;
-        // motion finished:
-        // stop all motion.
-        if(leg.vy<=0){
-          leg.move4=false;
-          leg.moveDone=true;
-        }
-      }
-      // set leg.x to match where the ball is
-    leg.x=ball.x;
-    // update leg position according to velocity
-    leg.y=legStartPos+leg.vy;
-}
-
-// displayLeg()
-//
-// the leg is more simple. there are no animations but
-// i tried to make it as "reversible" as possible to use the same
-// function to display the leg at the top and bottom of the screen.
-// inverting var leg.h and var paw does the trick to flip the image over,
-// except for the claws which need separate arc() functions for both positions.
-function displayLeg(){
-    // leg
-    noFill()
-    stroke(165);
-    strokeWeight(leg.thick);
-    arc(leg.x, leg.y, leg.w, 2*leg.h, 1.5*PI, 0.25*PI);
-    // paw
-    // outer circle
-    fill(185);
-    noStroke();
-    ellipse(leg.x-leg.paw/2, leg.y-leg.h+leg.paw, 1.6*leg.paw, 1.6*leg.paw);
-    ellipse(leg.x, leg.y-leg.h-leg.paw, 1.6*leg.paw, 1.6*leg.paw);
-    ellipse(leg.x-leg.paw, leg.y-leg.h, 1.6*leg.paw, 1.6*leg.paw);
-    // inner circle
-    fill(145);
-    noStroke();
-    ellipse(leg.x-leg.paw/2, leg.y-leg.h+leg.paw, 1*leg.paw, 1*leg.paw);
-    ellipse(leg.x, leg.y-leg.h-leg.paw, 1*leg.paw, 1*leg.paw);
-    ellipse(leg.x-leg.paw, leg.y-leg.h, 1*leg.paw, 1*leg.paw);
-    // claws
-    noFill();
-    stroke(215);
-    strokeWeight(5);
-    // if leg is on bottom side
-    if(leg.paw>0){
-      // display claws
-    arc(leg.x-1.1*leg.paw, leg.y-leg.h+2*leg.paw, 30, 50, 1.25*PI, 1.5*PI);
-    arc(leg.x-0.6*leg.paw, leg.y-leg.h-0.3*leg.paw, 60, 50, 1.20*PI, 1.5*PI);
-    arc(leg.x-1.6*leg.paw, leg.y-leg.h+leg.paw, 50, 50, 1.25*PI, 1.5*PI);
-  } else {
-    // if leg on top side display these claws instead
-    arc(leg.x-1.1*leg.paw, leg.y-leg.h+2*leg.paw, 30, 50, 0.25*PI, 0.5*PI);
-    arc(leg.x-0.6*leg.paw, leg.y-leg.h-0.3*leg.paw, 60, 50, 0.2*PI, 0.5*PI);
-    arc(leg.x-1.6*leg.paw, leg.y-leg.h+leg.paw, 50, 50, 0.25*PI, 0.5*PI);
-  }
-}
-
-// moveLegTop
-//
-// gets called once before initiating motion
-// prepares leg motion
-// flips cat leg to the top side
-function moveLegTop(){
-  if(leg.moveDone){
-    // reset motion
-    leg.vy=0;
-    leg.move1=false;
-    leg.move3=false;
-
-    // paw facing down
-    // invert shapes
-    leg.paw=-abs(leg.paw);
-    leg.h=-abs(leg.h);
-    leg.extend=-abs(leg.extend);
-    // set position
-    legStartPos=-200;
-    // start motion
-    leg.move3=true;
-    leg.moveDone=false;
-
-  }
-}
-
-// movelegbottom();
-//
-// prepares leg motion
-// flips cat lef to the bottom side
-function movelegBottom(){
-  if(leg.moveDone){
-    // reset motion
-    leg.vy=0;
-    leg.move1=false;
-    leg.move3=false;
-    // paw facing up
-    // set shapes to initial direction
-    leg.paw=abs(leg.paw);
-    leg.h=abs(leg.h);
-    leg.extend=abs(leg.extend);
-    // position
-     legStartPos=height+200;
-     // start motion
-     leg.move1=true;
-     leg.moveDone=false;
-  }
 }
 
 // displayControls()

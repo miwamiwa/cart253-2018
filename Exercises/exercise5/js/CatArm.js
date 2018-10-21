@@ -1,9 +1,9 @@
-var legStartPos=0;
+
 // this is the cat this that swipes at the ball when it reaches the side walls
 function CatArm(){
   //position
   this.x=200;
-  this.y=legStartPos;
+  this.y=height+200;
   // height and width (used to scale the image)
   this.h=100;
   this.w=80;
@@ -31,10 +31,6 @@ function CatArm(){
  this.speed=7;
  // how long to extend the this
  this.extend=180;
-}
-
-CatArm.prototype.setup = function(){
-     this.y=height+200;
 }
 
 // movethis()
@@ -182,5 +178,13 @@ CatArm.prototype.movebottom = function(){
      // start motion
      this.move1=true;
      this.moveDone=false;
+  }
+}
+
+CatArm.prototype.appear = function(){
+
+    if(this.move1||this.move2||this.move3||this.move4){
+    this.move();
+    this.display();
   }
 }

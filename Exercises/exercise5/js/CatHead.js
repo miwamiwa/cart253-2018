@@ -1,3 +1,4 @@
+var catConstrain=50;
 function CatHead() {
   //position (bottom left corner)
   this.x=500;
@@ -118,29 +119,74 @@ CatHead.prototype.growEye = function (){
 CatHead.prototype.move = function(){
 
   //increment noise value
-  cat.rand+=cat.inc;
+  gameOverCat.rand+=gameOverCat.inc;
   // pick seed for x velocity
   noiseSeed(0);
   // set random velocity
-  cat.vx=map(noise(cat.rand), 0, 1, -cat.speed, cat.speed);
+  gameOverCat.vx=map(noise(gameOverCat.rand), 0, 1, -gameOverCat.speed, gameOverCat.speed);
   // pick seed for y velocity
   noiseSeed(1);
   // set random velocity
-  cat.vy=map(noise(cat.rand), 0, 1, -cat.speed, cat.speed);
+  gameOverCat.vy=map(noise(gameOverCat.rand), 0, 1, -gameOverCat.speed, gameOverCat.speed);
   // constrain to stay on screen
   // left side
-  if(cat.x<catConstrain){cat.vx=abs(cat.vx);}
+  if(gameOverCat.x<catConstrain){gameOverCat.vx=abs(gameOverCat.vx);}
   // right side
-  if(cat.x>width-catConstrain){cat.vx=-abs(cat.vx);}
+  if(gameOverCat.x>width-catConstrain){gameOverCat.vx=-abs(gameOverCat.vx);}
   // top
-  if(cat.y<catConstrain){cat.vy=abs(cat.vy);}
+  if(gameOverCat.y<catConstrain){gameOverCat.vy=abs(gameOverCat.vy);}
   // bottom
-  if(cat.y>height-catConstrain){cat.vy=-abs(cat.vy);}
-  // update cat position
-  cat.x+=cat.vx;
-  cat.y+=cat.vy;
+  if(gameOverCat.y>height-catConstrain){gameOverCat.vy=-abs(gameOverCat.vy);}
+  // update gameOverCat position
+  gameOverCat.x+=gameOverCat.vx;
+  gameOverCat.y+=gameOverCat.vy;
   // set this x and y position to match cat x and y position
-  this.x=cat.x-cat.size/2;
-this.y=cat.y-470*this.xs;
+  this.x=gameOverCat.x-gameOverCat.size/2;
+this.y=gameOverCat.y-470*this.xs;
+
+}
+
+CatHead.prototype.appear = function(){
+  if (millis()<this.dispTimer){
+  this.display();
+  this.gobble=true;
+  this.eye=true;
+  }
+
+  if(millis()>this.dispTimer&&this.dispTimer!=0&&gameIsOver===false){
+
+
+// this is the load game over function
+
+
+
+    gameOverCat.load();
+    ui.bgColor=255;
+    // place ball in the middle so that it doesn't interact
+    ball.x=width/2;
+    ball.y=height/2;
+
+    // speed up the music!
+    musicSpeed=2;
+    // if musicInc is not a multiple of 2 it will mess up my note triggers,
+    // so make it an even number if it isn't already
+    if(musicInc%2!=0){
+      musicInc+=1;
+    }
+
+    // indicate that game is over. this will fire the game over screen in draw.
+    gameIsOver=true;
+}
+}
+
+CatHead.prototype.reset = function(){
+    this.dispTimer=0;
+  this.x=width*2;
+  this.y=height*2;
+
+  this.xs=0.3;
+  this.ys=0.3;
+  //position (bottom left corner)
+
 
 }

@@ -1,3 +1,5 @@
+// starting key midi value
+var rootNote=60;
 function Synth(oscType){
   // declare type of synth; and type of filter
   this.synthType= oscType;

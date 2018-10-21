@@ -98,8 +98,8 @@ Paddle.prototype.checkBallCollision = function(){
         ///////////// NEW /////////////
 
         // cancel any random ball movement if ball collides with this
-        if(ballIsSilly){
-          ballIsSilly=false;
+        if(ball.isSilly){
+          ball.isSilly=false;
         }
         ///////////// END NEW /////////////
 
@@ -161,10 +161,10 @@ Paddle.prototype.displayBullet = function(){
 
 Paddle.prototype.checkCatCollision = function(){
   // simplify the upcoming if statement by calculating variables prior
-    var catTop = cat.y - cat.size/2;
-    var catBottom = cat.y + cat.size/2;
-    var catLeft = cat.x - cat.size/2;
-    var catRight = cat.x + cat.size/2;
+    var catTop = gameOverCat.y - gameOverCat.size/2;
+    var catBottom = gameOverCat.y + gameOverCat.size/2;
+    var catLeft = gameOverCat.x - gameOverCat.size/2;
+    var catRight = gameOverCat.x + gameOverCat.size/2;
 
   // check for bullet proximity to cat
     if(this.bulletx>catLeft&&this.bulletx<catRight&&this.bullety>catTop&&this.bullety<catBottom&&this.bulletOn) {
@@ -174,4 +174,7 @@ Paddle.prototype.checkCatCollision = function(){
       this.bulletOn=false;
     }
 
+}
+Paddle.prototype.reset = function(){
+this.score=0;
 }

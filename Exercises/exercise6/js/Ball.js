@@ -21,7 +21,8 @@ function Ball(x,y,vx,vy,size,speed) {
 // Moves according to velocity, constrains y to be on screen,
 // checks for bouncing on upper or lower edgs, checks for going
 // off left or right side.
-Ball.prototype.updated = faction () {
+//////////////// FIXED
+Ball.prototype.updated = function () {
   // Update position with velocity
   this.x = this.vx;
   this.y += this.vy;

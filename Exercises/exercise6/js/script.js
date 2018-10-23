@@ -18,6 +18,7 @@ var rightPaddle;
 //
 // Creates the ball and paddles
 function setup() {
+  //////////////// FIXED
   createCanvas(640,480);
   noStroke();
   // Create a ball

@@ -1,5 +1,20 @@
-// This function creates a new ball!
+/*
+
+Ball.js
+This is the ball the game is played with.
+This script handles:
+- creating a new ball
+- moving the ball
+- displaying the ball
+- resetting the ball back to initial settings
+
+*/
+
+////////////// CREATE BALL //////////////
+
+// Ball()
 //
+// this function creates a new ball!
 function Ball(){
   // ball position
   this.x = width/2;
@@ -24,76 +39,85 @@ function Ball(){
   this.gameOverChance=0.5;
   // a boolean to allow chance of game over only once per ball out
   this.gameOverChanceOn=false;
+  // ball color
+  this.color=255;
 
 }
+
+////////////// BALL MOTION //////////////
 
 // update()
 //
 // updates ball position,
-// then checks for game over by feline intervention.
-//
-// game over is decided here rather than in handleballoffscreen()
-// since I want the cat head to come in before the ball
-// leaves the screen
+
 Ball.prototype.update = function(){
 
   // update ball position
   this.x += this.vx;
   this.y += this.vy;
-
 }
 
-
-
-Ball.prototype.display = function(){
-  // set fill as being different from score fill
-  fill(fgColor);
-  if(millis()<bigHead.dispTimer){fill(bgColor);}
-  ///////////// END NEW /////////////
-  rect(this.x,this.y,this.size,this.size);
-
-}
-
-Ball.prototype.reset = function(direction){
-  // turn silly this off
-  this.isWobbling=false;
-  // get a new random speed based on initial this speed parameter
-  this.vy=random(1, 2*this.speed);
-  // set new direction for this
-  // to the left
-if(direction==="left"){
-  this.vx=-abs(this.vx);
-  // to the right
-} else if(direction==="right"){
-  this.vx=abs(this.vx);
-}
-  // place this at the center of the screen
-  this.x = width/2;
-  this.y = height/2;
-  // reset gameover chance
-  this.gameOverChanceOn=false;
-}
+// isSwatted()
+//
+// should the ball have been swatted by the cat,
+// this function updates ball speed according to some mapped noise()
 
 Ball.prototype.isSwatted = function(){
+
+  // if Wobble is toggled on
   if(this.isWobbling){
   // increment noise
   this.wobbleInc+=this.wobbleFact;
-  // apply to velocity
+  // transform velocity
   this.vy=map(noise(this.wobbleInc), 0, 1, -this.speed, +this.speed);
+
 // prevent the ball from bigHeading straight back into the wall
-// if ball is still close to the wall
+// if ball is close to the top wall
   if(this.y<10*this.speed&&this.vy<0){
+    // send the ball back down
       this.vy=abs(this.vy);
-  } else   if(this.y>height-10*this.speed&&this.vy>0){
+  }
+  // if ball is close to bottom wall
+  else  if(this.y>height-10*this.speed&&this.vy>0){
+    // send the ball back up
         this.vy=-abs(this.vy);
     }
   }
 }
-Ball.prototype.reload = function(){
+
+////////////// DISPLAY //////////////
+
+// display()
+//
+// pick ball color,
+// display ball at x, y position
+Ball.prototype.display = function(){
+  // set fill to ball color
+  fill(this.color);
+  // if the cat heat is displayed, hide the ball (since the cat gobbles it).
+  if(millis()<bigHead.dispTimer){
+    // use background color.
+    fill(bgColor);
+  }
+  // draw the ball
+  rect(this.x,this.y,this.size,this.size);
+}
+
+////////////// RESET //////////////
+
+// reset()
+//
+// resets ball to the middle of the screen.
+// called when game resets.
+
+Ball.prototype.reset = function(){
+  // reset position
   this.x = width/2;
   this.y = height/2;
+  // reset speed
     this.speed= 5;
     this.vx = this.speed;
     this.vy = this.speed;
+    // reset wobble
     this.isWobbling=false;
 }

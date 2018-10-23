@@ -8,7 +8,7 @@ Game.prototype.checkGameOver = function(){
   // gameOverChanceOn is reset when ball goes out. ball way the chance that the cat comes in
   // is calculated only once per ball that makes it behind the paddle.
 if((ball.x<leftPaddle.inset-50||ball.x>width-rightPaddle.inset+50)&&ball.gameOverChanceOn===false){
-  // toggle ball statement off. it will be reset in handleballoffscreen()
+  // toggle ball statement off. it will be reset in ball.reset();
   ball.gameOverChanceOn=true;
   // random chance that game is over
 if(random()<ball.gameOverChance){
@@ -112,12 +112,12 @@ Game.prototype.checkOffScreen = function(){
   // Update the score
   if (ballRight < 0 ) {
     // reset the ball and fire to the right side
-    ball.reset("right");
+    game.resetBall("right");
     // Update right paddle score
     rightPaddle.score+=1;
   } else if (ballLeft > width) {
     // reset the ball and fire to the left side
-    ball.reset("left");
+    game.resetBall("left");
     // update left paddle score
     leftPaddle.score+=1;
   }
@@ -211,4 +211,29 @@ Game.prototype.catHeadAppears = function(){
     // indicate that game is over. bigHead will fire the game over screen in draw.
     gameIsOver=true;
 }
+}
+
+// reset()
+//
+// places the ball back in the middle after a point was scored.
+// picks a velocity and direction,
+// and resets position, gameoverchance and ball wobble.
+Game.prototype.resetBall = function(direction){
+  // turn silly ball off
+  ball.isWobbling=false;
+  // get a new random speed based on initial ball speed parameter
+  ball.vy=random(1, 2*ball.speed);
+  // set new direction for ball
+  // to the left
+if(direction==="left"){
+  ball.vx=-abs(ball.vx);
+  // to the right
+} else if(direction==="right"){
+  ball.vx=abs(ball.vx);
+}
+  // place ball at the center of the screen
+  ball.x = width/2;
+  ball.y = height/2;
+  // reset gameover chance
+  ball.gameOverChanceOn=false;
 }

@@ -54,7 +54,7 @@ function setup() {
   // create our playing area
   createCanvas(840,480);
   // load the object which will display background, score and instructions
-  ui= new Ui();
+  ui= new Interface();
   // load cat parts
   bigHead = new CatHead();
   catArm = new CatArm();
@@ -190,7 +190,7 @@ function playAgain(){
   gameIsOver=false;
   musicSpeed=1;
   bigHead.reset();
-  ball.reload();
+  ball.reset();
   leftPaddle.reset();
   rightPaddle.reset();
 }

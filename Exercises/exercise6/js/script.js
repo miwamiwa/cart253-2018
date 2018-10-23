@@ -52,8 +52,8 @@ function draw() {
   ball.reset();
  }
   //
-  // ball.handleCollision(leftPaddle);
-  // ball.handleCollision(rightPaddle);
+  ball.handleCollision(leftPaddle);
+  ball.handleCollision(rightPaddle);
   //
   ball.display();
    leftPaddle.display();

@@ -42,7 +42,7 @@ function draw() {
   leftPaddle.handleInput();
   rightPaddle.handleInput();
   //
-  // ball.update;
+  ball.update;
    leftPaddle.update();
    rightPaddle.update();
   //
@@ -53,7 +53,7 @@ function draw() {
   // ball.handleCollision(leftPaddle);
   // ball.handleCollision(rightPaddle);
   //
-  // ball.display();
+  ball.display();
    leftPaddle.display();
   // //////////////// FIXED
    rightPaddle.display();

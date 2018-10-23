@@ -22,7 +22,7 @@ function Ball(x,y,vx,vy,size,speed) {
 // checks for bouncing on upper or lower edgs, checks for going
 // off left or right side.
 //////////////// FIXED
-Ball.prototype.updated = function () {
+Ball.prototype.update = function () {
   // Update position with velocity
   this.x = this.vx;
   this.y += this.vy;

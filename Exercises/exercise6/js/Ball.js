@@ -43,11 +43,12 @@ Ball.prototype.update = function () {
 // Checks if the ball has moved off the screen and, if so, returns true.
 // Otherwise it returns false.
 Ball.prototype.isOffScreen = function () {
-    console.log(this.x);
+
   // Check for going off screen and reset if so
   //////////////// FIXED
   if (this.x + this.size < 0 && this.x > width) {
     return true;
+    console.log(this.x);
   }
   else {
     return false;
@@ -84,7 +85,7 @@ Ball.prototype.handleCollision = function(paddle) {
 // reset()
 //
 // Set position back to the middle of the screen
-Ball.prototype.rest = function () {
+Ball.prototype.reset = function () {
   this.x = width/2;
   this.y = height/2;
 }

@@ -39,7 +39,7 @@ function setup() {
 function draw() {
    background(0);
   //
-  // leftPaddle.handleInput();
+  leftPaddle.handleInput();
   // rightPaddle.handleInput();
   //
   // ball.update;

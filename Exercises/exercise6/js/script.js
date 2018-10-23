@@ -26,7 +26,8 @@ function setup() {
   rightPaddle = new Paddle(width-10,height/2,10,600,10,UP_ARROW,DOWN_ARROW);
   // Create the left paddle with W and S as controls
   // Keycodes 83 and 87 are W and S respectively
-  leftPaddle = new Paddle(0,height/2,10,60,10,83,87;
+  //////////////// FIXED
+  leftPaddle = new Paddle(0,height/2,10,60,10,83,87);
 
 
 // draw()

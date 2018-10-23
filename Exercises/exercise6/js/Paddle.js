@@ -45,6 +45,7 @@ Paddle.prototype.handleInput = function() {
 // update()
 // Update y position based on velocity
 // Constrain the resulting position to be within the canvas
+//////////////// FIXED
 Paddle.prototype.update = function() {
   this.y += this.vy;
   //////////////// FIXED

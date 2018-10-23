@@ -75,49 +75,7 @@ Paddle.prototype.update = function(){
   this.y += this.vy;
 }
 
-Paddle.prototype.checkBallCollision = function(){
 
-    // Calculate edges of ball for clearer if statements below
-    var ballTop = ball.y - ball.size/2;
-    var ballBottom = ball.y + ball.size/2;
-    var ballLeft = ball.x - ball.size/2;
-    var ballRight = ball.x + ball.size/2;
-
-    // Calculate edges of this for clearer if statements below
-    var thisTop = this.y - this.h/2;
-    var thisBottom = this.y + this.h/2;
-    var thisLeft = this.x - this.w/2;
-    var thisRight = this.x + this.w/2;
-
-    // First check it is in the vertical range of the this
-    if (ballBottom > thisTop && ballTop < thisBottom) {
-      // Then check if it is touching the this horizontally
-      if (ballLeft < thisRight && ballRight > thisLeft) {
-        // Then the ball is touching the this so reverse its vx
-
-        ///////////// NEW /////////////
-
-        // cancel any random ball movement if ball collides with this
-        if(ball.isSilly){
-          ball.isSilly=false;
-        }
-        ///////////// END NEW /////////////
-
-        ball.vx = -ball.vx;
-
-        ///////////// NEW /////////////
-        // update angle at which ball is sent back
-        ball.vy = map(this.y-ball.y, -this.h/2, this.h/2, ball.speed, -ball.speed);
-        ///////////// END NEW /////////////
-
-        // Play our bouncing sound effect by rewinding and then playing
-        beepSFX.currentTime = 0;
-        beepSFX.play();
-
-      }
-    }
-
-}
 
 Paddle.prototype.display = function(){
 
@@ -159,22 +117,7 @@ Paddle.prototype.displayBullet = function(){
 }
 }
 
-Paddle.prototype.checkCatCollision = function(){
-  // simplify the upcoming if statement by calculating variables prior
-    var catTop = gameOverCat.y - gameOverCat.size/2;
-    var catBottom = gameOverCat.y + gameOverCat.size/2;
-    var catLeft = gameOverCat.x - gameOverCat.size/2;
-    var catRight = gameOverCat.x + gameOverCat.size/2;
 
-  // check for bullet proximity to cat
-    if(this.bulletx>catLeft&&this.bulletx<catRight&&this.bullety>catTop&&this.bullety<catBottom&&this.bulletOn) {
-      // reset game
-      playAgain();
-      // make sure bullets are turned off when game is reset
-      this.bulletOn=false;
-    }
-
-}
 Paddle.prototype.reset = function(){
 this.score=0;
 }

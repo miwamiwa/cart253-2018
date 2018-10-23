@@ -146,38 +146,7 @@ this.y=gameOverCat.y-470*this.xs;
 
 }
 
-CatHead.prototype.appear = function(){
-  if (millis()<this.dispTimer){
-  this.display();
-  this.gobble=true;
-  this.eye=true;
-  }
 
-  if(millis()>this.dispTimer&&this.dispTimer!=0&&gameIsOver===false){
-
-
-// this is the load game over function
-
-
-
-    gameOverCat.load();
-    ui.bgColor=255;
-    // place ball in the middle so that it doesn't interact
-    ball.x=width/2;
-    ball.y=height/2;
-
-    // speed up the music!
-    musicSpeed=2;
-    // if musicInc is not a multiple of 2 it will mess up my note triggers,
-    // so make it an even number if it isn't already
-    if(musicInc%2!=0){
-      musicInc+=1;
-    }
-
-    // indicate that game is over. this will fire the game over screen in draw.
-    gameIsOver=true;
-}
-}
 
 CatHead.prototype.reset = function(){
     this.dispTimer=0;

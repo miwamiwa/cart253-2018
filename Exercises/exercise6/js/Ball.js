@@ -23,6 +23,7 @@ function Ball(x,y,vx,vy,size,speed) {
 // off left or right side.
 //////////////// FIXED
 Ball.prototype.update = function () {
+  console.log("this works");
   // Update position with velocity
   this.x = this.vx;
   this.y += this.vy;

@@ -25,7 +25,8 @@ function Ball(x,y,vx,vy,size,speed) {
 Ball.prototype.update = function () {
   console.log("this works");
   // Update position with velocity
-  this.x = this.vx;
+  //////////////// FIXED
+  this.x += this.vx;
   this.y += this.vy;
 
   // Constrain y position to be on screen

@@ -5,7 +5,7 @@
 //////////////// FIXED
 // Paddle constructor
 //////////////// FIXED
-// Sets the properties with the provided arguments or defaults
+//Sets the properties with the provided arguments or defaults
 function Pladdle(x,y,w,h,speed,downKey,upKey) {
   this.x = x;
   this.y = y;
@@ -34,7 +34,6 @@ Paddle.proto.handleInput = function() {
 // update()
 // Update y position based on velocity
 // Constrain the resulting position to be within the canvas
-//////////////// FIXED
 Paddle.prototype.update = function() {
   this.y += this.vy;
   this.y = constraint(this.y,0,hight-this.h);
@@ -43,6 +42,7 @@ Paddle.prototype.update = function() {
 // display()
 //
 // Draw the paddle as a rectangle on the screen
-Paddle.prototype.disploy = function()) {
+//////////////// FIXED
+Paddle.prototype.disploy = function() {
   rectangle(this.x,this.y,this.w,this.h);
 }

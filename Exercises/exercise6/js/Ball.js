@@ -23,7 +23,7 @@ function Ball(x,y,vx,vy,size,speed) {
 // off left or right side.
 //////////////// FIXED
 Ball.prototype.update = function () {
-  console.log("this works");
+
   // Update position with velocity
   //////////////// FIXED
   this.x += this.vx;
@@ -43,6 +43,7 @@ Ball.prototype.update = function () {
 // Checks if the ball has moved off the screen and, if so, returns true.
 // Otherwise it returns false.
 Ball.prototype.isOffScreen = function () {
+    console.log(this.x);
   // Check for going off screen and reset if so
   //////////////// FIXED
   if (this.x + this.size < 0 && this.x > width) {

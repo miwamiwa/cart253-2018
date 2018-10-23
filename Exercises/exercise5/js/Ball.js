@@ -2,11 +2,12 @@
 
 Ball.js
 This is the ball the game is played with.
+
 This script handles:
-- creating a new ball
+- creating a new ball object
 - moving the ball
 - displaying the ball
-- resetting the ball back to initial settings
+- resetting the ball back to initial settings upon game restart
 
 */
 
@@ -66,21 +67,21 @@ Ball.prototype.isSwatted = function(){
 
   // if Wobble is toggled on
   if(this.isWobbling){
-  // increment noise
-  this.wobbleInc+=this.wobbleFact;
-  // transform velocity
-  this.vy=map(noise(this.wobbleInc), 0, 1, -this.speed, +this.speed);
+    // increment noise
+    this.wobbleInc+=this.wobbleFact;
+    // transform velocity
+    this.vy=map(noise(this.wobbleInc), 0, 1, -this.speed, +this.speed);
 
-// prevent the ball from bigHeading straight back into the wall
-// if ball is close to the top wall
-  if(this.y<10*this.speed&&this.vy<0){
-    // send the ball back down
+    // prevent the ball from bigHeading straight back into the wall
+    // if ball is close to the top wall
+    if(this.y<10*this.speed&&this.vy<0){
+      // send the ball back down
       this.vy=abs(this.vy);
-  }
-  // if ball is close to bottom wall
-  else  if(this.y>height-10*this.speed&&this.vy>0){
-    // send the ball back up
-        this.vy=-abs(this.vy);
+    }
+    // if ball is close to bottom wall
+    else  if(this.y>height-10*this.speed&&this.vy>0){
+      // send the ball back up
+      this.vy=-abs(this.vy);
     }
   }
 }
@@ -97,7 +98,7 @@ Ball.prototype.display = function(){
   // if the cat heat is displayed, hide the ball (since the cat gobbles it).
   if(millis()<bigHead.dispTimer){
     // use background color.
-    fill(bgColor);
+    fill(ui.bgColor);
   }
   // draw the ball
   rect(this.x,this.y,this.size,this.size);
@@ -115,9 +116,9 @@ Ball.prototype.reset = function(){
   this.x = width/2;
   this.y = height/2;
   // reset speed
-    this.speed= 5;
-    this.vx = this.speed;
-    this.vy = this.speed;
-    // reset wobble
-    this.isWobbling=false;
+  this.speed= 5;
+  this.vx = this.speed;
+  this.vy = this.speed;
+  // reset wobble
+  this.isWobbling=false;
 }

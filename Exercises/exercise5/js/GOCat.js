@@ -4,7 +4,7 @@ GOCat.js
 This is the small cat head players shoot at during the game-over game.
 
 This script handles:
-- creating the gameover cat
+- creating the gameover cat object
 - initializing its position and scaling down the cat head
 - updating position of cat head
 - displaying cat head

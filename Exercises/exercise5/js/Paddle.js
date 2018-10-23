@@ -2,11 +2,12 @@
 
 Paddle.js
 These are the paddles players use to play the game.
+
 During the game, paddles can move in any direction.
-During the gameover game, paddles can shoot a bullet.
+During the gameover game, paddles can also shoot a bullet.
 
 This script handles:
-- creating a new paddle on the left or the right 
+- creating a new paddle object on the left or the right
 - keyboard inputs for movement and shooting
 - updating paddle position according to inputs
 - displaying paddle
@@ -108,7 +109,7 @@ Paddle.prototype.checkInput = function(){
   ///////// FIRE
 
   // If we are in the game over game, check for fire key
-  if (gameIsOver===true&&keyIsDown(this.fireKeyCode)){
+  if (game.gameIsOver===true&&keyIsDown(this.fireKeyCode)){
     // turn bullet on
     this.bulletOn=true;
     // place bullet on the paddle

@@ -1,6 +1,6 @@
 /*
 kame-pong by samuel paré-chouinard
-this is my version of the pong game:
+this is my oop-version of the pong game:
 
 meet kamehameha, my roommate's cat.
 in this version, she tries to mess with your game.
@@ -8,31 +8,40 @@ she will send the ball wobbling away if it gets too close to the side,
 and she has a chance of eating the ball if it goes out of bounds, bringing the game to an end.
 gently spray kame with a bit of water and she will return the ball and leave the playing field.
 
-left player moves with WASD and shoots with 1
-right player moves with arrow keys and shoots with 0
-shooting is enabled when game over starts. shoot the cat to restart
-or press enter at anytime to restart
+----------------------------------------------
+
+script.js
+This is the main script.
+
+Each game object I created can be moved, displayed and reset (the paddle, ball, cat head and arm)
+The Interface object displays background and text, while the Game object handles triggers such as
+musical time, collisions with wall, paddle or bullets, and ball going off screen.
+
+In script.js, all the objects are called.
+First the objects are set up,
+then the draw() function calls either runGame() or runGameOver()
+There are really two games here, a game and another game on the gameover screen.
+Once the gameover game is complete, playAgain() returns the game to its original setup.
+playSound() is also called in draw(). this is where the synth objects are played.
+The three synths use the same Synth object. In order to give them an unique sound, they
+are set up individually in setupInstruments().
+
 */
 
-// colors
-var bgColor = 0;
-var fgColor = 255;
-// objects
+// declare a variable for each object:
 var ball;
-var leftPaddle, rightPaddle;
+var leftPaddle;
+var rightPaddle;
 var bigHead;
 var gameOverCat;
 var catArm;
-var synth1, synth2, synth3;
+var synth1;
+var synth2;
+var synth3;
 var ui;
 var beepSFX;
 var game;
-// incremented value used to keep track of time
-var musicInc=0;
-// speed at which to increment. will increase on gameover screen.
-var musicSpeed=1;
-// a variable to indicate that game is over
-var gameIsOver=false;
+
 
 // preload()
 //
@@ -86,12 +95,14 @@ function draw() {
   handleInputs();
   // load an empty screen
   ui.loadBg();
-  // check if game is running or over
 
-  if(gameIsOver) {
+  // check if game is running or over
+  // if game is over:
+  if(game.gameIsOver) {
     // run Game Over sequence and display appropriate objects
     runGameOver();
   }
+  // if game is running:
   else {
     // run Game sequence and display appropriate objects
     runGame();
@@ -108,7 +119,7 @@ function draw() {
 
 function playSound(){
 
-  musicInc+=musicSpeed;
+  game.musicInc+=game.musicSpeed;
   synth1.playMusic();
   synth2.playMusic();
   synth3.playMusic();
@@ -122,8 +133,9 @@ function playSound(){
 function handleInputs(){
 
   leftPaddle.checkInput();
-  leftPaddle.update();
   rightPaddle.checkInput();
+  // update paddle position
+  leftPaddle.update();
   rightPaddle.update();
 }
 
@@ -149,7 +161,7 @@ function runGame(){
   rightPaddle.display();
   ball.display();
   // handle cat actions
-  catArm.appear();
+  game.moveCatArm();
   game.catHeadAppears();
   game.checkGameOver();
 }
@@ -187,8 +199,8 @@ function runGameOver(){
 
 function playAgain(){
 
-  gameIsOver=false;
-  musicSpeed=1;
+  game.gameIsOver=false;
+  game.musicSpeed=1;
   bigHead.reset();
   ball.reset();
   leftPaddle.reset();

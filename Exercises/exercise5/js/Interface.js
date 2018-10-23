@@ -2,6 +2,7 @@
 
 Interface.js
 This is the information displayed on screen.
+
 this script handles:
 - creating the interface object
 - loading a background
@@ -35,7 +36,7 @@ function Interface(){
 
 Interface.prototype.loadBg = function(){
   // display background
-  background(bgColor);
+  background(ui.bgColor);
 }
 
 // displayscore()
@@ -78,7 +79,7 @@ Interface.prototype.displayScore = function(){
 Interface.prototype.displayControls = function(){
   // stylize
   noStroke();
-  fill(fgColor);
+  fill(ui.fgColor);
   // display text
   text("left player: WASD. right player: Arrow keys.", width/2, height-15);
 }
@@ -91,7 +92,7 @@ Interface.prototype.displayControls = function(){
 
 Interface.prototype.displayGameOverText = function(){
   //stylize
-  fill(fgColor);
+  fill(ui.fgColor);
   //check who won
   if(leftPaddle.score>rightPaddle.score) {
     // left player won

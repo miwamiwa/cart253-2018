@@ -4,10 +4,10 @@ CatHead.js
 This is the scaleable cat head used both in Game.js and GOCat.js.
 
 this script handles:
-- creating a new cat head -> CatHead()
-- displaying the head -> dislay()
-- animating ears, jaw and eyes -> wiggleEars(), moveJaw(), growEye()
-- resetting scale upon game reset -> reset()
+- creating a new cat head
+- displaying the head
+- animating ears, jaw and eyes
+- resetting scale upon game reset
 
 */
 

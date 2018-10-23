@@ -37,6 +37,9 @@ Paddle.prototype.handleInput = function() {
     //////////////// FIXED
     this.vy = +this.speed;
   }
+  else {
+    this.vy=0;
+  }
 }
 
 // update()

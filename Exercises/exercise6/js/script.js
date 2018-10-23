@@ -18,7 +18,7 @@ var rightPaddle;
 //
 // Creates the ball and paddles
 function setup() {
-  crateCanvas(640,480);
+  createCanvas(640,480);
   noStroke();
   // Create a ball
   ball = new Ball(width/2,height/2,50,50,10,50);

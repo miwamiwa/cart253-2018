@@ -39,7 +39,6 @@ function setup() {
 // and displays everything.
 function draw() {
    background(0);
-  //
   leftPaddle.handleInput();
   rightPaddle.handleInput();
   //////////////// FIXED
@@ -52,12 +51,10 @@ function draw() {
     //////////////// FIXED
   ball.reset();
  }
-  //
   ball.handleCollision(leftPaddle);
   ball.handleCollision(rightPaddle);
-  //
   ball.display();
    leftPaddle.display();
-  // //////////////// FIXED
+   //////////////// FIXED
    rightPaddle.display();
 }

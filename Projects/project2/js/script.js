@@ -45,6 +45,12 @@ function draw() {
   rightPaddle.update();
   if (ants.length>0){
     for (var j=0; j<ants.length; j++){
+      ants[j].update();
+      ants[j].handleCollision(leftPaddle);
+      ants[j].handleCollision(rightPaddle);
+      for (var k=0; k<balls.length; k++){
+        ants[j].handleCollision(balls[k]);
+      }
       ants[j].display();
     }
   }
@@ -74,7 +80,7 @@ function draw() {
 }
 
 function createBalls(){
-  var numBalls = round(random(8, 10));
+  var numBalls = round(random(2, 3));
   console.log("numBalls = "+numBalls);
   for (var i=0; i<numBalls; i++){
   balls.push(new Ball());
@@ -91,4 +97,10 @@ else{
   balls = subset(balls, 0, index);
 }
    console.log("balls: "+balls.length);
+}
+
+function keyPressed(){
+  if(keyCode===ENTER){
+    createBalls();
+  }
 }

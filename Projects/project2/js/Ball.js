@@ -11,6 +11,10 @@ function Ball() {
   this.x = width/2;
   this.y = height/2;
   this.size = 10;
+  this.type = "ball";
+  this.isSafe = true;
+  this.w = this.size;
+  this.h = this.size;
   this.speed = random(3, 5);
   this.safeTime = 500;
   this.collisionTimer = millis()+this.safeTime;
@@ -59,7 +63,8 @@ Ball.prototype.isOffScreen = function () {
 //
 // Draw the ball as a rectangle on the screen
 Ball.prototype.display = function () {
-  if(this.collisionTimer>millis()){
+  noStroke();
+  if(this.isSafe){
     fill(25, 25, 200);
   }
    else {
@@ -93,10 +98,12 @@ Ball.prototype.reset = function () {
   this.x = width/2;
   this.y = height/2;
   this.collisionTimer = millis()+this.safeTime;
+  this.isSafe = true;
 }
 
 Ball.prototype.handleBallCollision = function(index){
   if(this.collisionTimer<millis()){
+    this.isSafe = false;
  for (var i=0; i<balls.length; i++){
    if (i!=index&&this.y + this.size > balls[i].y && this.y < balls[i].y + balls[i].size ){
      if (i!=index&&this.x + this.size > balls[i].x && this.x < balls[i].x + balls[i].size ){

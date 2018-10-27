@@ -10,17 +10,18 @@
 // Written with JavaScript OOP.
 
 // Variable to contain the objects representing our ball and paddles
-var ball;
+var balls = [];
 var leftPaddle;
 var rightPaddle;
+var totalBalls = 0;
+var drawAgain = false;
+var ants = [];
 
 // setup()
 //
 // Creates the ball and paddles
 function setup() {
-  createCanvas(640,480);
-  // Create a ball
-  ball = new Ball(width/2,height/2,5,5,10,5);
+  createCanvas(800,350);
   // Create the right paddle with UP and DOWN as controls
   rightPaddle = new Paddle(width-10,height/2,10,60,10,DOWN_ARROW,UP_ARROW);
   // Create the left paddle with W and S as controls
@@ -34,22 +35,60 @@ function setup() {
 // and displays everything.
 function draw() {
   background(0);
-
+  // Create a ball
+  if(balls.length<=1){
+    createBalls();
+  }
   leftPaddle.handleInput();
   rightPaddle.handleInput();
-
-  ball.update();
   leftPaddle.update();
   rightPaddle.update();
+  if (ants.length>0){
+    for (var j=0; j<ants.length; j++){
+      ants[j].display();
+    }
+  }
+  for(var i=0; i<balls.length; i++){
+    if(drawAgain){
+      drawAgain = false;
+      return;
+    }
 
-  if (ball.isOffScreen()) {
-    ball.reset();
+  balls[i].update();
+  if (balls[i].isOffScreen()) {
+    balls[i].reset();
   }
 
-  ball.handleCollision(leftPaddle);
-  ball.handleCollision(rightPaddle);
+  balls[i].handlePaddleCollision(leftPaddle);
+  balls[i].handlePaddleCollision(rightPaddle);
+  balls[i].handleBallCollision(i);
+    if(drawAgain){
+      drawAgain = false;
+      return;
+    }
+  balls[i].display();
+}
 
-  ball.display();
   leftPaddle.display();
   rightPaddle.display();
+}
+
+function createBalls(){
+  var numBalls = round(random(8, 10));
+  console.log("numBalls = "+numBalls);
+  for (var i=0; i<numBalls; i++){
+  balls.push(new Ball());
+}
+ console.log("balls: "+balls.length);
+}
+
+function removeBall(index){
+  var length = balls.length;
+  if(index!=length){
+  balls = concat(subset(balls, 0, index), subset(balls, index+1, length));
+}
+else{
+  balls = subset(balls, 0, index);
+}
+   console.log("balls: "+balls.length);
 }

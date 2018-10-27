@@ -7,13 +7,19 @@
 // Ball constructor
 //
 // Sets the properties with the provided arguments
-function Ball(x,y,vx,vy,size,speed) {
-  this.x = x;
-  this.y = y;
-  this.vx = vx;
-  this.vy = vy;
-  this.size = size;
-  this.speed = speed;
+function Ball() {
+  this.x = width/2;
+  this.y = height/2;
+  this.size = 10;
+  this.speed = random(3, 5);
+  this.safeTime = 500;
+  this.collisionTimer = millis()+this.safeTime;
+  if(random()<0.5){
+  this.vx = this.speed;
+} else {
+  this.vx = -this.speed;
+}
+  this.vy = this.speed/2 + random(this.speed/2);
 }
 
 // update()
@@ -53,7 +59,12 @@ Ball.prototype.isOffScreen = function () {
 //
 // Draw the ball as a rectangle on the screen
 Ball.prototype.display = function () {
+  if(this.collisionTimer>millis()){
+    fill(25, 25, 200);
+  }
+   else {
   fill(255);
+}
   rect(this.x,this.y,this.size,this.size);
 }
 
@@ -61,7 +72,7 @@ Ball.prototype.display = function () {
 //
 // Check if this ball overlaps the paddle passed as an argument
 // and if so reverse x velocity to bounce
-Ball.prototype.handleCollision = function(paddle) {
+Ball.prototype.handlePaddleCollision = function(paddle) {
   // Check if the ball overlaps the paddle on x axis
   if (this.x + this.size > paddle.x && this.x < paddle.x + paddle.w) {
     // Check if the ball overlaps the paddle on y axis
@@ -81,4 +92,22 @@ Ball.prototype.handleCollision = function(paddle) {
 Ball.prototype.reset = function () {
   this.x = width/2;
   this.y = height/2;
+  this.collisionTimer = millis()+this.safeTime;
+}
+
+Ball.prototype.handleBallCollision = function(index){
+  if(this.collisionTimer<millis()){
+ for (var i=0; i<balls.length; i++){
+   if (i!=index&&this.y + this.size > balls[i].y && this.y < balls[i].y + balls[i].size ){
+     if (i!=index&&this.x + this.size > balls[i].x && this.x < balls[i].x + balls[i].size ){
+     console.log("collision");
+     ants.push(new Ant(balls[i].x, balls[i].y, balls[index].x, balls[index].y));
+     removeBall(i);
+     removeBall(index);
+     drawAgain = true;
+     return;
+   }
+ }
+ }
+}
 }

@@ -13,11 +13,6 @@ gently spray kame with a bit of water and she will return the ball and leave the
 script.js
 This is the main script.
 
-Each game object I created can be moved, displayed and reset (the paddle, ball, cat head and arm)
-The Interface object displays background and text, while the Game object handles triggers such as
-musical time, collisions with wall, paddle or bullets, and ball going off screen.
-
-In script.js, all the objects are called.
 First the objects are set up,
 then the draw() function calls either runGame() or runGameOver()
 There are really two games here, a game and another game on the gameover screen.
@@ -25,6 +20,13 @@ Once the gameover game is complete, playAgain() returns the game to its original
 playSound() is also called in draw(). this is where the synth objects are played.
 The three synths use the same Synth object. In order to give them an unique sound, they
 are set up individually in setupInstruments().
+
+POST SCRIPTUM
+I realised rather late in the process that I hadn't paid enough attention to the
+instructions. I started with my exercise 4 file and transformed into its current oop
+form rather than starting with the exercise5.zip material. All I can say at this point is
+oops.. It's a bit late to do something about that now. I can try to point out which parts of the
+code come from the original ex4 file if that's any good.
 
 */
 
@@ -73,10 +75,11 @@ function setup() {
   synth2 = new Synth('square');
   synth3 = new Synth('square');
   setupInstruments();
-  // ball and paddles
+  // load ball and paddles
   ball=new Ball();
   leftPaddle= new Paddle(0, 87, 83, 65, 68, 49);
   rightPaddle= new Paddle(1, 38, 40, 37, 39, 48);
+  // load game triggers
   game= new Game();
 }
 
@@ -246,6 +249,7 @@ function setupInstruments(){
   synth1.loadInstrument();
 
   // synth2 setup
+  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
   synth2.setEnvelope(0.1, 0.1, 0.5, 0.4, 0.2, 0);
   // function(filterType, frequency)
   synth2.setFilter("LP", 500);
@@ -257,6 +261,7 @@ function setupInstruments(){
   synth2.loadInstrument();
 
   // synth3 setup
+  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
   synth3.setEnvelope(0.01, 0.2, 0.5, 0.4, 0.2, 0);
   // function(filterType, frequency)
   synth3.setFilter("LP", 800);

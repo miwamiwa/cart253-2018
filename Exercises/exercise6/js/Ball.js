@@ -10,10 +10,11 @@
 function Ball(x,y,vx,vy,size,speed) {
   this.x = x;
   this.y = y;
-  this.vx = vx;
-  this.vy = vy;
   this.size = size;
   this.speed = speed;
+  //////////////// FIXED
+  this.vx = speed;
+  this.vy = speed;
 }
 
 // update()
@@ -47,8 +48,9 @@ Ball.prototype.isOffScreen = function () {
   // Check for going off screen and reset if so
   //////////////// FIXED
   if (this.x + this.size < 0 || this.x > width) {
+      console.log(this.x);
     return true;
-    console.log(this.x);
+
   }
   else {
     return false;
@@ -71,6 +73,7 @@ Ball.prototype.display = function () {
 Ball.prototype.handleCollision = function(paddle) {
   // Check if the ball overlaps the paddle on x axis
   if (this.x + this.size > paddle.x && this.x < paddle.x + paddle.w) {
+    console.log("works");
     // Check if the ball overlaps the paddle on y axis
     if (this.y + this.size > paddle.y && this.y < paddle.y + paddle.h) {
       // If so, move ball back to previous position (by subtracting current velocity)

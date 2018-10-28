@@ -6,7 +6,7 @@
 // Paddle constructor
 //
 // Sets the properties with the provided arguments or defaults
-function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey) {
+function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   this.x = x;
   this.y = y;
   this.vx = 0;
@@ -21,12 +21,15 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey) {
   this.upKey = upKey;
   this.leftKey = leftKey;
   this.rightKey = rightKey;
+  this.fireKey = shootKey;
   this.wasSabotaged=false;
   this.safeTimer=0;
   this.safeLength=1000;
   this.sizeIncrease=0.5;
   this.maxSize=150;
   this.damaged = false;
+  this.reloadTimer = 0;
+  this.reloadLength = 200;
 }
 
 // handleInput()
@@ -45,6 +48,10 @@ Paddle.prototype.handleInput = function() {
   }
   else if (keyIsDown(this.rightKey)) {
     this.vx = this.speed;
+  }
+  else if (keyIsDown(this.fireKey)) {
+    this.shoot();
+    this.reloadTimer = millis()+this.reloadLength;
   }
   else {
     this.vy = 0;
@@ -80,4 +87,21 @@ Paddle.prototype.display = function() {
   noStroke();
   fill(255);
   rect(this.x,this.y,this.w,this.h);
+}
+
+
+Paddle.prototype.shoot = function(){
+  if(this.reloadTimer<millis()&&this.h>20){
+  fireBalls.push(new FireBall());
+  this.h-=10;
+  fireBalls[fireBalls.length-1].y = this.y+this.h/4;
+  if(this.x<width/2){
+    fireBalls[fireBalls.length-1].x = this.x+50;
+    fireBalls[fireBalls.length-1].direction = 1;
+  }
+  else {
+    fireBalls[fireBalls.length-1].x = this.x-50;
+    fireBalls[fireBalls.length-1].direction = -1;
+  }
+}
 }

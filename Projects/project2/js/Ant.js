@@ -215,8 +215,10 @@ Ant.prototype.dropItem = function(){
   this.searching=true;
   this.newTarget();
   console.log("dropped");
-  console.log("NEW");
+  console.log("chance that biscuit appears");
+
   if(random()<biscuitChance){
+    console.log("biscuit appeared!");
     biscuit.appear();
   }
 }

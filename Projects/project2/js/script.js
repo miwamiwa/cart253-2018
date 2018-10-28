@@ -13,7 +13,8 @@ var fireBalls=[];
 var maxBalls = 10;
 var biscuit;
 
-var biscuitChance = 0.1;
+var biscuitChance = 0.15;
+var ballIncrease =0;
 
 
 
@@ -25,8 +26,8 @@ function setup() {
 
   createCanvas(800,350);
   // Create paddles
-  rightPaddle = new Paddle(width-10,height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW);
-  leftPaddle = new Paddle(0,height/2,20,60,10,83,87, 65, 68);
+  rightPaddle = new Paddle(width-10,height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
+  leftPaddle = new Paddle(0,height/2,20,60,10,83,87, 65, 68, 49);
   biscuit = new Biscuit();
 }
 
@@ -144,7 +145,7 @@ function draw() {
 function createBalls(){
 
   // constrain random number of balls
-  var numBalls = round(random(2, 3));
+  var numBalls = round(random(ballIncrease+2, ballIncrease+3));
   console.log("numBalls = "+numBalls);
   // create new balls
   if(balls.length<maxBalls){
@@ -223,5 +224,8 @@ function keyPressed(){
   }
   if(keyCode===SHIFT){
     biscuit.appear();
+  }
+  if(key===" "){
+    ballIncrease+=1;
   }
 }

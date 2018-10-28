@@ -7,6 +7,7 @@
 // Ball constructor
 //
 // Sets the properties with the provided arguments
+
 function Ball() {
   this.x = width/2;
   this.y = height/2;
@@ -21,10 +22,10 @@ function Ball() {
   this.chanceForMoreBalls= 0.2;
   this.chanceForFireBall=0.1;
   if(random()<0.5){
-  this.vx = this.speed;
-} else {
-  this.vx = -this.speed;
-}
+    this.vx = this.speed;
+  } else {
+    this.vx = -this.speed;
+  }
   this.vy = this.speed/2 + random(this.speed/2);
 }
 
@@ -33,6 +34,7 @@ function Ball() {
 // Moves according to velocity, constrains y to be on screen,
 // checks for bouncing on upper or lower edgs, checks for going
 // off left or right side.
+
 Ball.prototype.update = function () {
   // Update position with velocity
   this.x += this.vx;
@@ -51,6 +53,7 @@ Ball.prototype.update = function () {
 //
 // Checks if the ball has moved off the screen and, if so, returns true.
 // Otherwise it returns false.
+
 Ball.prototype.isOffScreen = function () {
   // Check for going off screen and reset if so
   if (this.x + this.size < 0 || this.x > width) {
@@ -64,14 +67,15 @@ Ball.prototype.isOffScreen = function () {
 // display()
 //
 // Draw the ball as a rectangle on the screen
+
 Ball.prototype.display = function () {
   noStroke();
   if(this.isSafe){
     fill(25, 25, 200);
   }
-   else {
-  fill(255);
-}
+  else {
+    fill(255);
+  }
   rect(this.x,this.y,this.size,this.size);
 }
 
@@ -79,6 +83,7 @@ Ball.prototype.display = function () {
 //
 // Check if this ball overlaps the paddle passed as an argument
 // and if so reverse x velocity to bounce
+
 Ball.prototype.handlePaddleCollision = function(paddle) {
   // Check if the ball overlaps the paddle on x axis
   if (this.x + this.size > paddle.x && this.x < paddle.x + paddle.w) {
@@ -96,6 +101,7 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
 // reset()
 //
 // Set position back to the middle of the screen
+
 Ball.prototype.reset = function () {
   this.x = width/2;
   this.y = height/2;
@@ -109,22 +115,26 @@ Ball.prototype.reset = function () {
   }
 }
 
+// handleballcollision()
+//
+// creates a new ant when two balls collide
+
 Ball.prototype.handleBallCollision = function(index){
   if(this.collisionTimer<millis()){
     this.isSafe = false;
- for (var i=0; i<balls.length; i++){
-   if (i!=index&&this.y + this.size > balls[i].y && this.y < balls[i].y + balls[i].size ){
-     if (i!=index&&this.x + this.size > balls[i].x && this.x < balls[i].x + balls[i].size ){
-     console.log("collision");
+    for (var i=0; i<balls.length; i++){
+      if (i!=index&&this.y + this.size > balls[i].y && this.y < balls[i].y + balls[i].size ){
+        if (i!=index&&this.x + this.size > balls[i].x && this.x < balls[i].x + balls[i].size ){
+          console.log("collision");
 
-     ants.push(new Ant(balls[i].x, balls[i].y, balls[index].x, balls[index].y));
+          ants.push(new Ant(balls[i].x, balls[i].y, balls[index].x, balls[index].y));
 
-     removeBall(i);
-     removeBall(index);
-     drawAgain = true;
-     return;
-   }
- }
- }
-}
+          removeBall(i);
+          removeBall(index);
+          drawAgain = true;
+          return;
+        }
+      }
+    }
+  }
 }

@@ -24,6 +24,9 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey) {
   this.wasSabotaged=false;
   this.safeTimer=0;
   this.safeLength=1000;
+  this.sizeIncrease=0.5;
+  this.maxSize=150;
+  this.damaged = false;
 }
 
 // handleInput()

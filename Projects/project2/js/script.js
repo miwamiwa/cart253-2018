@@ -38,6 +38,14 @@ function setup() {
 
 function draw() {
 
+  runGame();
+
+}
+
+// createballs()
+//
+// creates a number of balls
+function runGame(){
   background(0);
   // Create a ball
   if(balls.length<=1){
@@ -137,11 +145,6 @@ function draw() {
   leftPaddle.display();
   rightPaddle.display();
 }
-
-// createballs()
-//
-// creates a number of balls
-
 function createBalls(){
 
   // constrain random number of balls

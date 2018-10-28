@@ -42,14 +42,6 @@ FireBall.prototype.isOffScreen = function () {
   if (this.x + this.size < 0 || this.x > width) {
     console.log("fireball off");
     this.offScreen = true;
-    if(leftPaddle.damaged){
-      leftPaddle.h-=10;
-      leftPaddle.damaged=false;
-    }
-    if(rightPaddle.damaged){
-      rightPaddle.h-=10;
-      rightPaddle.damaged=false;
-    }
     return true;
   }
   else {
@@ -76,6 +68,6 @@ FireBall.prototype.handlePaddleCollision = function(paddle){
   var padmidx = paddle.x+paddle.w/2;
   var padmidy = paddle.y+paddle.h/2;
   if ( padmidx > this.x && padmidx < this.x+this.size && padmidy > this.y && padmidy < this.y+this.size) {
-    paddle.damaged = true;
+    paddle.h-=2;
   }
 }

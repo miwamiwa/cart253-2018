@@ -18,6 +18,8 @@ function Ball() {
   this.speed = random(3, 5);
   this.safeTime = 500;
   this.collisionTimer = millis()+this.safeTime;
+  this.chanceForMoreBalls= 0.2;
+  this.chanceForFireBall=0.1;
   if(random()<0.5){
   this.vx = this.speed;
 } else {
@@ -81,7 +83,7 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
   // Check if the ball overlaps the paddle on x axis
   if (this.x + this.size > paddle.x && this.x < paddle.x + paddle.w) {
     // Check if the ball overlaps the paddle on y axis
-    if (this.y + this.size > paddle.y && this.y < paddle.y + paddle.h) {
+    if (this.y + this.size > paddle.y&& this.y < paddle.y + paddle.h) {
       // If so, move ball back to previous position (by subtracting current velocity)
       this.x -= this.vx;
       this.y -= this.vy;
@@ -99,6 +101,12 @@ Ball.prototype.reset = function () {
   this.y = height/2;
   this.collisionTimer = millis()+this.safeTime;
   this.isSafe = true;
+  if(random()<this.chanceForMoreBalls){
+    createBalls();
+  }
+  if(random()<this.chanceForFireBall){
+    fireBalls.push(new FireBall());
+  }
 }
 
 Ball.prototype.handleBallCollision = function(index){
@@ -108,7 +116,9 @@ Ball.prototype.handleBallCollision = function(index){
    if (i!=index&&this.y + this.size > balls[i].y && this.y < balls[i].y + balls[i].size ){
      if (i!=index&&this.x + this.size > balls[i].x && this.x < balls[i].x + balls[i].size ){
      console.log("collision");
+
      ants.push(new Ant(balls[i].x, balls[i].y, balls[index].x, balls[index].y));
+
      removeBall(i);
      removeBall(index);
      drawAgain = true;

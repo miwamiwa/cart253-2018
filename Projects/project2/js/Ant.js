@@ -2,6 +2,7 @@
 
 function Ant(x1, y1, x2, y2) {
   console.log("new ant");
+  this.index=0;
   this.x1 = x1;
   this.y1 = y1;
   this.x2 = x2;
@@ -26,6 +27,7 @@ function Ant(x1, y1, x2, y2) {
  this.stashx = width/2;
  this.stashy = height/2;
  this.stashsize = 10;
+ this.antIsDead = false;
 }
 
 Ant.prototype.update = function(){
@@ -95,6 +97,8 @@ Ant.prototype.display = function(){
     fill(185, 45, 45);
   }
   if(this.isCarrying){
+    fill(255);
+    rect(this.x, this.y, 10, 10);
     fill(45, 185, 45);
   }
 
@@ -120,13 +124,12 @@ if(this.itemPickedUp){
 }
 
 Ant.prototype.handleCollision = function(thing) {
-  if(this.isCarrying&&!this.itemPickedUp){
-    if (this.x + this.size > thing.x && this.x < thing.x + thing.w) {
-      // Check if the ant overlaps the thing on y axis
-      if (this.y + this.size > thing.y && this.y < thing.y + thing.h) {
-
-    this.dropItem();
-  }}
+  if (thing.type==="fireball"){
+    if (dist(thing.x-thing.size/2, thing.y-thing.size/2, this.x-this.size/2, this.y-this.size/2)<(thing.size+this.size)/2) {
+    console.log("CALL REMOVEANT");
+    this.antIsDead = true;
+    return;
+  }
   }
     if(thing.isSafe===false&&!this.isCarrying&&!this.itemPickedUp){
   // Check if the ant overlaps the thing on x axis
@@ -158,12 +161,10 @@ Ant.prototype.sabotage = function(thing){
 }
 
 Ant.prototype.dropItem = function(){
-  this.isCarrying = false;
-  console.log("dropped");
-  if(!this.waiting){
+    this.isCarrying = false;
+    this.searching=true;
+    this.newTarget();
+    console.log("dropped");
     console.log("NEW");
-    balls.push(new Ball());
-    balls[balls.length-1].x = this.x;
-    balls[balls.length-1].y = this.y;
-  }
+
 }

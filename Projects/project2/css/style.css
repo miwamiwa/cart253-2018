@@ -10,3 +10,9 @@ body {
   padding: 0;
   margin: 0;
 }
+
+#sketch-holder{
+  position:fixed;
+  top:0;
+  left:0;
+}

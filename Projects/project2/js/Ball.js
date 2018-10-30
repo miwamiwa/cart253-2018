@@ -21,6 +21,8 @@ function Ball() {
   this.collisionTimer = millis()+this.safeTime;
   this.chanceForMoreBalls= 0.2;
   this.chanceForFireBall=0.1;
+  this.hascollided=false;
+  this.lastPaddle = 0;
   if(random()<0.5){
     this.vx = this.speed;
   } else {
@@ -57,6 +59,7 @@ Ball.prototype.update = function () {
 Ball.prototype.isOffScreen = function () {
   // Check for going off screen and reset if so
   if (this.x + this.size < 0 || this.x > width) {
+    this.hascollided=false;
     return true;
   }
   else {
@@ -94,8 +97,19 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
       this.y -= this.vy;
       // Reverse x velocity to bounce
       this.vx = -this.vx;
+      this.hascollided=true;
+      this.lastPaddle = paddle;
+      if(paddle===leftPaddle&&this.hascollided===false){
+        leftPaddle.score+=1;
+        this.hascollided=true;
+      }
+      else   if(paddle===rightPaddle&&this.hascollided===false){
+          rightPaddle.score+=1;
+          this.hascollided=true;
+        }
     }
   }
+
 }
 
 // reset()
@@ -103,6 +117,12 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
 // Set position back to the middle of the screen
 
 Ball.prototype.reset = function () {
+  this.hascollided=false;
+  if(this.x<0){
+    leftPaddle.score-=1;
+  } else if(this.x>height){
+    rightPaddle.score-=1;
+  }
   this.x = width/2;
   this.y = height/2;
   this.collisionTimer = millis()+this.safeTime;
@@ -120,6 +140,7 @@ Ball.prototype.reset = function () {
 // creates a new ant when two balls collide
 
 Ball.prototype.handleBallCollision = function(index){
+  this.hascollided=false;
   if(this.collisionTimer<millis()){
     this.isSafe = false;
     for (var i=0; i<balls.length; i++){

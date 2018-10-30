@@ -28,6 +28,7 @@ function Ant(x1, y1, x2, y2) {
   this.stashy = height/2;
   this.stashsize = 10;
   this.antIsDead = false;
+  this.migrating = false;
 }
 
 // update()
@@ -54,6 +55,7 @@ Ant.prototype.update = function(){
   else {
     // else do not move
     this.vx = 0;
+    this.migrating=false;
   }
   // move ant towards its target along y axis:
   // if target is below
@@ -69,6 +71,7 @@ Ant.prototype.update = function(){
   // else do not move
   else {
     this.vy = 0;
+    this.migrating=false;
   }
 
   // if ant has reached its target, wait a bit
@@ -216,7 +219,7 @@ Ant.prototype.dropItem = function(){
   this.newTarget();
   console.log("dropped");
   console.log("chance that biscuit appears");
-  
+
   if(random()<biscuitChance){
     console.log("biscuit appeared!");
     biscuit.appear();

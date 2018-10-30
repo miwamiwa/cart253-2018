@@ -33,7 +33,7 @@ if(this.moving){
 }
 
 Biscuit.prototype.display = function(){
-if(millis()>this.appearTimer){
+if(millis()>this.appearTimer&&this.moving){
   this.moving=false;
   this.x = width*2;
   this.y = width*2;

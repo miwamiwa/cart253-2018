@@ -12,10 +12,11 @@ var ants = [];
 var fireBalls=[];
 var maxBalls = 10;
 var biscuit;
-
+var menuObjects  = [5]
 var biscuitChance = 0.15;
 var ballIncrease =3;
 
+var loseScore=10;
 
 var canvasIncrease = 25;
 var maxCanvasWidth = 0;
@@ -36,6 +37,9 @@ var newPhrase=false;
 var sectionSwitched=false;
 
 var ourcanvas;
+var currentScreen = "menu";
+var menuFrame=0;
+var menuText = [];
 // setup()
 //
 // Creates the ball and paddles
@@ -48,14 +52,12 @@ function setup() {
   synth3 = new Synth('square');
   sfx = new SFX('sine', 400);
   drums = new Drum('white');
-
+  setupMenuScreen();
   setupInstruments();
-    launchPart1();
+  launchPart0();
 
   // Create paddles
-  rightPaddle = new Paddle(width-10,height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
-  leftPaddle = new Paddle(0,height/2,20,60,10,83,87, 65, 68, 49);
-  biscuit = new Biscuit();
+
 
 
 }
@@ -67,7 +69,18 @@ function setup() {
 
 function draw() {
   playSound();
-  runGame();
+
+  if(currentScreen==="menu"){
+    runMenuScreen();
+  }
+  else if(currentScreen==="game"){
+    runGame();
+  }
+  else if(currentScreen==="gameover"){
+    runGameOverScreen();
+  }
+
+
 
 }
 
@@ -76,6 +89,7 @@ function draw() {
 // creates a number of balls
 function runGame(){
   background(0);
+  displayScore();
   // Create a ball
   if(balls.length<=1){
     createBalls();
@@ -233,20 +247,20 @@ function removeAnt(antIndex){
 
   var length = ants.length;
 
-    // if this is not the last ant
-    if(antIndex!=length-1){
-      // glue together ants arrays before and after this ant
-      ants = concat(subset(ants, 0, antIndex), subset(ants, antIndex+1, length));
-    }
-    else {
-      ants = subset(ants, 0, antIndex);
-    }
-    if(random()<0.5){
-      migrate("left");
-    }
-    else {
-      migrate("right");
-    }
+  // if this is not the last ant
+  if(antIndex!=length-1){
+    // glue together ants arrays before and after this ant
+    ants = concat(subset(ants, 0, antIndex), subset(ants, antIndex+1, length));
+  }
+  else {
+    ants = subset(ants, 0, antIndex);
+  }
+  if(random()<0.5){
+    migrate("left");
+  }
+  else {
+    migrate("right");
+  }
 
   console.log("ants: "+ants.length);
 }
@@ -263,12 +277,12 @@ function keyPressed(){
     biscuit.appear();
   }
   switch(key){
-  case "4": startSFX("up");  break;
-  case "5": startSFX("down");  break;
-  case "6": startSFX("trem");  break;
-  case "7": migrate("left");  break;
+    case "4": startSFX("up");  break;
+    case "5": startSFX("down");  break;
+    case "6": startSFX("trem");  break;
+    case "7": migrate("left");  break;
     case "8": migrate("right");  break;
-}
+  }
   if(key===" "){
     /*
     ballIncrease+=4;
@@ -352,7 +366,7 @@ function setupInstruments(){
 
   // synth1 setup
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth1.setEnvelope(0.01, 0.4, 0.001, 0.4, 0.32, 0);
+  synth1.setEnvelope(0.01, 0.4, 0.001, 0.5, 0.32, 0);
   // function(filterType, frequency)
   synth1.setFilter("LP", 400);
   // function(delayIsOn, length, feedback, filterFrequency)
@@ -464,13 +478,130 @@ function launchPart2(){
 function migrate(direction){
 
   for (var i=0; i<ants.length;i++){
+    if(ants[i].migrating===false){
+      ants[i].migrating = true;
     if(direction==="left"){
-    ants[i].tarx = leftPaddle.x;
-    ants[i].tary = leftPaddle.y;
+      ants[i].tarx = leftPaddle.x;
+      ants[i].tary = leftPaddle.y;
+    }
+    else if(direction==="right"){
+      ants[i].tarx = rightPaddle.x;
+      ants[i].tary = rightPaddle.y;
+    }
   }
-  else if(direction==="right"){
-  ants[i].tarx = rightPaddle.x;
-  ants[i].tary = rightPaddle.y;
+  }
 }
+function setupMenuScreen(){
+
+  var objectsX= width/5;
+  var objectsY= 0.666*height;
+  var menuBGcolor = 0;
+  background(menuBGcolor);
+
+  menuFrame = 0;
+
+  menuObjects[1] = new Ball();
+  menuObjects[1].isSafe = false;
+  menuObjects[1].x = 1.5*objectsX-0.5*menuObjects[1].size;
+  menuObjects[1].y = objectsY;
+  menuObjects[0] = new Ant(0.5*objectsX, objectsY,0.5*objectsX+menuObjects[1].size, objectsY+menuObjects[1].size);
+  menuObjects[0].x -=menuObjects[0].size;
+  menuObjects[0].y -=0.5*menuObjects[0].size;
+  menuObjects[0].isCarrying = true;
+  menuObjects[2] = new FireBall();
+  menuObjects[2].x = 2.5*objectsX-0.5*menuObjects[2].size;;
+  menuObjects[2].y = objectsY-0.5*menuObjects[2].size;
+  menuObjects[3] = new Paddle(3.5*objectsX, objectsY, 20, 100, 0, 0, 0, 0, 0, 0);
+  menuObjects[3].y -= 0.5*menuObjects[3].h;
+  menuObjects[3].x -=0.5*menuObjects[3].w;
+  menuObjects[4] = new Biscuit();
+  menuObjects[4].moving = false;
+  menuObjects[4].x = 4.5*objectsX-0.5*menuObjects[4].size;;
+
+  menuObjects[4].y = objectsY-0.5*menuObjects[4].size;
+
+  menuText[0] = "ant pong! click screen to start.";
+  menuText[1] = "ant";
+  menuText[2] = "ball";
+  menuText[3] = "fire";
+  menuText[4] = "paddle";
+  menuText[5] = "biscuit";
+}
+function runMenuScreen(){
+  menuObjects[4].moving = false;
+  textAlign(CENTER);
+  var menuBGcolor = 0;
+
+
+  var menuTextSpeed =10;
+  var textToDisplay = [6];
+
+  var objectsX= width/5;
+  var objectsY= 0.666*height;
+
+
+  fill(255);
+
+  if(menuFrame<=menuText[0].length*menuTextSpeed){
+    menuFrame +=1;
+  }
+  if(menuFrame%menuTextSpeed===0){
+    background(menuBGcolor);
+    textToDisplay[0] = subset(menuText[0], 0, menuFrame/menuTextSpeed);
+
+    textSize(50);
+    text(textToDisplay[0], width/2, height/3);
+    textSize(25);
+
+    var displayNext = 9;
+
+    if(menuFrame/menuTextSpeed>displayNext){
+
+      displayNext +=2;
+      for(var i=1; i<6; i++){
+
+
+
+        textToDisplay[i] = subset(menuText[i], 0, (menuFrame)/menuTextSpeed-9);
+        fill(255);
+        menuObjects[i-1].display();
+        console.log(textToDisplay[i])
+        text(textToDisplay[i], (i-0.5)*objectsX, (0.5)*height);
+
+
+      }
+    }
+  }
+
+
+  if(mouseIsPressed===true&&mouseButton===LEFT){
+    // PREPARE AND LAUNCH GAME
+    currentScreen="game";
+    launchPart1();
+    rightPaddle =0;
+    leftPaddle=0;
+    balls = [];
+    ants=[];
+    fireBalls = [];
+    rightPaddle = new Paddle(width-10,height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
+    leftPaddle = new Paddle(0,height/2,20,60,10,83,87, 65, 68, 49);
+    biscuit = new Biscuit();
+  }
+}
+function displayScore(){
+  console.log("score:"+leftPaddle.score);
+  fill(255);
+  text("P1 HITS-MISSES= "+leftPaddle.score+", P2 HITS-MISSES= "+rightPaddle.score, width/2, 50);
+  if(leftPaddle.score>loseScore){
+    launchPart2();
+    setupMenuScreen();
+    currentScreen="menu";
+    menuText[0] = "Game! Right player wins. click to start.";
+  }
+  else if(leftPaddle.score>loseScore){
+      launchPart2();
+    setupMenuScreen();
+    currentScreen="menu";
+    menuText[0] = "Game! Left player wins. click to start.";
   }
 }

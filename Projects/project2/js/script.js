@@ -14,10 +14,9 @@ var maxBalls = 10;
 var biscuit;
 
 var biscuitChance = 0.15;
-var ballIncrease =0;
+var ballIncrease =3;
 
-var canvasWidth = 800;
-var canvasHeight = 350;
+
 var canvasIncrease = 25;
 var maxCanvasWidth = 0;
 var maxCanvasHeight = 0;
@@ -36,12 +35,14 @@ var rootNote=60;
 var newPhrase=false;
 var sectionSwitched=false;
 
-var canvas;
+var ourcanvas;
 // setup()
 //
 // Creates the ball and paddles
 
 function setup() {
+  ourcanvas = createCanvas(900, 450);
+  ourcanvas.parent('sketch-holder');
   synth1 = new Synth('sine');
   synth2 = new Synth('square');
   synth3 = new Synth('square');
@@ -50,11 +51,6 @@ function setup() {
 
   setupInstruments();
     launchPart1();
-
-  maxCanvasWidth = window.innerWidth;
-  maxCanvasHeight = window.innerHeight;
-  canvas = createCanvas(800, 350);
-  canvas.parent('sketch-holder');
 
   // Create paddles
   rightPaddle = new Paddle(width-10,height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
@@ -274,12 +270,14 @@ function keyPressed(){
     case "8": migrate("right");  break;
 }
   if(key===" "){
-    ballIncrease+=1;
-    canvasWidth+=canvasIncrease;
-    canvasHeight+=canvasIncrease;
+    /*
+    ballIncrease+=4;
+    canvasWidth+=4*canvasIncrease;
+    canvasHeight+=4*canvasIncrease;
     canvasWidth = constrain(canvasWidth, 0, maxCanvasWidth);
     canvasHeight = constrain(canvasHeight, 0, maxCanvasHeight);
     canvas = createCanvas(canvasWidth, canvasHeight);
+    */
   }
 }
 

@@ -592,7 +592,7 @@ function displayScore(){
   console.log("score:"+leftPaddle.score);
   fill(255);
   text("P1 HITS-MISSES= "+leftPaddle.score+", P2 HITS-MISSES= "+rightPaddle.score, width/2, 50);
-  if(leftPaddle.score>loseScore){
+  if(rightPaddle.score>loseScore){
     launchPart2();
     setupMenuScreen();
     currentScreen="menu";

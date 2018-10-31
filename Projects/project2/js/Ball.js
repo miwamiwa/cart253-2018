@@ -21,8 +21,8 @@ function Ball() {
   this.collisionTimer = millis()+this.safeTime;
   this.chanceForMoreBalls= 0.2;
   this.chanceForFireBall=0.1;
-  this.hascollided=false;
   this.lastPaddle = 0;
+  
   if(random()<0.5){
     this.vx = this.speed;
   } else {
@@ -59,7 +59,7 @@ Ball.prototype.update = function () {
 Ball.prototype.isOffScreen = function () {
   // Check for going off screen and reset if so
   if (this.x + this.size < 0 || this.x > width) {
-    this.hascollided=false;
+
     return true;
   }
   else {
@@ -91,21 +91,30 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
   // Check if the ball overlaps the paddle on x axis
   if (this.x + this.size > paddle.x && this.x < paddle.x + paddle.w) {
     // Check if the ball overlaps the paddle on y axis
-    if (this.y + this.size > paddle.y&& this.y < paddle.y + paddle.h) {
+    if (this.y + this.size >= paddle.y && this.y <= paddle.y + paddle.h ) {
       // If so, move ball back to previous position (by subtracting current velocity)
-      this.x -= this.vx;
+      if(this.vx>0){
+      this.x = paddle.x-this.size-this.vx;
+    }
+    else if(this.vx<0){
+      this.x = paddle.x+paddle.size+this.vx;
+    }
       this.y -= this.vy;
       // Reverse x velocity to bounce
+
       this.vx = -this.vx;
-      this.hascollided=true;
+    this.vy = map(paddle.y+paddle.h/2-this.y, -paddle.h/2, paddle.h/2, this.speed, -this.speed);
+
       this.lastPaddle = paddle;
-      if(paddle===leftPaddle&&this.hascollided===false){
+      if(paddle===leftPaddle){
+
         leftPaddle.score+=1;
-        this.hascollided=true;
+
       }
-      else   if(paddle===rightPaddle&&this.hascollided===false){
+      else   if(paddle===rightPaddle){
+
           rightPaddle.score+=1;
-          this.hascollided=true;
+
         }
     }
   }
@@ -117,7 +126,7 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
 // Set position back to the middle of the screen
 
 Ball.prototype.reset = function () {
-  this.hascollided=false;
+
   if(this.x<0){
     leftPaddle.score-=1;
   } else if(this.x>height){
@@ -140,7 +149,7 @@ Ball.prototype.reset = function () {
 // creates a new ant when two balls collide
 
 Ball.prototype.handleBallCollision = function(index){
-  this.hascollided=false;
+
   if(this.collisionTimer<millis()){
     this.isSafe = false;
     for (var i=0; i<balls.length; i++){

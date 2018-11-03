@@ -1,20 +1,3 @@
-/*
-
-Drums.js
-This is what the three synths in the bgm are made of.
-
-this script handles:
-- creating a Synth object
-- setting the envelope
-- setting the filter
-- setting the delay effect
-- setting the notes to be played
-- putting the oscillator, envelope, filter and delay together and starting the sound
-- playing this synth's list of notes
-
-Envelope, filter, delay settings and note lists are declared in the main script.
-
-*/
 
 // starting key midi value
 var rootNote=60;
@@ -42,6 +25,7 @@ function Drum(oscType){
   this.thisSynth=0;
   this.filter=0;
   this.delay=0;
+  this.note=0;
   // filter frequency
   this.fFreq=0;
   // delay parameters
@@ -49,6 +33,7 @@ function Drum(oscType){
   this.delayLength=0;
   this.delayFB= 0;
   this.delayFilter= 0;
+  this.noteIndex=0;
 
     this.beat=40;
 
@@ -218,23 +203,25 @@ Drum.prototype.loadInstrument = function(){
 
 Drum.prototype.handleDrums = function(){
   if(this.isPlaying){
-  if(music.musicInc%this.bar*this.barperphrase){
+  if(musicInc%this.bar*this.barperphrase){
     this.phrase+=1;
   }
   if(this.phrase%this.phrasepersection){
     this.section+=1;
     this.phrase=0;
     console.log("section :"+this.section);
+
     noiseSeed(this.section);
   }
 
-  var weight =  drums.salience(music.musicInc);
+  var weight =  drums.salience(musicInc);
 
   // uncomment this to get the same drum line every time
   //noiseSeed(this.section);
 
-  var thisnoise = noise(music.musicInc*this.noiseInc);
+  var thisnoise = noise(musicInc*this.noiseInc);
   var stimulus = thisnoise*this.stimulusScale;
+console.log("stimulus 1"+stimulus);
 
   if(stimulus+weight>this.thresh&&weight!=0){
 
@@ -243,10 +230,15 @@ Drum.prototype.handleDrums = function(){
   //  console.log("stimulus: "+stimulus);
   //  console.log("loudness: "+loudness);
 
-    this.filter.freq( 18150-loudness*18000 );
-    this.env.setADSR(this.attackTime, 0.10*loudness, this.susPercent, this.releaseTime);
-    this.env.setRange(this.attackLevel, this.releaseLevel);
+    //this.filter.freq( 18150-loudness*18000 );
+
+    this.note = phrase.newNote();
+    var newNote =midiToFreq(constrain(this.note, 0, 127));
+    console.log("THE NEW NOTE IS : "+newNote);
+
+    this.thisSynth.freq(newNote);
     this.env.play();
+    this.noteIndex+=1;
   }
 
 }
@@ -255,14 +247,14 @@ Drum.prototype.handleDrums = function(){
 
 Drum.prototype.salience = function(t){
 
-  if(music.musicInc%this.beat===0){
+  if(musicInc%this.beat===0){
     this.currentbeat+=1;
     if(this.currentbeat>this.divperbar){
       this.currentbeat=0;
     }
   }
 
-  if(music.musicInc%this.subdiv===0){
+  if(musicInc%this.subdiv===0){
     this.currentsub+=1;
     if(this.currentbeat>this.divperbeat){
       this.currentsub=0;

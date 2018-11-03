@@ -17,7 +17,7 @@ Envelope, filter, delay settings and note lists are declared in the main script.
 */
 
 // starting key midi value
-
+var rootNote=60;
 
 // Synth(oscType)
 //
@@ -74,21 +74,18 @@ function Synth(oscType){
 // plays notes from the note list at the rate set with setNotes()
 
 Synth.prototype.playMusic = function(){
-//console.log("musicInc : "+music.musicInc+", this.rate : "+this.rate+", this.rType : "+this.rType+", this.nextNote : "+this.nextNote);
-  if((music.musicInc%this.rate===0&&this.rType==="pulse") || (music.musicInc===this.nextNote&&this.rType==="array")){
-
-    if(this.loop===0){music.sectionSwitched=false;}
+  if((musicInc%this.rate===0&&this.rType==="pulse") || (musicInc===this.nextNote&&this.rType==="array")){
+    if(this.loop===0){sectionSwitched=false;}
     if(this.isPlaying){
-        var newNote =midiToFreq(music.rootNote+this.oct+this.notes[this.loop]);
+        var newNote =midiToFreq(rootNote+this.oct+this.notes[this.loop]);
         this.env.setADSR(this.attackTime, this.decayTime, this.susLevel, this.releaseTime);
         this.env.setRange(this.attackLevel, this.releaseLevel);
         if(this.rType==="array"){
-          this.env.setADSR(this.attackTime, this.rhythm[this.loop]/100*this.decayTime, this.susLevel, this.releaseTime);
-          this.env.setRange(this.attackLevel, this.releaseLevel);
+        this.env.setADSR(this.attackTime, this.decayTime*this.rhythm[this.loop]/100, 0.8*this.susLevel, this.releaseTime*this.rhythm[this.loop]/100);
+       this.env.setRange(this.attackLevel, this.releaseLevel);
    }
         this.thisSynth.freq(newNote);
          this.env.play();
-
        }
        //continue rhythm even if synth is not isisPlaying
          if(this.rType==="array"){

@@ -1,14 +1,14 @@
 function FireBall(){
 
   if(random()<0.5){
-    this.x=0.2*width;
+    this.x=0.2*game.width;
     this.direction = 1;
   } else {
-    this.x = width-0.2*width;
+    this.x = game.width-0.2*game.width;
     this.direction = -1;
   }
   this.type = "fireball";
-  this.y = height/2;
+  this.y = game.height/2;
   this.vx = 0;
   this.vy = 0;
   this.inc = 0;
@@ -28,7 +28,7 @@ FireBall.prototype.update = function(){
 
   this.x+=this.vx;
   this.y+=this.vy;
-  this.y = constrain(this.y, 0, height);
+  this.y = constrain(this.y, 0, game.height);
 }
 
 FireBall.prototype.display = function(){
@@ -39,7 +39,7 @@ FireBall.prototype.display = function(){
 
 FireBall.prototype.isOffScreen = function () {
   // Check for going off screen and reset if so
-  if (this.x + this.size < 0 || this.x > width) {
+  if (this.x + this.size < 0 || this.x > game.width) {
     console.log("fireball off");
     this.offScreen = true;
     return true;
@@ -60,7 +60,9 @@ for (var i=0; i<ants.length; i++){
 }
   for (var j=0; j<deadAnts.length; j++){
     removeAnt(deadAnts[j]);
+    music.startSFX(sfx, "chirp");
   }
+
 }
 
 FireBall.prototype.handlePaddleCollision = function(paddle){

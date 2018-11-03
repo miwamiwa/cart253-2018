@@ -8,15 +8,19 @@ var leftPaddle;
 var rightPaddle;
 var totalBalls = 0;
 var drawAgain = false;
+
 var ants = [];
 var fireBalls=[];
 var maxBalls = 10;
 var biscuit;
 var menuObjects  = [5]
 var biscuitChance = 0.15;
-var ballIncrease =3;
+var ballIncrease =1;
+var music;
 
-var loseScore=10;
+var level=1;
+
+var winScore=10;
 
 var canvasIncrease = 25;
 var maxCanvasWidth = 0;
@@ -27,34 +31,37 @@ var synth2;
 var synth3;
 var drum;
 var sfx;
+var sfx2;
 
-var musicInc = 0;
-var musicSpeed = 1;
 
-var rootNote=60;
-
-var newPhrase=false;
-var sectionSwitched=false;
 
 var ourcanvas;
 var currentScreen = "menu";
 var menuFrame=0;
 var menuText = [];
+var game;
 // setup()
 //
 // Creates the ball and paddles
 
 function setup() {
+
+  music = new Music();
   ourcanvas = createCanvas(900, 450);
+  game = new Game();
   ourcanvas.parent('sketch-holder');
   synth1 = new Synth('sine');
   synth2 = new Synth('square');
   synth3 = new Synth('square');
   sfx = new SFX('sine', 400);
+  sfx2 = new SFX('white', 400);
   drums = new Drum('white');
+  rightPaddle = new Paddle(game.width-10,game.height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
+  leftPaddle = new Paddle(0,game.height/2,20,60,10,83,87, 65, 68, 49);
+
   setupMenuScreen();
-  setupInstruments();
-  launchPart0();
+  music.setupInstruments();
+  music.launchPart0();
 
   // Create paddles
 
@@ -88,6 +95,9 @@ function draw() {
 //
 // creates a number of balls
 function runGame(){
+  if(leftPaddle.score<-50||rightPaddle.score<-50){
+    gameOver();
+  }
   background(0);
   displayScore();
   // Create a ball
@@ -277,11 +287,14 @@ function keyPressed(){
     biscuit.appear();
   }
   switch(key){
-    case "4": startSFX("up");  break;
-    case "5": startSFX("down");  break;
-    case "6": startSFX("trem");  break;
+    case "4": music.startSFX("up");  break;
+    case "5": music.startSFX("down");  break;
+    case "6": music.startSFX("trem");  break;
+    case "9": music.startSFX("chirp");  break;
+    case "0": music.startSFX("downchirp");  break;
     case "7": migrate("left");  break;
     case "8": migrate("right");  break;
+    case "r": gameReset(); break;
   }
   if(key===" "){
     /*
@@ -296,45 +309,7 @@ function keyPressed(){
 }
 
 
-function startSFX(sfxType){
-  // prepare all SFX to allow new one to start
-  sfx.upFX = false;
-  sfx.downFX = false;
-  sfx.tremFX = false;
-  sfx.FXinc = 0;
-  sfx.FXtimer = musicInc+ sfx.FXlength;
-  sfx.baseFreq = sfx.defaultFreq;
-  // launch the SFX
-  switch(sfxType){
-    case "up": sfx.upFX = true;  break;
-    case "down": sfx.downFX = true; break;
-    case "trem": sfx.tremFX = true; break;
-  }
-}
 
-function startNewPhrase(synx, noteList, octave, rhythm, loop, fromTheTop){
-  synx.playing=true;
-  synx.notes=noteList;
-  synx.phrase=noteList.length;
-  synx.playedThru=0;
-  synx.oct=octave;
-  // set rate at which notes are played
-  synx.rate=loop;
-
-
-  if(rhythm===0){
-    synx.rType="pulse";
-    synx.rhythm=0;
-  } else {
-    synx.rType="array";
-    synx.rhythm=rhythm;
-    synx.nextNote=0;
-  }
-  if(fromTheTop){
-    synx.loop=0;
-  }
-  newPhrase=true;
-}
 
 // playsound()
 //
@@ -342,137 +317,23 @@ function startNewPhrase(synx, noteList, octave, rhythm, loop, fromTheTop){
 // play individual instruments
 
 function playSound(){
-  if(!newPhrase){
-    musicInc+=musicSpeed;
-  } else {
-    newPhrase=false;
-  }
+
 
   drums.handleDrums();
+  sfx.playSFX();
+  sfx2.playSFX();
   synth1.playMusic();
   synth2.playMusic();
   synth3.playMusic();
-  sfx.playSFX();
+  music.musicInc+=music.musicSpeed;
+/*
+  if(!this.newPhrase){
+    music.musicInc+=music.musicSpeed;
+  } else {
+    music.newPhrase=false;
+  }
+  */
 
-
-}
-
-// setupinstruments()
-//
-// here the values which will define the different
-// instruments' sound are declared.
-
-function setupInstruments(){
-
-  // synth1 setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth1.setEnvelope(0.01, 0.4, 0.001, 0.5, 0.32, 0);
-  // function(filterType, frequency)
-  synth1.setFilter("LP", 400);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  synth1.setDelay(true, 0.5, 0.55, 400)
-  // function(noteList, octave, loopLength)
-
-  // load it
-  synth1.loadInstrument();
-
-
-  // synth2 setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth2.setEnvelope(0.001, 0.5, 0.2, 0.8, 0.4, 0);
-  // function(filterType, frequency)
-  synth2.setFilter("LP", 1500);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  synth2.setDelay(true, 0.33, 0.4, 2000)
-  // function(noteList, octave, loopLength)
-
-
-  // synth3 setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth3.setEnvelope(0.01, 0.7, 0.8, 0.3, 0.1, 0);
-  // function(filterType, frequency)
-  synth3.setFilter("LP", 800);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  synth3.setDelay(true, 0.165, 0.3, 1500);
-  // function(noteList, octave, loopLength)
-
-  // sfx setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  sfx.setEnvelope(0.001, 0.6, 0.0, 0.4, 0.4, 0);
-  // function(filterType, frequency)
-  sfx.setFilter("LP", 500);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  sfx.setDelay(false, 0, 0, 0);
-  // function(noteList, octave, loopLength)
-
-  // drum setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  drums.setEnvelope(0.005, 0.2, 0.2, 0.5, 0.2, 0.0);
-  // function(filterType, frequency)
-  drums.setFilter("BP", 400);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  drums.setDelay(false, 0, 0, 0);
-  //drums.setDivisions(bar, beat, subdiv, finediv, beatsperbar, divsperbeat, fineperdiv)
-
-
-
-  // load it
-  synth2.loadInstrument();
-  synth3.loadInstrument();
-  sfx.loadInstrument();
-  drums.loadInstrument();
-
-}
-
-function launchPart1(){
-
-  var phrase1=[-5, 5, 6, 7, 6, 5, 6, 7, 6, -7];
-  var rhythm1=[60, 40, 20, 40, 20, 40, 20, 40, 120, 80];
-  var phrase2=[3, 2, 3, 7, 3, 9, 3, 7, 3, 5, 7, 3, 3, 2, 3, 9, 3, 10, 3, 9, 3, 5, 7, 3];
-  var phrase3=[0, 5, 0, 0, 5, 5, 0, 0, 8, 7, 0, 7];
-  startNewPhrase(synth2, phrase1, 0, rhythm1, 30, true);
-  startNewPhrase(synth1, phrase2, 12, 0, 60, true);
-  startNewPhrase(synth3, phrase3, -24, 0, 120, true);
-  drums.setDivisions(120, 60, 30, 10, 2, 2, 3);
-  drums.setWeights(18, 27, 25, 10, 10, 8, 8);
-  synth1.isPlaying = true;
-  synth2.isPlaying = true;
-  synth3.isPlaying = true;
-  drums.isPlaying = true;
-  newPhrase = true;
-  musicInc = 0;
-}
-function launchPart0(){
-
-  var phrase1=[-5, -7, 3, 5];
-  var rhythm1=[20, 40, 30, 30];
-  var phrase2=[3, 2, 3, 7, 3, 9, 3, 7, 3, 5, 7, 3, 3, 2, 3, 9, 3, 10, 3, 9, 3, 5, 7, 3];
-  var phrase3=[0, 0, 0, -7];
-  var rhythm2=[40, 10, 60, 10]
-  startNewPhrase(synth2, phrase1, 0, rhythm1, 30, true);
-  startNewPhrase(synth1, phrase2, 12, 0, 20, true);
-  startNewPhrase(synth3, phrase3, -24, rhythm2, 30, true);
-  drums.setDivisions(60, 20, 10, 5, 3, 2, 2);
-  drums.setWeights(18, 27, 24, 10, 10, 2, 8);
-  synth1.isPlaying = true;
-  synth2.isPlaying = true;
-  synth3.isPlaying = true;
-  drums.isPlaying = true;
-  newPhrase = true;
-  musicInc = 0;
-}
-function launchPart2(){
-
-  var phrase2=[3, 2, 3, 7, 3, 9, 3, 7, 3, 5, 7, 3, 3, 2, 3, 9, 3, 10, 3, 9, 3, 5, 7, 3];
-
-  startNewPhrase(synth1, phrase2, 12, 0, 20, true);
-
-  newPhrase = true;
-  musicInc = 0;
-  synth1.isPlaying = true;
-  synth2.isPlaying = false;
-  synth3.isPlaying = false;
-  drums.isPlaying = false;
 }
 
 function migrate(direction){
@@ -491,10 +352,12 @@ function migrate(direction){
   }
   }
 }
+
 function setupMenuScreen(){
 
-  var objectsX= width/5;
-  var objectsY= 0.666*height;
+  var objectsX= game.width/5;
+  var objectsY= 0.666*game.height;
+
   var menuBGcolor = 0;
   background(menuBGcolor);
 
@@ -505,6 +368,7 @@ function setupMenuScreen(){
   menuObjects[1].x = 1.5*objectsX-0.5*menuObjects[1].size;
   menuObjects[1].y = objectsY;
   menuObjects[0] = new Ant(0.5*objectsX, objectsY,0.5*objectsX+menuObjects[1].size, objectsY+menuObjects[1].size);
+  console.log("MENU OBJECT[0]"+menuObjects[0])
   menuObjects[0].x -=menuObjects[0].size;
   menuObjects[0].y -=0.5*menuObjects[0].size;
   menuObjects[0].isCarrying = true;
@@ -528,6 +392,8 @@ function setupMenuScreen(){
   menuText[5] = "biscuit";
 }
 function runMenuScreen(){
+  leftPaddle.isSafe = true;
+  rightPaddle.isSafe = true;
   menuObjects[4].moving = false;
   textAlign(CENTER);
   var menuBGcolor = 0;
@@ -536,8 +402,8 @@ function runMenuScreen(){
   var menuTextSpeed =10;
   var textToDisplay = [6];
 
-  var objectsX= width/5;
-  var objectsY= 0.666*height;
+  var objectsX= game.width/5;
+  var objectsY= 0.666*game.height;
 
 
   fill(255);
@@ -550,25 +416,19 @@ function runMenuScreen(){
     textToDisplay[0] = subset(menuText[0], 0, menuFrame/menuTextSpeed);
 
     textSize(50);
-    text(textToDisplay[0], width/2, height/3);
+    text(textToDisplay[0], game.width/2, game.height*2/7);
     textSize(25);
 
     var displayNext = 9;
 
     if(menuFrame/menuTextSpeed>displayNext){
-
       displayNext +=2;
       for(var i=1; i<6; i++){
-
-
-
         textToDisplay[i] = subset(menuText[i], 0, (menuFrame)/menuTextSpeed-9);
         fill(255);
-        menuObjects[i-1].display();
+       menuObjects[i-1].display();
         console.log(textToDisplay[i])
-        text(textToDisplay[i], (i-0.5)*objectsX, (0.5)*height);
-
-
+        text(textToDisplay[i], (i-0.5)*objectsX, (0.5)*game.height);
       }
     }
   }
@@ -577,31 +437,74 @@ function runMenuScreen(){
   if(mouseIsPressed===true&&mouseButton===LEFT){
     // PREPARE AND LAUNCH GAME
     currentScreen="game";
-    launchPart1();
-    rightPaddle =0;
-    leftPaddle=0;
+    music.launchPart1();
     balls = [];
-    ants=[];
     fireBalls = [];
-    rightPaddle = new Paddle(width-10,height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
-    leftPaddle = new Paddle(0,height/2,20,60,10,83,87, 65, 68, 49);
     biscuit = new Biscuit();
+    leftPaddle.isSafe = false;
+    rightPaddle.isSafe = false;
+    leftPaddle.score = 0;
+    rightPaddle.score =0;
   }
 }
 function displayScore(){
+  var scoretext = "P1 HITS-MISSES= "+leftPaddle.score+", P2 HITS-MISSES= "+rightPaddle.score+ "\n SCORE TO WIN: "+winScore;
+
   console.log("score:"+leftPaddle.score);
   fill(255);
-  text("P1 HITS-MISSES= "+leftPaddle.score+", P2 HITS-MISSES= "+rightPaddle.score, width/2, 50);
-  if(rightPaddle.score>loseScore){
-    launchPart2();
-    setupMenuScreen();
-    currentScreen="menu";
-    menuText[0] = "Game! Right player wins. click to start.";
+  strokeWeight(1);
+  stroke(255);
+  line(0, game.height, game.width, game.height);
+  noStroke();
+  textSize(15);
+  text(scoretext, game.width/2, height-30);
+  if(rightPaddle.score>=winScore){
+    setupLevel();
+    menuText[0] = "Match! Right player wins. \nclick to continue to level "+level+".";
   }
-  else if(leftPaddle.score>loseScore){
-      launchPart2();
-    setupMenuScreen();
-    currentScreen="menu";
-    menuText[0] = "Game! Left player wins. click to start.";
+  else if(leftPaddle.score>=winScore){
+    setupLevel();
+    menuText[0] = "Match! Left player wins. \nclick to continue to level "+level+".";
   }
+}
+
+function gameReset(){
+  music.launchPart0();
+  ants = [];
+  setupMenuScreen();
+  level=1;
+  ballIncrease=1;
+  winScore = 10;
+  currentScreen= "menu";
+  menuText[0] = "ant pong! click screen to start.";
+  rightPaddle = new Paddle(game.width-10,game.height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
+  leftPaddle = new Paddle(0,game.height/2,20,60,10,83,87, 65, 68, 49);
+
+}
+
+function gameOver(){
+  var winner;
+  if(leftPaddle.score<-50){
+    winner = "right";
+  } else {
+    winner = "left";
+  }
+gameReset();
+
+menuText[0] = "Game over.. "+winner+" player wins! \n click screen to start again.";
+}
+
+function setupLevel(){
+  music.launchPart2();
+setupMenuScreen();
+level+=1;
+winScore+=3;
+ballIncrease+=1;
+currentScreen="menu";
+leftPaddle.h +=40;
+rightPaddle.h +=40;
+for(var i=0; i<ants.length; i++){
+  ants[i].damage+=5;
+  ants[i].damage = constrain(ants[i].damage, 10, 30);
+}
 }

@@ -64,7 +64,7 @@ Paddle.prototype.handleInput = function() {
 // Update y position based on velocity
 // Constrain the resulting position to be within the canvas
 Paddle.prototype.update = function() {
-  this.h = constrain(this.h, 10, height);
+  this.h = constrain(this.h, 10, game.height);
   if(this.wasSabotaged){
     this.isSafe=true;
     this.safeTimer = millis() + this.safeLength;
@@ -77,7 +77,7 @@ Paddle.prototype.update = function() {
     this.isSafe=true;
   }
   this.y += this.vy;
-  this.y = constrain(this.y,0,height-this.h);
+  this.y = constrain(this.y,0,game.height-this.h);
   this.x +=this.vx;
 }
 
@@ -96,7 +96,7 @@ Paddle.prototype.shoot = function(){
   fireBalls.push(new FireBall());
   this.h-=10;
   fireBalls[fireBalls.length-1].y = this.y+this.h/4;
-  if(this.x<width/2){
+  if(this.x<game.width/2){
     fireBalls[fireBalls.length-1].x = this.x+50;
     fireBalls[fireBalls.length-1].direction = 1;
   }

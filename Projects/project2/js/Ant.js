@@ -15,8 +15,8 @@ function Ant(x1, y1, x2, y2) {
   this.rate = 0.1;
   this.vx = 0;
   this.vy = 0;
-  this.tarx = width/2;
-  this.tary = height/2;
+  this.tarx = game.width/2;
+  this.tary = game.height/2;
   this.tars = 10;
   this.waitTimer = 0;
   this.waitLength = 500;
@@ -24,11 +24,12 @@ function Ant(x1, y1, x2, y2) {
   this.searching = true;
   this.isCarrying = false;
   this.itemPickedUp= false;
-  this.stashx = width/2;
-  this.stashy = height/2;
+  this.stashx = game.width/2;
+  this.stashy = game.height/2;
   this.stashsize = 10;
   this.antIsDead = false;
   this.migrating = false;
+  this.damage = 10;
 }
 
 // update()
@@ -120,8 +121,23 @@ Ant.prototype.display = function(){
   noStroke();
   // set fill depending on ant's current action
   if(this.searching){
+
     // default grey
-    fill(75);
+    if(this.damage===10){
+      fill(75);
+    }
+    else if(this.damage===15){
+      fill(75, 125, 75);
+    }
+    else if(this.damage===20){
+      fill(75, 75, 125);
+    }
+    else if(this.damage===25){
+      fill(125, 75,75);
+    }
+    else if(this.damage===30){
+      fill(175,175, 175);
+    }
   }
   if(this.waiting){
     // blue if waiting
@@ -152,8 +168,8 @@ Ant.prototype.newTarget = function(){
 
   // set list:
   // possible targets are the four corners, the two paddles, and the middle of the screen.
-  var targetxlist = [0, width-2*this.size, leftPaddle.x, rightPaddle.x, width/2, 0, width-2*this.size];
-  var targetylist = [0, 0, leftPaddle.y, rightPaddle.y, height/2, height-2*this.size, height-2*this.size];
+  var targetxlist = [0, game.width-2*this.size, leftPaddle.x, rightPaddle.x, game.width/2, 0, game.width-2*this.size];
+  var targetylist = [0, 0, leftPaddle.y, rightPaddle.y, game.height/2, game.height-2*this.size, game.height-2*this.size];
 
   // pick a random number
   var choice = floor(random(targetxlist.length));
@@ -180,7 +196,7 @@ Ant.prototype.newTarget = function(){
 
 Ant.prototype.handleCollision = function(thing) {
 
-  if(thing.isSafe===false&&!this.isCarrying&&!this.itemPickedUp){
+  if(!thing.isSafe&&!this.isCarrying&&!this.itemPickedUp){
     // Check if the ant overlaps the thing on x axis
     if (this.x + this.size > thing.x && this.x < thing.x + thing.w) {
       // Check if the ant overlaps the thing on y axis
@@ -196,6 +212,7 @@ Ant.prototype.handleCollision = function(thing) {
   }
 }
 Ant.prototype.sabotage = function(thing){
+  music.startSFX(sfx, "downChirp");
   if(thing.type==="ball"){
     for(var i=0; i<balls.length; i++){
       if(thing.x===balls[i].x&&thing.y===balls[i].y){
@@ -204,7 +221,7 @@ Ant.prototype.sabotage = function(thing){
     }
   }
   if(thing.type==="paddle"){
-    thing.h -= 10;
+    thing.h -= this.damage;
     thing.wasSabotaged=true;
   }
 }

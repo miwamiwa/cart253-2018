@@ -1,8 +1,8 @@
 function Biscuit(){
 
-this.x = random(width);
+this.x = random(game.width);
   this.type = "Biscuit";
-  this.y = random(height);
+  this.y = random(game.height);
   this.vx = 0;
   this.vy = 0;
   this.inc = 0;
@@ -35,8 +35,8 @@ if(this.moving){
 Biscuit.prototype.display = function(){
 if(millis()>this.appearTimer&&this.moving){
   this.moving=false;
-  this.x = width*2;
-  this.y = width*2;
+  this.x = game.width*2;
+  this.y = game.width*2;
 } else {
   this.moving = true;
   fill(25, 25, 185);
@@ -46,11 +46,11 @@ if(millis()>this.appearTimer&&this.moving){
 /*
 Biscuit.prototype.isOffScreen = function () {
   // Check for going off screen and reset if so
-  if (this.x + this.size < 0 || this.x > width) {
+  if (this.x + this.size < 0 || this.x > game.width) {
     console.log("Biscuit off");
     this.offScreen = true;
-    this.x = width*2;
-    this.y = height*2;
+    this.x = game.width*2;
+    this.y = game.height*2;
     return true;
   }
   else {
@@ -75,14 +75,15 @@ Biscuit.prototype.handlePaddleCollision = function(paddle){
   var padmidy = paddle.y+paddle.h/2;
   if ( padmidx > this.x && padmidx < this.x+this.size && padmidy > this.y && padmidy < this.y+this.size) {
     paddle.h+=100;
-    this.x = width*2;
-    this.y = height*2;
+    this.x = game.width*2;
+    this.y = game.height*2;
     this.moving = false;
+    music.startSFX(sfx, "trem");
   }
 }
 
 Biscuit.prototype.appear = function(){
   this.appearTimer = millis() + this.appearLength;
-  this.x = random(100, width-100);
-  this.y = random(100, height-100);
+  this.x = random(100, game.width-100);
+  this.y = random(100, game.height-100);
 }

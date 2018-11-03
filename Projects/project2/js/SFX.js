@@ -56,49 +56,19 @@ function SFX(oscType, frequency){
     this.tremFX= false;
     // length of sfx sounds
     this.FXlength= 45;
+    this.upFXlength= 14;
+    this.downFXlength= 45;
+    this.tremFXlength= 45;
     // sfx trigger timer
     this.FXtimer= 0;
     this.FXinc = 0;
-
+    this.chirpFX = false;
+    this.chirpFXlength =10;
+    this.downChirpFX = false;
+    this.downChirpFXlength =10;
 }
 
 //////////////// PLAY SFX ////////////////
-
-/*
-var this={ //FX synth
-  // declare type of synth, and type of filter
-  synthType: 'sine',
-  filtAtt: "LP",
-  attackLevel: 0.4,
-  releaseLevel: 0,
-  attackTime: 0.001,
-  decayTime: 0.6,
-  susPercent: 0.4,
-  releaseTime: 0.0,
-  env:0,
-  thisSynth:0,
-  // parameters used to trigger the different sfx sounds
-  upFX:false,
-  downFX: false,
-  tremFX: false,
-  // length of sfx sounds
-  FXlength: 45,
-  // sfx trigger timer
-  FXtimer: 0,
-  // sfx filter
-  filter:0,
-  fFreq:400,
-  // sfx starting frequency
-  baseFreq: 650,
-  // parameter used to increment the frequency for cool effects
-  FXinc:0,
-  // state no delay
-  delayFX:false
-}
-
-
-
-*/
 
 SFX.prototype.playSFX = function(){
 
@@ -107,29 +77,113 @@ SFX.prototype.playSFX = function(){
   if(this.upFX){
 
     // for the duration of the FX timer
-    if(musicInc<this.FXtimer){
+    if(music.musicInc<this.FXtimer){
       console.log("upfx");
       // use FXinc(rement) to keep track of time during the FX
-      this.FXinc+=1;
+
+      if(this.FXinc%7===0){
       // increase frequency by increment
-      this.thisSynth.freq(this.baseFreq+5*this.FXinc);
+      if(this.synthType==="white"){ this.filter.freq(500+200*this.FXinc);}
+      else{
+      this.thisSynth.freq(this.baseFreq+20*this.FXinc);
+    }
+    }
+    this.env.setADSR(0.001, 0.03, 0.5, 0.01+this.FXinc/56);
+    this.env.setRange(1, 0);
       // play this
     this.env.play();
+    this.FXinc+=1;
     } else {
       // if timer is over stop this
       this.upFX=false;
+    }
+  }
+  else if(this.chirpFX){
+
+    // for the duration of the FX timer
+    if(music.musicInc<this.FXtimer){
+      console.log("chirpfx");
+      // use FXinc(rement) to keep track of time during the FX
+
+      if(this.FXinc%4===0){
+      // increase frequency by increment
+      if(this.synthType==="white"){
+        this.filter.freq(500+200*this.FXinc);
+        this.env.setADSR(0.001, 0.01, 0.0, 0.01);
+        this.env.setRange(1, 0);
+      }
+      else{
+      this.thisSynth.freq(this.baseFreq+20*this.FXinc);
+      this.env.setADSR(0.001, 0.03, 0.5, 0.01);
+      this.env.setRange(1, 0);
+    }
+    }
+
+      // play this
+    this.env.play();
+    this.FXinc+=1;
+    } else {
+      // if timer is over stop this
+      this.chirpFX=false;
+    }
+  }
+  else if(this.downChirpFX){
+
+    // for the duration of the FX timer
+    if(music.musicInc<this.FXtimer){
+      console.log("downChirpfx");
+      // use FXinc(rement) to keep track of time during the FX
+
+      if(this.FXinc%4===0){
+      // increase frequency by increment
+      if(this.synthType==="white"){
+        this.filter.freq(500-200*this.FXinc);
+        this.env.setADSR(0.001, 0.01, 0.0, 0.01);
+        this.env.setRange(1, 0);
+      }
+      else{
+      this.thisSynth.freq(this.baseFreq*2-20*this.FXinc);
+      this.env.setADSR(0.001, 0.03, 0.5, 0.01);
+      this.env.setRange(1, 0);
+    }
+    }
+
+    this.env.play();
+    this.FXinc+=1;
+    } else {
+      // if timer is over stop this
+      this.downChirpFX=false;
     }
   }
 
 
   else   if(this.downFX){
        // trigger down effect
-       if(musicInc<this.FXtimer){
-         this.FXinc+=1;
+       if(music.musicInc<this.FXtimer){
+         if(this.FXinc<15){
+           if(this.FXinc%7===0){
+             if(this.synthType==="white"){ this.filter.freq(500+200*this.FXinc);}
+             else{
+             this.thisSynth.freq(this.baseFreq-4*this.FXinc);
+           }
+             //play this
+             this.env.setADSR(0.001, 0.05, 0.5, 0.01);
+           }
+
+       }
+       if(this.FXinc>=15){
          // increment frequency downward
-         this.thisSynth.freq(this.baseFreq-5*this.FXinc);
+         if(this.synthType==="white"){ this.filter.freq(500+200*this.FXinc);}
+         else{
+         this.thisSynth.freq(this.baseFreq+1*this.FXinc);
+}
+
          //play this
+         this.env.setADSR(0.001, 0.03, 0.5, 0.01);
+       }
+         this.env.setRange(1, 0);
          this.env.play();
+         this.FXinc+=1;
        } else {
          // stop this
          this.downFX=false;
@@ -140,15 +194,28 @@ SFX.prototype.playSFX = function(){
        // trigger tremolo effect
        // FYI "tremolo" means rapidly alternating two separate pitches
        // this is not exactly a tremolo since the pitches change over time but hey
-       if(musicInc<this.FXtimer){
+       if(music.musicInc<this.FXtimer){
          // start incrementing the increment variable
          this.FXinc+=1;
          // alternate between adding and subtracting the increment.
          // change pitch only when the increment is a multiple of 4 (or 8)
-         if(this.FXinc%8===0){
+         if(this.FXinc%12===0){
+           if(this.synthType==="white"){ this.filter.freq(500+200*this.FXinc);}
+           else{
+
+           this.thisSynth.freq(this.baseFreq+15*this.FXinc);
+         }
+         }
+         else if(this.FXinc%8===0){
+           if(this.synthType==="white"){ this.filter.freq(500+200*this.FXinc);}
+           else{
            this.thisSynth.freq(this.baseFreq+5*this.FXinc);
+         }
          } else if(this.FXinc%4===0) {
+           if(this.synthType==="white"){ this.filter.freq(500+200*this.FXinc);}
+           else{
            this.thisSynth.freq(this.baseFreq-5*this.FXinc);
+         }
          }
          // play this. this will actually get played again every 4 musicIncs in this case.
          // but it sounds nice that way okay
@@ -160,8 +227,8 @@ SFX.prototype.playSFX = function(){
      }
      else {
        this.FXinc = 0;
-       sfx.FXtimer = musicInc+ sfx.FXlength;
-       sfx.baseFreq = sfx.defaultFreq;
+       this.FXtimer = 0;
+       this.baseFreq = this.defaultFreq;
      }
    }
 

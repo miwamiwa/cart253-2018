@@ -9,8 +9,8 @@
 // Sets the properties with the provided arguments
 
 function Ball() {
-  this.x = width/2;
-  this.y = height/2;
+  this.x = game.width/2;
+  this.y = game.height/2;
   this.size = 10;
   this.type = "ball";
   this.isSafe = true;
@@ -22,7 +22,7 @@ function Ball() {
   this.chanceForMoreBalls= 0.2;
   this.chanceForFireBall=0.1;
   this.lastPaddle = 0;
-  
+
   if(random()<0.5){
     this.vx = this.speed;
   } else {
@@ -43,11 +43,12 @@ Ball.prototype.update = function () {
   this.y += this.vy;
 
   // Constrain y position to be on screen
-  this.y = constrain(this.y,0,height-this.size);
+  this.y = constrain(this.y,0,game.height-this.size);
 
   // Check for touching upper or lower edge and reverse velocity if so
-  if (this.y === 0 || this.y + this.size === height) {
+  if (this.y === 0 || this.y + this.size === game.height) {
     this.vy = -this.vy;
+    music.startSFX(sfx2, "downchirp");
   }
 }
 
@@ -58,7 +59,7 @@ Ball.prototype.update = function () {
 
 Ball.prototype.isOffScreen = function () {
   // Check for going off screen and reset if so
-  if (this.x + this.size < 0 || this.x > width) {
+  if (this.x + this.size < 0 || this.x > game.width) {
 
     return true;
   }
@@ -104,7 +105,7 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
 
       this.vx = -this.vx;
     this.vy = map(paddle.y+paddle.h/2-this.y, -paddle.h/2, paddle.h/2, this.speed, -this.speed);
-
+       music.startSFX(sfx2, "up");
       this.lastPaddle = paddle;
       if(paddle===leftPaddle){
 
@@ -126,18 +127,19 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
 // Set position back to the middle of the screen
 
 Ball.prototype.reset = function () {
-
+music.startSFX(sfx2, "chirp")
   if(this.x<0){
     leftPaddle.score-=1;
-  } else if(this.x>height){
+  } else if(this.x>game.height){
     rightPaddle.score-=1;
   }
-  this.x = width/2;
-  this.y = height/2;
+  this.x = game.width/2;
+  this.y = game.height/2;
   this.collisionTimer = millis()+this.safeTime;
   this.isSafe = true;
   if(random()<this.chanceForMoreBalls){
     createBalls();
+    music.startSFX(sfx2, "down");
   }
   if(random()<this.chanceForFireBall){
     fireBalls.push(new FireBall());

@@ -95,7 +95,7 @@ function draw() {
 
 function runGame(){
 
-  /////////// GAME AREA ///////////
+  /////////// GAME ///////////
 
   // draw background
   background(0);
@@ -106,6 +106,9 @@ function runGame(){
   if(leftPaddle.score<gameOverScore&&rightPaddle.score<gameOverScore){
     gameOver();
   }
+
+  // if a paddle reaches the target score, this round is over
+  matchWon();
 
   /////////// BISCUIT ///////////
 
@@ -351,5 +354,30 @@ function setupLevel(){
     ants[i].damage+=5;
     // constrain damage so it doesn't excede 30
     ants[i].damage = constrain(ants[i].damage, 10, 30);
+  }
+}
+
+// matchWon()
+//
+// check if this round is over
+
+function matchWon(){
+  // if right paddle reached target score
+  if(rightPaddle.score>=winScore){
+    // setup new level
+    setupLevel();
+    // add match point
+    rightPaddle.matchPoint+=1;
+    // set correct menu text
+    game.menuText[0] = "Match! Right player wins. \nclick to continue to level "+level+".";
+  }
+  // if left paddle reached target score
+  else if(leftPaddle.score>=winScore){
+    // setup new level
+    setupLevel();
+    // add match point
+    leftPaddle.matchPoint+=1;
+    //set menu text
+    game.menuText[0] = "Match! Left player wins. \nclick to continue to level "+level+".";
   }
 }

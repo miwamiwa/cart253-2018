@@ -2,7 +2,7 @@
 Drums.js
 this object uses the same constructor and setup functions as synth and sfx.
 
-however playing the notes is done completely differently. here i am using
+here, triggering the notes is done completely differently. i am using
 a system i am working on for my cart 211 final project. Since i'm at a point
 where i have a nice new random rhythm idea working, i thought i would try it out here.
 
@@ -181,7 +181,7 @@ Drum.prototype.handleDrums = function(){
 Drum.prototype.salience = function(t){
 
   // first count beats and subdivisions.
-  // this is necessary to introduce beat hierarchy 
+  // this is necessary to introduce beat hierarchy
   // if time corresponds to a beat
   if(t%this.beat===0){
     // count beats

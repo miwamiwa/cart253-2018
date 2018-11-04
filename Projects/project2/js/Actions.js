@@ -1,6 +1,27 @@
+/*
+
+Actions.js
+another script that hides things away from script.js!
+In this one I placed a few functions that i use to manipulate arrays.
+these are functions i haven't changed much since writing them so
+prehaps it seemed like they were in the way inside script.js.
+
+this script handles:
+- creating a number of new balls
+- removing specific balls from their array
+- removing specific fireballs from their array
+- removing specific ants from their array
+- getting idle ants to swarm towards a point
+
+*/
+
 function Actions() {
 
 }
+
+// createballs()
+//
+// creates a variable number of balls
 
 Actions.prototype.createBalls = function(){
 
@@ -69,22 +90,27 @@ Actions.prototype.removeAnt = function(antIndex){
   else {
     ants = subset(ants, 0, antIndex);
   }
+  // send ants swarming towards either paddle
   if(random()<0.5){
     this.swarm("left");
   }
   else {
     this.swarm("right");
   }
-
-  console.log("ants: "+ants.length);
 }
 
+// swarm()
+//
+// sets target of all ants to either paddle.
 
 Actions.prototype.swarm = function(direction){
 
   for (var i=0; i<ants.length;i++){
+    // if ant is not yet swarming
     if(ants[i].migrating===false){
+      // make it swarm
       ants[i].migrating = true;
+      // set appropriate target
       if(direction==="left"){
         ants[i].tarx = leftPaddle.x;
         ants[i].tary = leftPaddle.y;

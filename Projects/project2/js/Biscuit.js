@@ -1,89 +1,112 @@
-function Biscuit(){
+/*
 
+Biscuit.js
+this creates a biscuit that heals a paddle's height
+this script handles:
+- creating the biscuit constructor
+- updating position
+- displaying biscuit
+- collision with paddle
+- timed appearance
+
+*/
+
+function Biscuit(){
+//position
 this.x = random(game.width);
-  this.type = "Biscuit";
   this.y = random(game.height);
+  // object type
+    this.type = "Biscuit";
+    // velocity (mapped to noise)
   this.vx = 0;
   this.vy = 0;
+    this.speed = 2;
+  // increment for noise()
   this.inc = 0;
   this.rate = 0.1;
-  this.speed = 2;
+//size
   this.size = 40;
   this.h = size;
   this.w = size;
-  this.offScreen = false;
+// trigger movement
   this.moving = true;
+  // appearance length in ms
   this.appearLength = 3000;
   this.appearTimer = this.appearLength+millis();
-  this.awayTimer = 0;
-  this.awayLength = 10000;
-  this.appeared = false;
 }
+
+// update()
+//
+// update velocity based on noise
+// update position based on velocity
 
 Biscuit.prototype.update = function(){
 
-
+// increment noise
   this.inc+=this.rate;
+  // map noise to velocity
   this.vx = map(noise(this.inc), 0, 1, -this.speed, this.speed);
   this.vy = map(noise(this.inc), 0, 1, -this.speed, this.speed);
+  // if movement is allowed
 if(this.moving){
+  // update position
   this.x+=this.vx;
   this.y+=this.vy;
 }
 }
 
+// display()
+//
+// display biscuit
+
 Biscuit.prototype.display = function(){
+  // if biscuit is not supposed to be there
 if(millis()>this.appearTimer&&this.moving){
   this.moving=false;
+  // place off screen
   this.x = game.width*2;
   this.y = game.width*2;
 } else {
+  // else if biscuit is supposed to be there
   this.moving = true;
+  // stylize and display
   fill(25, 25, 185);
   rect(this.x, this.y, this.size, this.size);
 }
 }
-/*
-Biscuit.prototype.isOffScreen = function () {
-  // Check for going off screen and reset if so
-  if (this.x + this.size < 0 || this.x > game.width) {
-    console.log("Biscuit off");
-    this.offScreen = true;
-    this.x = game.width*2;
-    this.y = game.height*2;
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-*/
-/*
-Biscuit.prototype.handleCollision = function(){
-// optional ant collision stuff
-for (var i=0; i<ants.length; i++){
-  var antmidx = ants[i].x+ants[i].size/2;
-  var antmidy = ants[i].y+ants[i].size/2;
-  if ( antmidx > this.x && antmidx < this.x+this.size && antmidy > this.y && antmidy < this.y+this.size) {
 
-  }
-}
-}
-*/
+// handlePaddleCollision()
+//
+// checks for collision with paddle.
+// awards health bonus to paddle and removes biscuit from play.
+
 Biscuit.prototype.handlePaddleCollision = function(paddle){
+
   var padmidx = paddle.x+paddle.w/2;
   var padmidy = paddle.y+paddle.h;
+  // check if paddle is overlapped
   if ( padmidx > this.x && padmidx < this.x+this.size && padmidy > this.y && paddle.y < this.y+this.size) {
+    // award health
     paddle.h+=100;
+    // place off screen
     this.x = game.width*2;
     this.y = game.height*2;
+    // stop moving
     this.moving = false;
+    // start sfx
     music.startSFX(sfx, "trem");
   }
 }
 
+// appear()
+//
+// set time at which biscuit should disappear
+// place biscuit on screen
+
 Biscuit.prototype.appear = function(){
+  // set timer
   this.appearTimer = millis() + this.appearLength;
+  // update x, y position
   this.x = random(100, game.width-100);
   this.y = random(100, game.height-100);
 }

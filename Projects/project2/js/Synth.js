@@ -102,8 +102,14 @@ Synth.prototype.playMusic = function(){
       this.thisSynth.freq(newNote);
       // play note
       this.env.play();
-    }
 
+      // continue array rhythm even if synth is not playing
+      // this only becomes useful if fromTheTop is set to false.
+      // a voice could then enbark into the loop at any point
+      if(this.rType==="array"){
+        this.nextNote+=this.rhythm[this.loop];
+      }
+      
     // increment appropriate loop
     this.loop+=1;
     // if loop has reached maximum limit reset loop
@@ -111,13 +117,9 @@ Synth.prototype.playMusic = function(){
       this.loop=0;
     }
 
-    // continue array rhythm even if synth is not playing
-    // this only becomes useful if fromTheTop is set to false.
-    // a voice could then enbark into the loop at any point
-    if(this.rType==="array"){
-      this.nextNote+=this.rhythm[this.loop];
-    }
+
   }
+}
 }
 
 

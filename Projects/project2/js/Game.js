@@ -75,12 +75,13 @@ Game.prototype.setupMenuScreen = function(){
   }
   // correct paddle position
     this.menuObjects[3].x = (3.5)*objectsX-0.5*this.menuObjects[3].w;
+    this.menuObjects[3].y -=10;
 
 // declare the text to be displayed
   this.menuText[0] = "ant pong! click screen to start.";
   this.menuText[1] = "ant";
   this.menuText[2] = "ball";
-  this.menuText[3] = "fire";
+  this.menuText[3] = "fireball";
   this.menuText[4] = "paddle";
   this.menuText[5] = "biscuit";
   this.menuText[6] = "two balls colliding\nmake an ant.\nants eat paddles\nand take balls away";

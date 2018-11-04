@@ -77,7 +77,7 @@ function setup() {
 function draw() {
 
   // play sound
-  // playSound();
+  playSound();
 
   // run menu screen
   if(currentScreen==="menu"){

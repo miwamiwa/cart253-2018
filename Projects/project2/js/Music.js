@@ -283,6 +283,7 @@ Music.prototype.startNewPhrase = function(synx, noteList, octave, rhythm, loop, 
   // just keep it for future reference.
   if(fromTheTop){
     synx.loop=0;
+    music.musicInc =0;
   }
 }
 

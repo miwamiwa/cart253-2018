@@ -138,7 +138,7 @@ music.startSFX(sfx2, "chirp")
   this.collisionTimer = millis()+this.safeTime;
   this.isSafe = true;
   if(random()<this.chanceForMoreBalls){
-    createBalls();
+    actions.createBalls();
     music.startSFX(sfx2, "down");
   }
   if(random()<this.chanceForFireBall){
@@ -161,8 +161,8 @@ Ball.prototype.handleBallCollision = function(index){
 
           ants.push(new Ant(balls[i].x, balls[i].y, balls[index].x, balls[index].y));
 
-          removeBall(i);
-          removeBall(index);
+          actions.removeBall(i);
+          actions.removeBall(index);
           drawAgain = true;
           return;
         }

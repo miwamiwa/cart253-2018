@@ -2,17 +2,18 @@
 
 Synth.js
 This is what the three synths in the bgm are made of.
+this object, as well as Drum and SFX are another edit
+of the music objects i've been working on in my exercises and projects.
+They all use pretty much the same constructor parameters and setup functions (trimmed to suit the object's needs)
+The differences lie mostly in the manner in which sound if triggered in playSFX(), handleDrums() and playMusic()
 
 this script handles:
 - creating a Synth object
 - setting the envelope
 - setting the filter
 - setting the delay effect
-- setting the notes to be played
-- putting the oscillator, envelope, filter and delay together and starting the sound
-- isisPlaying this synth's list of notes
-
-Envelope, filter, delay settings and note lists are declared in the main script.
+- setting the notes and rhythm to be played
+- playing this synth's list of notes with a given rhythm
 
 */
 
@@ -22,10 +23,11 @@ Envelope, filter, delay settings and note lists are declared in the main script.
 // Synth(oscType)
 //
 // creates a synth object.
-// everything is set to 0. Parameters are assigned in the functions that follow.
+// everything is set to 0. Parameters are assigned by functions that follow (called inside music.js)
 // required argument: oscillator type (square, sine, triangle)
 
 function Synth(oscType){
+
   // declare type of synth; and type of filter
   this.synthType= oscType;
   this.filtAtt= "LP";
@@ -55,15 +57,17 @@ function Synth(oscType){
   this.rate= 0;
   // note values
   this.notes=[0];
+  // transposition factor.
+  // doesn't really have to be an octave (12).
   this.oct=0;
   // rhythm array
   this.rhythm= 0;
-    this.rType= 0;
+  this.rType= 0;
   this.nextNote= 0;
-    this.isisPlaying=true;
-    this.playedThru=0;
-    this.sections=[0];
-    this.thisSection=0;
+  this.isPlaying=true;
+
+  this.sections=[0];
+  this.thisSection=0;
 
 }
 
@@ -74,54 +78,46 @@ function Synth(oscType){
 // plays notes from the note list at the rate set with setNotes()
 
 Synth.prototype.playMusic = function(){
-//console.log("musicInc : "+music.musicInc+", this.rate : "+this.rate+", this.rType : "+this.rType+", this.nextNote : "+this.nextNote);
+
+  // the following if() checks for the time until the next note is triggered,
+  // depending on the type of rhythm (array or pulse):
+  // pulse rhythm plays at the rate of this.rate
+  // the time until the next note of an array is given by this.nextNote
+
   if((music.musicInc%this.rate===0&&this.rType==="pulse") || (music.musicInc===this.nextNote&&this.rType==="array")){
 
-    if(this.loop===0){music.sectionSwitched=false;}
+    // if voice is playing
     if(this.isPlaying){
-        var newNote =midiToFreq(music.rootNote+this.oct+this.notes[this.loop]);
-        this.env.setADSR(this.attackTime, this.decayTime, this.susLevel, this.releaseTime);
+      // apply octave transposition to note and convert to a frequency value
+      var newNote =midiToFreq(music.rootNote+this.oct+this.notes[this.loop]);
+      // set envelope
+      this.env.setADSR(this.attackTime, this.decayTime, this.susLevel, this.releaseTime);
+      this.env.setRange(this.attackLevel, this.releaseLevel);
+      // if rhythm is an array, update decay length to deflect time until next note
+      if(this.rType==="array"){
+        this.env.setADSR(this.attackTime, this.rhythm[this.loop]/100*this.decayTime, this.susLevel, this.releaseTime);
         this.env.setRange(this.attackLevel, this.releaseLevel);
-        if(this.rType==="array"){
-          this.env.setADSR(this.attackTime, this.rhythm[this.loop]/100*this.decayTime, this.susLevel, this.releaseTime);
-          this.env.setRange(this.attackLevel, this.releaseLevel);
-   }
-        this.thisSynth.freq(newNote);
-         this.env.play();
+      }
+      // assign frequency
+      this.thisSynth.freq(newNote);
+      // play note
+      this.env.play();
+    }
 
-       }
-       //continue rhythm even if synth is not isisPlaying
-         if(this.rType==="array"){
-           this.nextNote+=this.rhythm[this.loop];
-           }
-         // increment appropriate loop
-         this.loop+=1;
-         // if loop has reached maximum limit reset loop
-         if(this.loop===this.phrase){
-           this.loop=0;
-           this.playedThru+=1;
-           this.sectionSwitched = false;
-        }
-   }
-
-/*
-  // musicInc is incremented by musicSpeed in draw()
-  // if musicInc reaches the synth's pulse rate
-  if(musicInc%this.rate===0){
-    // convert midi to frequency
-    var newNote =midiToFreq(rootNote+this.oct+this.notes[this.loop]);
-    // set frequency
-    this.thisSynth.freq(newNote);
-    // play synth
-    this.env.play();
     // increment appropriate loop
     this.loop+=1;
     // if loop has reached maximum limit reset loop
     if(this.loop===this.phrase){
       this.loop=0;
     }
+
+    // continue array rhythm even if synth is not playing
+    // this only becomes useful if fromTheTop is set to false.
+    // a voice could then enbark into the loop at any point
+    if(this.rType==="array"){
+      this.nextNote+=this.rhythm[this.loop];
+    }
   }
-  */
 }
 
 
@@ -180,61 +176,4 @@ Synth.prototype.setNotes = function(noteList, octave, loopLength){
   this.rate=loopLength;
   // set phrase length
   this.phrase=this.notes.length;
-}
-
-
-//////////////// LOAD INSTRUMENT ////////////////
-
-// loadInstrument()
-//
-// this function sets up our instrument:
-// it creates the oscillator, envelope, filter and delay
-// it wires their sound outputs correctly
-// it starts the sound
-// should be called in main script after having called the settings functions
-
-Synth.prototype.loadInstrument = function(){
-  // load envelope
-  this.env=new p5.Env();
-  // setup envelope parameters
-  this.env.setADSR(this.attackTime, this.decayTime, this.susLevel, this.releaseTime);
-  this.env.setRange(this.attackLevel, this.releaseLevel);
-  // check which filter to use
-  if(this.filtAtt==="BP"){
-    // if the filter attribute says BP the create a band pass filter
-    this.filter= new p5.BandPass();
-  }
-  // if the filter attribute says LP then create a low pass filter
-  if(this.filtAtt==="LP"){
-    this.filter=new p5.LowPass();
-  }
-  // set filter frequency
-  this.filter.freq(this.fFreq);
-  // now load the type of oscillator used.
-  // this code was written for Project 1 so it also handles drums (noise)
-  // if the synth type is "pink" then we have a noise synth.
-  if(this.synthType==='pink'||this.synthType==='white'){
-    this.thisSynth=new p5.Noise(this.synthType);
-    // if anything else (square or sine) then we have an oscillator
-  } else {
-    this.thisSynth=new p5.Oscillator(this.synthType);
-  }
-  // plug-in the amp, which will be monitored using the envelope (env) object
-  this.thisSynth.amp(this.env);
-  // disconnect this sound from audio output
-  this.thisSynth.disconnect();
-  // reconnect it with the filter this time
-  this.thisSynth.connect(this.filter);
-  // start audio
-  this.thisSynth.start();
-  // set the initial frequency. do not set if this is the noise drum.
-  if(this.synthType!='pink'&&this.synthType!='white'){this.thisSynth.freq(1);
-  }
-  // if delayFX is true, then there is also a delay object to load
-  if(this.delayFX){
-    // create delay object
-    this.delay = new p5.Delay();
-    // update settings
-    this.delay.process(this.thisSynth, this.delayLength, this.delayFB, this.delayFilter);
-  }
 }

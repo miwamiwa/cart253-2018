@@ -31,6 +31,7 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   this.reloadTimer = 0;
   this.reloadLength = 200;
   this.score=0;
+  this.matchPoint=0;
 }
 
 // handleInput()

@@ -72,8 +72,8 @@ for (var i=0; i<ants.length; i++){
 */
 Biscuit.prototype.handlePaddleCollision = function(paddle){
   var padmidx = paddle.x+paddle.w/2;
-  var padmidy = paddle.y+paddle.h/2;
-  if ( padmidx > this.x && padmidx < this.x+this.size && padmidy > this.y && padmidy < this.y+this.size) {
+  var padmidy = paddle.y+paddle.h;
+  if ( padmidx > this.x && padmidx < this.x+this.size && padmidy > this.y && paddle.y < this.y+this.size) {
     paddle.h+=100;
     this.x = game.width*2;
     this.y = game.height*2;

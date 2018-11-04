@@ -59,7 +59,7 @@ for (var i=0; i<ants.length; i++){
   }
 }
   for (var j=0; j<deadAnts.length; j++){
-    removeAnt(deadAnts[j]);
+    actions.removeAnt(deadAnts[j]);
     music.startSFX(sfx, "chirp");
   }
 
@@ -69,7 +69,7 @@ FireBall.prototype.handlePaddleCollision = function(paddle){
 
   var padmidx = paddle.x+paddle.w/2;
   var padmidy = paddle.y+paddle.h/2;
-  if ( padmidx > this.x && padmidx < this.x+this.size && padmidy > this.y && padmidy < this.y+this.size) {
+  if ( padmidx > this.x && padmidx < this.x+this.size && padmidy > this.y && paddle.y < this.y+this.size) {
     paddle.h-=2;
   }
 }

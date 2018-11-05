@@ -279,8 +279,12 @@ function gameReset(){
 
   // reset difficulty level
   level=0;
+  winScore=10;
   ballIncrease=1;
-  winScore = 10;
+  maxBalls=3;
+  minBalls=1;
+  antEatingBonus=1;
+  biscuitChance=0.15;
 
   // create new paddles
   // this resets size, score and match points.

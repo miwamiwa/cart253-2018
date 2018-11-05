@@ -27,7 +27,7 @@ function Ball() {
   } else {
     this.vx = -this.speed;
   }
-  this.vy = this.speed/2 + random(this.speed/2);
+  this.vy = random(-this.speed, this.speed);
 }
 
 // update()
@@ -120,10 +120,10 @@ Ball.prototype.handlePaddleCollision = function(paddle) {
       music.startSFX(sfx2, "up");
 
       // add score for hitting the ball
-      if(paddle===leftPaddle){
+      if(paddle===leftPaddle&&!this.isSafe){
         leftPaddle.score+=1;
       }
-      else if(paddle===rightPaddle){
+      else if(paddle===rightPaddle&&!this.isSafe){
         rightPaddle.score+=1;
       }
     }
@@ -148,6 +148,11 @@ Ball.prototype.reset = function () {
   }
   else if(this.x>game.height){
     rightPaddle.score-=1;
+  }
+
+  //pick a random direction
+  if(random()<0.5){
+    this.vx=-this.vx;
   }
 
   // place ball in the middle of the screen

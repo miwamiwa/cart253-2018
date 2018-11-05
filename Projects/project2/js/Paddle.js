@@ -81,11 +81,16 @@ Paddle.prototype.update = function() {
   if(this.h===10){
     this.isSafe=true;
   }
+  // if paddle has been sabotaged, start a timer during which paddle is safe
   if(this.wasSabotaged&&!this.isSafe){
+    // toggle sabotage trigger off
     this.wasSabotaged =false;
-    this.safeTimer = millis()+50;
+    // start timer
+    // paddle is now safe
+    this.safeTimer = millis()+80;
     this.isSafe = true;
   }
+  // if timer value is reached, paddle is no longer safe.
   if(this.isSafe&&millis()>this.safeTimer){
     this.isSafe=false;
   }
@@ -94,7 +99,7 @@ Paddle.prototype.update = function() {
   this.y += this.vy;
   this.y = constrain(this.y,0,game.height-this.h);
   this.x +=this.vx;
-  this.y = constrain(this.y,0,game.height-this.h);
+  this.x = constrain(this.x,0,game.width-this.w);
 }
 
 // display()

@@ -79,7 +79,7 @@ Music.prototype.setupInstruments = function(){
 
   // sfx2 setup
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  sfx2.setEnvelope(0.001, 0.6, 0.0, 0.4, 0.4, 0);
+  sfx2.setEnvelope(0.001, 0.6, 0.0, 0.2, 0.2, 0);
   // function(filterType, frequency)
   sfx2.setFilter("LP", 500);
   // function(delayIsOn, length, feedback, filterFrequency)
@@ -88,7 +88,7 @@ Music.prototype.setupInstruments = function(){
 
   // drum setup
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  drums.setEnvelope(0.005, 0.2, 0.2, 0.5, 0.2, 0.0);
+  drums.setEnvelope(0.005, 0.3, 0.2, 0.9, 0.4, 0.0);
   // function(filterType, frequency)
   drums.setFilter("BP", 400);
   // function(delayIsOn, length, feedback, filterFrequency)

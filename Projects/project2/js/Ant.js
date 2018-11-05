@@ -2,7 +2,7 @@
 Ant.js
 When balls collide, an ant appears in their place!
 The ants are a total nuisance - they grab balls and damage your paddle.
-Generally they just wander around, but sometime they swarm collectively towards a given paddle. 
+Generally they just wander around, but sometime they swarm collectively towards a given paddle.
 
 This script handles:
 - creating a new ant
@@ -76,6 +76,9 @@ function Ant(x1, y1, x2, y2) {
   this.stashsize = 10;
   // the damage an ant deals to a paddle's height
   this.damage = 10;
+  // start sfx
+  music.startSFX(sfx, "down");
+
 }
 
 // update()
@@ -178,27 +181,30 @@ Ant.prototype.display = function(){
 
     // set color while searching and carrying (actions the ant is carrying out most of the time)
     // to reflect the ant's level or damage it deals.
-    // lowest level
-    // set color to grey
-    if(this.damage===10){
-      fill(75);
-    }
-    // level 2: green
-    else if(this.damage===15){
-      fill(75, 125, 75);
-    }
-    else if(this.damage===20){
-      // level 3: blue
-      fill(75, 75, 125);
-    }
-    // level 4: red
-    else if(this.damage===25){
-      fill(125, 75,75);
-    }
     // level 5: light grey
-    else if(this.damage===30){
+     if(this.damage>=30){
       fill(125,125, 135);
     }
+    // level 4: red
+    else if(this.damage>=25){
+      fill(125, 75,75);
+    }
+    else if(this.damage>=20){
+     // level 3: blue
+     fill(75, 75, 125);
+   }
+   // level 2: green
+    else if(this.damage>=15){
+     fill(75, 125, 75);
+   }
+    // level1: grey
+    else if(this.damage>=10){
+      fill(75);
+    }
+
+
+
+
   }
 
   if(this.waiting){
@@ -281,9 +287,6 @@ Ant.prototype.handleCollision = function(thing) {
 
 Ant.prototype.sabotage = function(thing){
 
-  // trigger sabotage sfx
-  music.startSFX(sfx, "downChirp");
-
   // if target is a ball
   if(thing.type==="ball"){
     for(var i=0; i<balls.length; i++){
@@ -291,6 +294,8 @@ Ant.prototype.sabotage = function(thing){
       if(thing.x===balls[i].x&&thing.y===balls[i].y){
         // remove that ball.
         actions.removeBall(i);
+        // trigger sabotage sfx
+        music.startSFX(sfx, "downchirp");
       }
     }
   }
@@ -300,6 +305,8 @@ Ant.prototype.sabotage = function(thing){
     thing.h -= this.damage;
     // signify that paddle was sabotaged (supposed to trigger a safe timer. think i removed it though)
     thing.wasSabotaged=true;
+    // trigger sabotage sfx
+    music.startSFX(sfx, "downchirp");
   }
 }
 
@@ -307,6 +314,7 @@ Ant.prototype.sabotage = function(thing){
 //
 // ant drops the item it is carrying.
 // causes a chance for the biscuit to appear
+// ant gets slightly stronger
 
 Ant.prototype.dropItem = function(){
 
@@ -316,7 +324,8 @@ Ant.prototype.dropItem = function(){
   this.searching=true;
   // pick a new target
   this.newTarget();
-
+  // increase ant damage
+  this.damage+=antEatingBonus;
   console.log("dropped");
   console.log("chance that biscuit appears");
 

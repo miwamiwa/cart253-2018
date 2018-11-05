@@ -102,7 +102,7 @@ function Drum(oscType){
   // rate at which to increment noise
   this.noiseInc = 0.11;
   // value for noiseSeed();
-  this.noiseseed=1;
+  this.noiseseed=random(100);
 }
 
 // setDivisions
@@ -147,6 +147,7 @@ Drum.prototype.handleDrums = function(){
   // if drums are playing
   if(this.isPlaying){
 
+    noiseSeed(this.noiseseed);
     // obtain weights from salience() function
     var weight =  drums.salience(music.musicInc);
     // generate noise value

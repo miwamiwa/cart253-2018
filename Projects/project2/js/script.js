@@ -22,13 +22,15 @@ var fireBalls=[];
 var biscuit;
 var actions;
 // game variables
-var maxBalls = 10;
+var maxBalls = 3;
 var drawAgain = false;
 var biscuitChance = 0.15;
 var ballIncrease =1;
 var level=0;
 var winScore=10;
+var minBalls =1;
 var gameOverScore = -25;
+var antEatingBonus=2;
 var canvas;
 var currentScreen = "menu";
 
@@ -177,7 +179,7 @@ function runGame(){
   /////////// BALL ///////////
 
   // If there are not enough balls create more balls
-  if(balls.length<=1){
+  if(balls.length<=minBalls){
     actions.createBalls();
   }
 
@@ -224,11 +226,11 @@ function keyPressed(){
   }
   switch(key){
     // sfx triggers
-    case "4": music.startSFX(sfx, "up");  break;
-    case "5": music.startSFX(sfx, "down");  break;
-    case "6": music.startSFX(sfx, "trem");  break;
-    case "9": music.startSFX(sfx, "chirp");  break;
-    case "0": music.startSFX(sfx, "downchirp");  break;
+    case "4": music.startSFX(sfx2, "up");  break;
+    case "5": music.startSFX(sfx2, "down");  break;
+    case "6": music.startSFX(sfx2, "trem");  break;
+    case "9": music.startSFX(sfx2, "chirp");  break;
+    case "0": music.startSFX(sfx2, "downchirp");  break;
     // cause ants to swarm towards either paddle
     case "7": actions.swarm("left");  break;
     case "8": actions.swarm("right");  break;
@@ -321,15 +323,17 @@ function gameOver(){
   // reset game and launch menu screen
   gameReset();
   // set header text to reflect that it's game over and who won.
-  game.menuText[0] = "Game over.. "+winner+" \n click screen to start again.";
+  game.menuText[0] = "Game over.. "+winner+" \n reached level "+level+". click to restart.";
 }
 
 // setuplevel()
 //
 // prepares a new level.
 // increases difficulty by increasing number of balls generated with createBalls()
+// also increases maximum and minimum number of balls on screen
 // increases the score needed to win this match.
 // levels up all ants on screen by increasing their damage
+// increases health bonus ants get from eating
 // heals the paddles a little
 
 function setupLevel(){
@@ -342,8 +346,12 @@ function setupLevel(){
 
   // increment level and difficulty
   level+=1;
-  winScore+=3;
+  winScore+=level*2;
   ballIncrease+=1;
+  maxBalls+=1;
+  minBalls+=0.5;
+  antEatingBonus+=1;
+  biscuitChance-=0.01
 
   // heal paddles by increasing height
   leftPaddle.h +=40;

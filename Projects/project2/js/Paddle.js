@@ -23,6 +23,8 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   this.type = "paddle";
   // safety feature
   this.isSafe = false;
+  this.safeTimer = 0;
+  this.wasSabotaged = false;
   // key controls
   this.downKey = downKey;
   this.upKey = upKey;
@@ -79,6 +81,14 @@ Paddle.prototype.update = function() {
   if(this.h===10){
     this.isSafe=true;
   }
+  if(this.wasSabotaged&&!this.isSafe){
+    this.wasSabotaged =false;
+    this.safeTimer = millis()+50;
+    this.isSafe = true;
+  }
+  if(this.isSafe&&millis()>this.safeTimer){
+    this.isSafe=false;
+  }
 
   // update and constrain x, y position
   this.y += this.vy;
@@ -109,7 +119,7 @@ Paddle.prototype.shoot = function(){
   this.h-=10;
   // set y position to match paddle.y
   fireBalls[fireBalls.length-1].y = this.y+this.h/4;
-  // set x position and direction to correct sides of the screen 
+  // set x position and direction to correct sides of the screen
   if(this.x<game.width/2){
     fireBalls[fireBalls.length-1].x = this.x+50;
     fireBalls[fireBalls.length-1].direction = 1;

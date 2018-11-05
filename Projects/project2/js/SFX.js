@@ -93,20 +93,21 @@ SFX.prototype.playSFX = function(){
     if(music.musicInc<this.FXtimer){
       console.log("upfx");
       // use FXinc(rement) to keep track of time during the FX
-      if(this.FXinc%7===0){
+      if(this.FXinc%8===0){
         // if input is noise, update filter frequency
         if(this.synthType==="white"){
-          this.filter.freq(500+200*this.FXinc);}
+          this.filter.freq(500+200*this.FXinc)+random(500);}
           else{
             // else increase oscillator frequency by increment
-            this.thisSynth.freq(this.baseFreq+20*this.FXinc);
+            this.thisSynth.freq(this.baseFreq+30*this.FXinc);
           }
+          // update envelope to increase release time as increment gets higher
+          this.env.setADSR(0.001, 0.03, 0.5, 0.01+this.FXinc/56);
+          this.env.setRange(1, 0);
+          // play this
+          this.env.play();
         }
-        // update envelope to increase release time as increment gets higher
-        this.env.setADSR(0.001, 0.03, 0.5, 0.01+this.FXinc/56);
-        this.env.setRange(1, 0);
-        // play this
-        this.env.play();
+
         this.FXinc+=1;
       } else {
         // if timer is over stop the sfx
@@ -118,7 +119,7 @@ SFX.prototype.playSFX = function(){
 
     else if(this.chirpFX){
       // set envelope
-      this.env.setADSR(0.001, 0.03, 0.5, 0.01);
+      this.env.setADSR(0.001, 0.2, 0.5, 0.01);
       this.env.setRange(1, 0);
       // for the duration of the FX timer
       if(music.musicInc<this.FXtimer){
@@ -133,9 +134,9 @@ SFX.prototype.playSFX = function(){
             // else increase oscillator frequency
             this.thisSynth.freq(this.baseFreq+20*this.FXinc);
           }
+          // play this
+          this.env.play();
         }
-        // play this
-        this.env.play();
         // increment fx frame
         this.FXinc+=1;
       } else {
@@ -148,7 +149,7 @@ SFX.prototype.playSFX = function(){
 
     else if(this.downChirpFX){
       // set envelope
-      this.env.setADSR(0.001, 0.01, 0.0, 0.01);
+      this.env.setADSR(0.001, 0.1, 0.0, 0.01);
       this.env.setRange(1, 0);
       // for the duration of the FX timer
       if(music.musicInc<this.FXtimer){
@@ -157,15 +158,17 @@ SFX.prototype.playSFX = function(){
         if(this.FXinc%4===0){
           // if input is noise set filter frequency
           if(this.synthType==="white"){
-            this.filter.freq(500-200*this.FXinc);
+            this.filter.freq(15000-100*this.FXinc);
+            // set noise volume
+            this.env.setRange(0.1, 0);
           }
           else{
             // else set oscillator frequency
             this.thisSynth.freq(this.baseFreq*2-20*this.FXinc);
           }
+          this.env.play();
         }
-        this.env.play();
-        this.FXinc+=1;
+    this.FXinc+=1;
       } else {
         // if timer is over stop this
         this.downChirpFX=false;
@@ -182,7 +185,7 @@ SFX.prototype.playSFX = function(){
       if(music.musicInc<this.FXtimer){
         // first part:
         if(this.FXinc<15){
-          if(this.FXinc%7===0){
+          if(this.FXinc%7===0&&this.FXinc<15){
             // if input is noise set filter freq
             if(this.synthType==="white") {
               this.filter.freq(500+200*this.FXinc);
@@ -191,13 +194,21 @@ SFX.prototype.playSFX = function(){
             else {
               this.thisSynth.freq(this.baseFreq-4*this.FXinc);
             }
-            //play this
+            //set envelope
             this.env.setADSR(0.001, 0.05, 0.5, 0.01);
+            //play this
+            this.env.play();
           }
 
         }
         // second part:
         if(this.FXinc>=15){
+          if(this.FXinc===15){
+            //set envelope
+            this.env.setADSR(0.001, 0.5, 0.5, 0.01);
+            //play this
+            this.env.play();
+          }
           // increment frequency downward
           // noise input
           if(this.synthType==="white"){
@@ -207,9 +218,9 @@ SFX.prototype.playSFX = function(){
             // oscillator input
             this.thisSynth.freq(this.baseFreq+1*this.FXinc);
           }
+
         }
-        //play this
-        this.env.play();
+        // increment time
         this.FXinc+=1;
       } else {
         // stop this
@@ -239,6 +250,7 @@ SFX.prototype.playSFX = function(){
               // if input is oscillator
               this.thisSynth.freq(this.baseFreq+15*this.FXinc);
             }
+              this.env.play();
           }
           // if current is a multiple of 8
           else if(this.FXinc%8===0){
@@ -250,6 +262,7 @@ SFX.prototype.playSFX = function(){
               // input is oscillator
               this.thisSynth.freq(this.baseFreq+5*this.FXinc);
             }
+              this.env.play();
           }
           // if current is a multiple of 4
           else if(this.FXinc%4===0) {
@@ -261,10 +274,9 @@ SFX.prototype.playSFX = function(){
               // input is oscillator
               this.thisSynth.freq(this.baseFreq-5*this.FXinc);
             }
+              this.env.play();
           }
-          // play this. this will actually get played again every 4 musicIncs in this case.
-          // but it sounds nice that way okay
-          this.env.play();
+
         } else {
           //  stop this
           this.tremFX=false;

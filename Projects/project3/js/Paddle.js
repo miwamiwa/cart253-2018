@@ -14,7 +14,7 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   this.y = y;
   this.w = w;
   this.h = 20;
-  this.size = h-w;
+  this.size = 20;
   // speed
   this.vx = 0;
   this.vy = 0;
@@ -35,7 +35,7 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   this.sizeIncrease=0.5;
   // reload timer for shooting
   this.reloadTimer = 0;
-  this.reloadLength = 200;
+  this.reloadLength = 2000;
   // paddle round score and match points
   this.score=0;
   this.matchPoint=0;
@@ -54,7 +54,6 @@ Paddle.prototype.handleInput = function() {
     this.vy = -this.speed;
   }
   else if (keyIsDown(this.downKey)) {
-    console.log("down")
     this.vy = this.speed;
   }
   else if (keyIsDown(this.leftKey)) {
@@ -76,53 +75,69 @@ Paddle.prototype.handleInput = function() {
   }
 }
 
-// update()
-// Update y position based on velocity
-// Constrain the resulting position to be within the canvas
+
 Paddle.prototype.update = function() {
+
+
+  // check all obstacles
   for (var i=0; i<obstacles.length; i++){
+
+if (obstacles[i].size>5){
+
     //if close to left obstacle wall, can't move right.
     if(
-      this.x+this.vx<obstacles[i].x 
-      && this.x+this.vx>obstacles[i].x-this.size/3
-      && this.y>obstacles[i].y-10
-      && this.y<obstacles[i].y+obstacles[i].size+10
+      this.x+this.vx<obstacles[i].x
+      && this.x+this.vx+this.size>obstacles[i].x
+      && this.y+this.size>obstacles[i].y
+      && this.y<obstacles[i].y+obstacles[i].size
       && this.vx>0
     ){
-    this.vx=0;
+    this.x=obstacles[i].x-this.size;
+    this.vx =0;
+    console.log("collided with obstacle #"+i+", on its left side");
+    this.eatObstacle(i);
   }
   //if close to right obstacle wall, can't move left.
   else if(
-    this.x-this.vx>obstacles[i].x+obstacles[i].size
-    && this.x-this.vx<obstacles[i].x+obstacles[i].size+this.size/3
-    && this.y>obstacles[i].y-10
-    && this.y<obstacles[i].y+obstacles[i].size+10
+    this.x+this.vx+this.size>obstacles[i].x+obstacles[i].size
+    && this.x+this.vx<obstacles[i].x+obstacles[i].size
+    && this.y+this.size>obstacles[i].y
+    && this.y<obstacles[i].y+obstacles[i].size
     && this.vx<0
   ){
-  this.vx=0;
-  }
+  this.x=obstacles[i].x+obstacles[i].size;
+  this.vx =0;
+  console.log("collided with obstacle #"+i+", on its right side");
+    this.eatObstacle(i);
+}
   // if close to top wall, can't move down
-  else if(
+  if(
     this.y+this.vy<obstacles[i].y
-    && this.y+this.vy>obstacles[i].y-this.size/3
-    && this.x>obstacles[i].x-10
-    && this.x<obstacles[i].x+obstacles[i].size+10
+    && this.y+this.vy+this.size>obstacles[i].y
+    && this.x+this.size>obstacles[i].x
+    && this.x<obstacles[i].x+obstacles[i].size
     && this.vy>0
   ){
-  this.vy=0;
-  }
+  this.y=obstacles[i].y-this.size;
+  this.vy =0;
+  console.log("collided with obstacle #"+i+", on its upper side");
+    this.eatObstacle(i);
+}
   //if close to bottom obstacle wall, can't move up
   else if(
-    this.y-this.vy>obstacles[i].y+obstacles[i].size
-    && this.y-this.vy<obstacles[i].y+obstacles[i].size+this.size/3
-    && this.x>obstacles[i].x-10
-    && this.x<obstacles[i].x+obstacles[i].size+10
+    this.y+this.vy+this.size>obstacles[i].y+obstacles[i].size
+    && this.y+this.vy<obstacles[i].y+obstacles[i].size
+    && this.x+this.size>obstacles[i].x
+    && this.x<obstacles[i].x+obstacles[i].size
     && this.vy<0
   ){
-  this.vy=0;
-  }
+  this.y=obstacles[i].y+obstacles[i].size;
+  this.vy =0;
+  console.log("collided with obstacle #"+i+", on its bottom side");
+  this.eatObstacle(i);
 }
-
+}
+}
   // update and constrain x, y position
   this.y += this.vy;
   this.y = constrain(this.y,0,height-this.h);
@@ -136,7 +151,19 @@ Paddle.prototype.update = function() {
 Paddle.prototype.display = function() {
   noStroke();
   fill(this.red, this.green, this.blu)
-  rect(this.x,this.y,this.w,this.h);
+  rect(this.x,this.y,this.size,this.size);
   fill(this.red+40, this.green+40, this.blu+40)
-  rect(this.x+5,this.y+5,this.w-10,this.h-10);
+  if(this.reloadTimer>millis()){
+  rect(this.x,this.y,this.size,this.size-map(this.reloadTimer-millis(), 0, this.reloadLength, 0, this.size));
+}
+}
+
+
+
+
+Paddle.prototype.eatObstacle = function(index) {
+  if(this.reloadTimer<millis()){
+obstacles[index].getEaten();
+this.reloadTimer = millis()+this.reloadLength;
+}
 }

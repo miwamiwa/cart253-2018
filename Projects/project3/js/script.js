@@ -17,7 +17,6 @@ var obsSize= 50;
 // Creates the ball and paddles
 
 function setup() {
-
   // create canvas:
   canvas = createCanvas(900, 450);
   canvas.parent('sketch-holder');
@@ -27,7 +26,7 @@ function setup() {
   yobs = floor(height/obsSize);
 
   for (var i=0; i<xobs*yobs; i++){
-    if(random()<0.3){
+    if(random()<0.5){
       totalobs+=1;
       obstacles.push(new Obstacle(i));
     }

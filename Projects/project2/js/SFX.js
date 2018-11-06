@@ -153,14 +153,19 @@ SFX.prototype.playSFX = function(){
       this.env.setRange(1, 0);
       // for the duration of the FX timer
       if(music.musicInc<this.FXtimer){
+
         console.log("downChirpfx");
         // use FXinc(rement) to keep track of time during the FX
         if(this.FXinc%4===0){
           // if input is noise set filter frequency
           if(this.synthType==="white"){
+            // make this sfx shorter if noise is involved;
+            // since this is the ball-wall collision sfx i don't want it too long.
+            this.FXtimer = 6;
+            // set filter frequency
             this.filter.freq(15000-100*this.FXinc);
             // set noise volume
-            this.env.setRange(0.1, 0);
+            this.env.setRange(0.4, 0);
           }
           else{
             // else set oscillator frequency

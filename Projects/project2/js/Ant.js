@@ -49,6 +49,8 @@ function Ant(x1, y1, x2, y2) {
   this.y = 2*y1-y2;
   // size
   this.size = 10;
+  // size difference of inner rect()
+  this.dif = random(1, this.size-1);
   // speed
   this.speed = 0;
   this.vx = 0;
@@ -170,6 +172,8 @@ Ant.prototype.display = function(){
 
   noStroke();
 
+  var red, gre, blu;
+
   if(this.searching||this.isCarrying){
     // display the item ant is carrying
     if(this.isCarrying){
@@ -181,44 +185,64 @@ Ant.prototype.display = function(){
 
     // set color while searching and carrying (actions the ant is carrying out most of the time)
     // to reflect the ant's level or damage it deals.
+
+
     // level 5: light grey
      if(this.damage>=30){
-      fill(125,125, 135);
+      red = 125;
+      gre = 125;
+      blu = 135;
+
     }
     // level 4: red
     else if(this.damage>=25){
-      fill(125, 75,75);
+      red = 125;
+      gre = 75;
+      blu = 75;
     }
     else if(this.damage>=20){
      // level 3: blue
-     fill(75, 75, 125);
+     red = 75;
+     gre = 75;
+     blu = 125;
    }
    // level 2: green
     else if(this.damage>=15){
-     fill(75, 125, 75);
+     red = 75;
+     gre = 125
+     blu = 75;
    }
     // level1: grey
     else if(this.damage>=10){
-      fill(75);
+      red = 75;
+      gre = 75;
+      blu = 75;
     }
-
-
-
-
   }
 
   if(this.waiting){
     // blue if waiting
-    fill(45, 45, 185);
+    red = 45;
+    gre = 45;
+    blu = 185;
   }
+
   if(this.itemPickedUp){
     // red if picking something up
-    fill(185, 45, 45);
+    red = 185;
+    gre = 45;
+    blu = 45;
   }
 
   // display ant parts
+  fill(red, gre, blu);
   rect(this.x1, this.y1, this.size, this.size);
   rect(this.x2, this.y2, this.size, this.size);
+
+  // give the ant body a smaller, lighter rect() within those last rect()s
+  fill(red+40, gre+40, blu+40);
+  rect(this.x1+this.dif/2, this.y1+this.dif/2, this.size-this.dif, this.size-this.dif);
+  rect(this.x2+this.dif/2, this.y2+this.dif/2, this.size-this.dif, this.size-this.dif);
 }
 
 // newtarget()

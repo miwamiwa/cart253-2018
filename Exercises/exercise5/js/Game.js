@@ -50,7 +50,9 @@ Game.prototype.checkGameOver = function(){
   // gameOverChanceOn is a trigger used to cause the chance of
   // gameover only once per ball going out of reach.
 
-  if((ball.x<leftPaddle.inset-50||ball.x>width-rightPaddle.inset+50)&&ball.gameOverChanceOn===false){
+  if( (ball.x<leftPaddle.inset-50 ||
+    ball.x > width-rightPaddle.inset+50)
+    && ball.gameOverChanceOn === false) {
     // toggle this statement off. it will be reset in ball.reset();
     ball.gameOverChanceOn=true;
 

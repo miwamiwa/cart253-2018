@@ -67,8 +67,9 @@ GOCat.prototype.move = function(){
 
   ///// constrain to stay on screen
   // left side
-  if(gameOverCat.x<catConstrain){gameOverCat.vx=abs(gameOverCat.vx);
-  }
+  if (gameOverCat.x<catConstrain)
+    gameOverCat.vx=abs(gameOverCat.vx);
+
   // right side
   if(gameOverCat.x>width-catConstrain){gameOverCat.vx=-abs(gameOverCat.vx);
   }

@@ -1,5 +1,43 @@
 /*
-basic ant pong
+basic ANT PONG!
+by Samuel Pare-Chouinard
+
+GAME:
+
+On the weekend i started this project, i had an ant outbreak in my bathtub..
+when life gives you lemons, you make ant pong.
+In this version of PONG colliding balls will transform into ants.
+
+- ants are born to cause trouble: they will take balls away from play and eat
+parts of your paddle.
+- you can shoot them with a ball of fire, but that also takes away some of your
+paddle length.
+- biscuits which restore your paddle length have a chance of appearing throughout
+the game, but only if ants are eating things.
+- individual ants get more destructive as they eat (you will see their color
+change), and as they survive through rounds. They usually wander around randomly,
+but if one of their brothers is harmed, they will gang up on a random target.
+- try to find a balance between defending your side and defending the play area
+from these ants!
+
+Score is hits minus misses.
+Reach the target score to win the match and access the next difficulty level.
+
+MUSIC:
+
+Music in this game is again generated with p5.sound.js. This time I have three
+synth voices: two which loop through an array of notes at a set pulse rate, and
+one which plays melody using a rhythm array.
+
+Drums are random! I'm using code i put together for my cart 211 final project.
+It's a kind of skewed probability system inspired by passages of Robert Rowe's
+Machine Musicianship which I read parts of last year.
+
+There are also two SFX synths handling 5 different sounds each. Each synth can
+only play 1 sound at a time, which is not too bad considering that if every
+event in this game always got an individual sound, there would be way too much
+going on.
+
 */
 
 // DECLARE VARIABLES
@@ -100,7 +138,8 @@ function runGame(){
   /////////// GAME ///////////
 
   // draw background
-  background(0);
+  // display background
+  fill(game.menuBGcolor); stroke(0); rect(0, 0, game.width-1, game.height-1);
   // display text at the bottom of the screen
   game.displayScore();
 

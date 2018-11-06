@@ -70,8 +70,14 @@ if(millis()>this.appearTimer&&this.moving){
   // else if biscuit is supposed to be there
   this.moving = true;
   // stylize and display
-  fill(25, 25, 185);
+  var red = 25;
+  var gre = 25;
+  var blu = 185;
+  stroke(red+25, gre+25, blu+25);
+  strokeWeight(4);
+  fill(red, gre, blu);
   rect(this.x, this.y, this.size, this.size);
+  strokeWeight(1);
 }
 }
 

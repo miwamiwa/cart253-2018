@@ -33,13 +33,15 @@ this.menuTextSpeed = 7;
 this.menuObjects  = [5];
 // a variable to save the longest string of text in the array
 this.longestText=0;
+// color
+this.menuBGcolor = 255;
+this.menuTxtFill = 35;
 }
 
 Game.prototype.setupMenuScreen = function(){
 
   // display background
-  var menuBGcolor = 0;
-  background(menuBGcolor);
+  fill(this.menuBGcolor); stroke(0); rect(0, 0, this.width-1, this.height-1);
   // count frames from 0
   this.menuFrame = 0;
 
@@ -119,8 +121,6 @@ Game.prototype.runMenuScreen = function(){
   this.menuObjects[4].moving = false;
 
   textAlign(CENTER);
-  // set bg color
-  var menuBGcolor = 0;
   // arrays to contain menu text
   var textToDisplay = [11];
   // game objects x, y pos
@@ -128,8 +128,7 @@ Game.prototype.runMenuScreen = function(){
   var objectsX= this.width/5;
   var objectsY= 0.666*this.height;
 
-  fill(255);
-
+  fill(this.menuTxtFill);
   // the animation is in three parts: the header text is first to appear,
   // then the game objects and descriptions,  then the info.
 
@@ -138,13 +137,16 @@ Game.prototype.runMenuScreen = function(){
     // increment animation frame
     this.menuFrame +=1;
   }
-  // everytime meny text speed is reached
+  // everytime menu text speed is reached
   if(this.menuFrame%this.menuTextSpeed===0){
+
     // draw bg
-    background(menuBGcolor);
+    background(this.menuBGcolor);
+
     // pick a new subset of the header text to display
     textToDisplay[0] = subset(this.menuText[0], 0, this.menuFrame/this.menuTextSpeed);
     // display text
+    fill(this.menuTxtFill);
     textSize(50);
     text(textToDisplay[0], this.width/2, this.height*1/6);
 
@@ -159,7 +161,9 @@ Game.prototype.runMenuScreen = function(){
       for(var i=1; i<6; i++){
         // pick subset of text description to display
         textToDisplay[i] = subset(this.menuText[i], 0, (this.menuFrame)/this.menuTextSpeed-9);
-        fill(255);
+        stroke(45);
+        strokeWeight(2);
+        fill(this.menuTxtFill);
         // display object
         this.menuObjects[i-1].display();
         // display text description
@@ -172,7 +176,8 @@ Game.prototype.runMenuScreen = function(){
         for(var i=6; i<12; i++){
           // pick subset of info text to display
           textToDisplay[i] = subset(this.menuText[i], 0, (this.menuFrame)/this.menuTextSpeed-9);
-          fill(255);
+          noStroke();
+          fill(this.menuTxtFill);
           // if it's the last info text display it at the bottom of the page
           if(i===11){
               text(textToDisplay[i], (0.5)*this.width, (0.93)*height);
@@ -193,7 +198,8 @@ Game.prototype.runMenuScreen = function(){
     currentScreen="game";
     // set correct music
     music.launchPart1();
-    // reset objects (not necessarily ants)
+    // reset objects (ants are reset somewhere else as they don't reset
+    // everytime this function is called)
     balls = [];
     fireBalls = [];
     biscuit = new Biscuit();
@@ -217,12 +223,12 @@ Game.prototype.displayScore = function(){
   var scoretext = join(lines,"\n" )
 
   // stylize
-  fill(255);
-  strokeWeight(1);
-  stroke(255);
-  // display line to delimitate game area
-  line(0, this.height, this.width, this.height);
   noStroke();
+  fill(this.menuBGcolor);
+  // display rect over which text is written
+  rect(0, this.height, this.width, height-this.height);
+  fill(this.menuTxtFill);
+  stroke(0);
   textSize(15);
   // display score text
   text(scoretext, this.width/2, height-30);

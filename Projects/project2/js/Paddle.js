@@ -39,6 +39,10 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   // paddle round score and match points
   this.score=0;
   this.matchPoint=0;
+  // fill
+  this.red = random(215);
+  this.green = random(125);
+  this.blu = random(125);
 }
 
 // handleInput()
@@ -107,8 +111,10 @@ Paddle.prototype.update = function() {
 // Draw the paddle as a rectangle on the screen
 Paddle.prototype.display = function() {
   noStroke();
-  fill(255);
+  fill(this.red, this.green, this.blu)
   rect(this.x,this.y,this.w,this.h);
+  fill(this.red+40, this.green+40, this.blu+40)
+  rect(this.x+5,this.y+5,this.w-10,this.h-10);
 }
 
 // shoot()

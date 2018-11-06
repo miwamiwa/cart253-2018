@@ -74,9 +74,14 @@ FireBall.prototype.update = function(){
 FireBall.prototype.display = function(){
   console.log("fireballs"+fireBalls.length);
   // set fill
-  fill(235, 25, 25);
-  // display rect()
+  var red = 225;
+  var gre = 25;
+  var blu = 25;
+  stroke(red+25, gre+25, blu+25);
+  strokeWeight(4);
+  fill(red, gre, blu);
   rect(this.x, this.y, this.size, this.size);
+  strokeWeight(1);
 }
 
 // isoffscreen()

@@ -69,8 +69,18 @@ CatHead.prototype.display = function(){
 
   // lower jaw (moving part)
   // this.jaw used to change the y-pos of lips (tip of the mouth)
-  triangle(this.x+565*this.xs, this.y+(611+this.jaw)*this.ys, this.x+466*this.xs, this.y+563*this.ys, this.x+386*this.xs, this.y+646*this.ys);
-  triangle(this.x+466*this.xs, this.y+563*this.ys, this.x+588*this.xs, this.y+(572+this.jaw)*this.ys, this.x+565*this.xs, this.y+(611+this.jaw)*this.ys);
+  triangle(
+    this.x+565*this.xs,
+    this.y+(611+this.jaw)*this.ys,
+    this.x+466*this.xs,
+    this.y+563*this.ys,
+    this.x+386*this.xs,
+    this.y+646*this.ys
+  );
+
+  triangle(this.x+466*this.xs,
+    this.y+563*this.ys,
+    this.x+588*this.xs, this.y+(572+this.jaw)*this.ys, this.x+565*this.xs, this.y+(611+this.jaw)*this.ys);
   //upper jaw (moving part)
   triangle(this.x+466*this.xs, this.y+563*this.ys, this.x+588*this.xs, this.y+(572-this.jaw)*this.ys, this.x+638*this.xs, this.y+464*this.ys);
 

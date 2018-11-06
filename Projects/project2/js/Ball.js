@@ -4,6 +4,8 @@
 // and bottom edges of the canvas, going off the left and right sides,
 // and bouncing off paddles.
 
+// When balls collide, ants are created.
+
 // Ball constructor
 //
 // Sets the properties with the provided arguments
@@ -72,7 +74,7 @@ Ball.prototype.isOffScreen = function () {
 // Draw the ball as a rectangle on the screen
 
 Ball.prototype.display = function () {
-  noStroke();
+  stroke(0);
   if(this.isSafe){
     fill(25, 25, 200);
   }

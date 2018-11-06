@@ -52,11 +52,11 @@ Music.prototype.setupInstruments = function(){
 
   // synth2 setup
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth2.setEnvelope(0.001, 0.5, 0.2, 0.8, 0.4, 0);
+  synth2.setEnvelope(0.001, 0.5, 0.05, 0.6, 0.4, 0);
   // function(filterType, frequency)
   synth2.setFilter("LP", 1500);
   // function(delayIsOn, length, feedback, filterFrequency)
-  synth2.setDelay(true, 0.33, 0.4, 2000)
+  synth2.setDelay(true, 0.335, 0.5, 2000)
   // function(noteList, octave, loopLength)
 
   // synth3 setup

@@ -20,13 +20,13 @@ function setup() {
   // create canvas:
   canvas = createCanvas(900, 450);
   canvas.parent('sketch-holder');
-  player = new Paddle(0,height/2,20,60,4,83,87, 65, 68, 49);
+  player = new MovingObject(0,height/2,20,60,4,83,87, 65, 68, 49);
 
   xobs = floor(width/obsSize);
   yobs = floor(height/obsSize);
 
   for (var i=0; i<xobs*yobs; i++){
-    if(random()<0.5){
+    if(random()<0.2){
       totalobs+=1;
       obstacles.push(new Obstacle(i));
     }

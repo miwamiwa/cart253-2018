@@ -1,14 +1,14 @@
-// Paddle
+// MovingObject
 //
 // A class that defines how a paddle behaves, including the ability
 // to specify the input keys to move it up and down
 
 // EDIT: paddles shoot fireballs.
 
-// Paddle constructor
+// MovingObject constructor
 //
 // Sets the properties with the provided arguments or defaults
-function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
+function MovingObject(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   // position and size
   this.x = x;
   this.y = y;
@@ -49,7 +49,7 @@ function Paddle(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
 //
 // Check if the up or down keys are pressed and update velocity
 // appropriately
-Paddle.prototype.handleInput = function() {
+MovingObject.prototype.handleInput = function() {
   if (keyIsDown(this.upKey)) {
     this.vy = -this.speed;
   }
@@ -76,7 +76,7 @@ Paddle.prototype.handleInput = function() {
 }
 
 
-Paddle.prototype.update = function() {
+MovingObject.prototype.update = function() {
 
 
   // check all obstacles
@@ -148,7 +148,7 @@ if (obstacles[i].size>5){
 // display()
 //
 // Draw the paddle as a rectangle on the screen
-Paddle.prototype.display = function() {
+MovingObject.prototype.display = function() {
   noStroke();
   fill(this.red, this.green, this.blu)
   rect(this.x,this.y,this.size,this.size);
@@ -161,7 +161,7 @@ Paddle.prototype.display = function() {
 
 
 
-Paddle.prototype.eatObstacle = function(index) {
+MovingObject.prototype.eatObstacle = function(index) {
   if(this.reloadTimer<millis()){
 obstacles[index].getEaten();
 this.reloadTimer = millis()+this.reloadLength;

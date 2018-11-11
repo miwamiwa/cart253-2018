@@ -241,8 +241,6 @@ var alreadysmelled = false;
 
           this.knownObjectsInRange.push(this.knownObjects[j]);
          nextObject = true;
-
-
       }
     }
     }

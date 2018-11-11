@@ -1,5 +1,6 @@
 
-var player
+var player;
+var enemy;
 
 var canvas;
 
@@ -8,6 +9,7 @@ var totalobs = 0;
 var kindsOfObs = 3;
 var playerIsFullThreshold = 1;
 var droppings = [];
+
 
 // sound
 var synths = [];
@@ -31,6 +33,7 @@ function setup() {
   canvas = createCanvas(900, 450);
   canvas.parent('sketch-holder');
   player = new MovingObject(0,height/2,20,60,4,83,87, 65, 68, 49);
+  enemy = new EnemyObject(random(width), random(height));
   for (var i=0; i<kindsOfObs-1; i++){
     synths[i] = new Synth("sine");
     console.log("new synth");
@@ -83,6 +86,10 @@ player.sniffOut();
   player.display();
   displayScore();
 
+  enemy.update();
+  enemy.display();
+  enemy.lookOut(player);
+
   if(droppings.length!=0){
     for(var i=0; i<droppings.length; i++){
       droppings[i].display();
@@ -101,9 +108,9 @@ for(var i=0; i<obstacles.length; i++){
 function runSound(){
   for (var i=0; i<player.knownObjectsInRange.length; i++){
     var whichobject = player.knownObjectsInRange[i]-1;
-    synths[whichobject].playMusic();
+//    synths[whichobject].playMusic();
   }
-  drums.handleDrums();
+//  drums.handleDrums();
   // increment musical time
   music.musicInc+=music.musicSpeed;
 }

@@ -97,6 +97,21 @@ if (obstacles[i].size>5){
 }
 }
 }
+
+  // Check for going off screen and set new bearing if so
+  if (this.x <= 0 ) {
+    this.newBearing("left");
+  }
+  else if (this.x +this.size >= width ) {
+    this.newBearing("right");
+  }
+ else   if (this.y <= 0 ) {
+     this.newBearing("down");
+   }
+   else if (this.y +this.size >=height) {
+     this.newBearing("up");
+   }
+
   // update and constrain x, y position
   this.y += this.vy;
   this.y = constrain(this.y,0,height-this.size);
@@ -107,10 +122,22 @@ if (obstacles[i].size>5){
 EnemyObject.prototype.newBearing = function(blockedBearing){
 var randomChoice = floor(random(3));
 switch(blockedBearing){
-  case "left": if(random()<0.5){ this.vy = random(-speed, speed); } else { this.vx = random(0, speed); } break;
-  case "right": if(random()<0.5){ this.vy = random(-speed, speed); } else { this.vx = random(-speed, 0); } break;
-  case "up": if(random()<0.5){ this.vy = random(-speed,0); } else { this.vx = random(-speed, speed); } break;
-  case "down": if(random()<0.5){ this.vy = random(0, speed); } else { this.vx = random(-speed, speed); } break;
+  case "left": if(random()<0.5){ this.vy = random(-this.speed, this.speed); } else { this.vx = random(0, this.speed); } break;
+  case "right": if(random()<0.5){ this.vy = random(-this.speed,this.speed); } else { this.vx = random(-this.speed, 0); } break;
+  case "up": if(random()<0.5){ this.vy = random(-this.speed,0); } else { this.vx = random(-this.speed, this.speed); } break;
+  case "down": if(random()<0.5){ this.vy = random(0, this.speed); } else { this.vx = random(-this.speed, this.speed); } break;
+}
+}
+
+EnemyObject.prototype.setBearing = function(axis, direction){
+  this.vx=0;
+  this.vy =0;
+  if (axis==="x"){
+    this.vx = -direction*this.speed;
+  }
+  else if (axis ==="y"){
+    this.vy = -direction*this.speed;
+  }
 }
 
 // display()
@@ -130,60 +157,69 @@ ellipse(this.x+this.size/2, this.y+this.size/2, this.smellRange, this.smellRange
 noStroke()
 }
 
+// lookout()
+// modified obstacle collision function
 
 EnemyObject.prototype.lookOut = function(target){
 
-      //if close to left obstacle wall, can't move right.
+      // if enemy and player are aligned on the y axis
       if(
-        this.x+this.vx<target.x
-        && this.x+this.vx+this.size>target.x
-        && this.y+this.size>target.y
-        && this.y<target.y+target.size
-        && this.vx>0
+        this.x+this.vx<target.x && this.x+this.vx+this.size>target.x
       ){
-      this.x=target.x-this.size;
-      this.vx =0;
-      console.log("collided with obstacle #"+i+", on its left side");
-      this.eatObstacle(i);
+        direction = (this.y-target.y)/abs(this.y-target.y);
+     // check for obstacles in the way
+      this.checkObstacles("y", direction, target);
     }
-    //if close to right obstacle wall, can't move left.
-    else if(
-      this.x+this.vx+this.size>target.x+target.size
-      && this.x+this.vx<target.x+target.size
-      && this.y+this.size>target.y
-      && this.y<target.y+target.size
-      && this.vx<0
-    ){
-    this.x=target.x+target.size;
-    this.vx =0;
-    console.log("collided with obstacle #"+i+", on its right side");
-      this.eatObstacle(i);
-  }
-    // if close to top wall, can't move down
+      // if enemy and player are aligned on the x axis
     if(
-      this.y+this.vy<target.y
-      && this.y+this.vy+this.size>target.y
-      && this.x+this.size>target.x
-      && this.x<target.x+target.size
-      && this.vy>0
+      this.y+this.vy<target.y && this.y+this.vy+this.size>target.y
     ){
-    this.y=target.y-this.size;
-    this.vy =0;
-    console.log("collided with obstacle #"+i+", on its upper side");
-      this.eatObstacle(i);
+      direction = (this.x-target.x)/abs(this.x-target.x);
+   // check for obstacles in the way
+    this.checkObstacles("x", direction, target);
   }
-    //if close to bottom obstacle wall, can't move up
-    else if(
-      this.y+this.vy+this.size>target.y+target.size
-      && this.y+this.vy<target.y+target.size
-      && this.x+this.size>target.x
-      && this.x<target.x+target.size
-      && this.vy<0
+
+}
+
+EnemyObject.prototype.checkObstacles = function(axis, direction, target){
+  // check obstacles on the x axis
+ if(axis==="x"){
+   // for all obstacles
+   for(var i=0; i<obstacles.length; i++){
+     // if the obstacle is aligned with enemy along the y axis
+     if(
+       this.y+this.vy<obstacles[i].y
+       && this.y+this.vy+this.size>obstacles[i].y
+       // and if this obstacle is closer than the player along the x-axis
+       && (
+         (this.x - obstacles[i].x < this.x - target.x && direction ===-1)
+      || (this.x - obstacles[i].x > this.x - target.x && direction === 1)
+       )
+     ){
+    // do something
+    this.setBearing(axis, direction);
+   }
+   }
+ }
+
+ // check obstacles on the y axis
+if(axis==="y"){
+  // for all obstacles
+  for(var i=0; i<obstacles.length; i++){
+    // if the obstacle is aligned with enemy along the x axis
+    if(
+      this.x+this.vx<obstacles[i].x
+      && this.x+this.vx+this.size>obstacles[i].x
+      // and if this obstacle is closer than the player along the y-axis
+      && (
+        (this.y - obstacles[i].y < this.y - target.y && direction ===-1)
+     || (this.y - obstacles[i].y > this.y - target.y && direction === 1)
+      )
     ){
-    this.y=target.y+target.size;
-    this.vy =0;
-    console.log("collided with obstacle #"+i+", on its bottom side");
-    this.eatObstacle(i);
+   // do something
+   this.setBearing(axis, direction);
   }
+  }
+}
 
 }

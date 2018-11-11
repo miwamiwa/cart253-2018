@@ -1,9 +1,5 @@
 // MovingObject
 //
-// A class that defines how a paddle behaves, including the ability
-// to specify the input keys to move it up and down
-
-// EDIT: paddles shoot fireballs.
 
 // MovingObject constructor
 //
@@ -12,7 +8,6 @@ function MovingObject(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   // position and size
   this.x = x;
   this.y = y;
-
   this.size = 20;
   // speed
   this.vx = 0;
@@ -195,7 +190,7 @@ if(obstacles[index].size<5){
 }
 
 MovingObject.prototype.digest = function () {
-if(this.foodInBelly === playerIsFullThreshold && this.reloadTimer<millis()){
+if(this.foodInBelly >= playerIsFullThreshold && this.reloadTimer<millis()){
   this.foodInBelly = 0;
 
   if(this.isSick){

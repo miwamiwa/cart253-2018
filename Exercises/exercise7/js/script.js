@@ -8,7 +8,13 @@ var totalobs = 0;
 var kindsOfObs = 3;
 var playerIsFullThreshold = 1;
 var droppings = [];
-var synths = [kindsOfObs-1];
+
+// sound
+var synths = [];
+var drums;
+var music;
+
+var obsMode = true;
 
 // number of obstacles on an axis
 var xobs = 0;
@@ -25,13 +31,21 @@ function setup() {
   canvas = createCanvas(900, 450);
   canvas.parent('sketch-holder');
   player = new MovingObject(0,height/2,20,60,4,83,87, 65, 68, 49);
+  for (var i=0; i<kindsOfObs-1; i++){
+    synths[i] = new Synth("sine");
+    console.log("new synth");
+  }
 
-  xobs = floor(width/obsSize);
-  yobs = floor(height/obsSize);
+  drums = new Drum("white");
+  music = new Music();
+  music.setupInstruments();
+  music.launchPart1();
+  xobs = floor((width-50)/obsSize);
+  yobs = floor((height-50)/obsSize);
 
 var obstacleindex =0;
   for (var i=0; i<xobs*yobs; i++){
-    if(random()<0.2){
+    if(random()<0.1){
       totalobs+=1;
 
       obstacles.push(new Obstacle(i, obstacleindex));
@@ -48,6 +62,8 @@ var obstacleindex =0;
 function draw() {
 
   runGame();
+
+runSound();
 }
 
 // rungame()
@@ -65,8 +81,7 @@ function runGame(){
 player.digest();
 player.sniffOut();
   player.display();
-
-
+  displayScore();
 
   if(droppings.length!=0){
     for(var i=0; i<droppings.length; i++){
@@ -83,6 +98,16 @@ for(var i=0; i<obstacles.length; i++){
 
 }
 
+function runSound(){
+  for (var i=0; i<player.knownObjectsInRange.length; i++){
+    var whichobject = player.knownObjectsInRange[i]-1;
+    synths[whichobject].playMusic();
+  }
+  drums.handleDrums();
+  // increment musical time
+  music.musicInc+=music.musicSpeed;
+}
+
 // keypressed()
 //
 // a place to test functions
@@ -90,9 +115,17 @@ for(var i=0; i<obstacles.length; i++){
 function keyPressed(){
 switch(key){
   case " ": playerIsFullThreshold +=1; break;
+  case "q": toggleObsMode(); break;
 }
 }
 
+function toggleObsMode(){
+  if(obsMode){
+    obsMode = false;
+  } else {
+    obsMode = true;
+  }
+}
 function removeObstacle(index){
 console.log("OBSTACLEREMOVED");
     // save length of balls array
@@ -110,4 +143,10 @@ console.log("OBSTACLEREMOVED");
     // print new ball array size
     console.log("balls: "+obstacles.length);
 
+}
+
+function displayScore(){
+
+  fill(0);
+  text("healthy droppings: "+player.healthydroppings+", sickly droppings: "+player.sickdroppings, 10, 10);
 }

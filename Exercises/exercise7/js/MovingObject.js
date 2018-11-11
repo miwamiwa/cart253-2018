@@ -37,9 +37,11 @@ function MovingObject(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
 
   this.foodInBelly = 0;
   this.isSick = false;
-  this.smellRange = 100;
+  this.smellRange = 200;
   this.knownObjects = [];
   this.knownObjectsInRange = [];
+  this.healthydroppings = 0;
+  this.sickdroppings = 0;
 }
 
 // handleInput()
@@ -198,9 +200,11 @@ if(this.foodInBelly === playerIsFullThreshold && this.reloadTimer<millis()){
 
   if(this.isSick){
       droppings.push(new Droppings(this.x, this.y, false, playerIsFullThreshold));
+      this.sickdroppings+=1;
   }
   else {
     droppings.push(new Droppings(this.x, this.y, true, playerIsFullThreshold));
+    this.healthydroppings+=1;
   }
 this.isSick = false;
 }
@@ -209,13 +213,35 @@ this.isSick = false;
 MovingObject.prototype.sniffOut = function () {
   // find which objects are in range
   this.knownObjectsInRange = [];
+  var nextObject=false;
+  //for all obstacles
   for (var i=0; i<obstacles.length; i++){
-    var distance = dist(this.x+this.size/2, this.y+this.size/2, obstacles[i].x+obstacles[i].size/2, obstacles[i].y+obstacles[i].size/2);
 
+
+    var distance = dist(this.x+this.size/2, this.y+this.size/2, obstacles[i].x+obstacles[i].size/2, obstacles[i].y+obstacles[i].size/2);
+    nextObject=false;
+
+    // if this obstacle is in range
     if(distance<this.smellRange/2){
+var alreadysmelled = false;
+      // tag if already smelled
+      for (var k=0; k<this.knownObjectsInRange.length; k++){
+
+        if (this.knownObjectsInRange[k]===obstacles[i].type){
+          alreadysmelled = true;
+          console.log("already smelled")
+        }
+      }
+
+
     for (var j=0; j<this.knownObjects.length; j++){
-      if(this.knownObjects[j]===obstacles[i].type){
-        this.knownObjectsInRange.push(this.knownObjects[j]);
+      // if this is a known object
+      if(this.knownObjects[j]===obstacles[i].type &&nextObject === false && !alreadysmelled){
+        // and not already smelled
+
+          this.knownObjectsInRange.push(this.knownObjects[j]);
+         nextObject = true;
+
 
       }
     }
@@ -223,7 +249,7 @@ MovingObject.prototype.sniffOut = function () {
   }
 
   // express which objects are in range
-  for (var i=0; i<this.knownObjectsInRange.length; i++){
-    console.log("objects in range: "+this.knownObjectsInRange[i]);
-  }
+
+    console.log("objects in range: "+this.knownObjectsInRange);
+
 }

@@ -24,34 +24,18 @@ function Music(){
 // instruments' sound are declared.
 
 Music.prototype.setupInstruments = function(){
-
-  // synth1 setup
+for(var i=0; i<synths.length; i++){
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth1.setEnvelope(0.01, 0.4, 0.001, 0.5, 0.32, 0);
+  synths[i].setEnvelope(0.01, 0.4, 0.001, 0.5, 0.32, 0);
   // function(filterType, frequency)
-  synth1.setFilter("LP", 400);
+  synths[i].setFilter("LP", 400);
   // function(delayIsOn, length, feedback, filterFrequency)
-  synth1.setDelay(true, 0.5, 0.55, 400)
-  // function(noteList, octave, loopLength)
+  synths[i].setDelay(true, 0.5, 0.55, 400)
 
-  // synth2 setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth2.setEnvelope(0.001, 0.5, 0.05, 0.6, 0.4, 0);
-  // function(filterType, frequency)
-  synth2.setFilter("LP", 1500);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  synth2.setDelay(true, 0.335, 0.5, 2000)
-  // function(noteList, octave, loopLength)
+  this.loadInstrument(synths[i]);
 
-  // synth3 setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synth3.setEnvelope(0.01, 0.7, 0.8, 0.3, 0.1, 0);
-  // function(filterType, frequency)
-  synth3.setFilter("LP", 800);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  synth3.setDelay(true, 0.165, 0.3, 1500);
-  // function(noteList, octave, loopLength)
-
+}
+/*
   // sfx setup
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
   sfx.setEnvelope(0.001, 0.6, 0.0, 0.4, 0.4, 0);
@@ -79,15 +63,17 @@ Music.prototype.setupInstruments = function(){
   drums.setDelay(false, 0, 0, 0);
   //drums.setDivisions(bar, beat, subdiv, finediv, beatsperbar, divsperbeat, fineperdiv)
 
+
+
   // load it!
   // these functions create envelope, filter and delay objects
   // and plugs in the audio.
 
-  this.loadInstrument(synth1);
-  this.loadInstrument(synth2);
-  this.loadInstrument(synth3);
+
   this.loadInstrument(sfx);
   this.loadInstrument(sfx2);
+  */
+
   this.loadInstrument(drums);
 
 }
@@ -106,23 +92,22 @@ Music.prototype.launchPart1 = function(){
 
   // stop any sounds currently playing
   this.stopSound();
-  // phrase and rhythm for synth2
+  // phrase and rhythm
   // phrase values are (midi) intervals over the root note
-  var phrase1=[-5, 5, 6, 7, 6, 5, 6, 7, 6, -7];
+
+  var phrase1=[0, 1];
+  var phrase2=[4, 6];
+
   // while rhythm values are expressed in frames
-  var rhythm1=[60, 40, 20, 40, 20, 40, 20, 40, 120, 80];
-  // phrase for synth1 (the softer upper voice)
-  var phrase2=[3, 2, 3, 7, 3, 9, 3, 7, 3, 5, 7, 3, 3, 2, 3, 9, 3, 10, 3, 9, 3, 5, 7, 3];
-  // bluesy bass line
-  var phrase3=[0, 5, 0, 0, 5, 5, 0, 0, 8, 7, 0, 7];
+  // var rhythm1=[60, 40, 20, 40, 20, 40, 20, 40, 120, 80];
 
   // startnewphrase() requires: synth used, list of notes to play,
   // octave transposition, list of rhythms to play, pulse rate, whether to start from the top.
   // see Synth.js for how this stuff works
 
-  this.startNewPhrase(synth2, phrase1, 0, rhythm1, 30, true);
-  this.startNewPhrase(synth1, phrase2, 12, 0, 60, true);
-  this.startNewPhrase(synth3, phrase3, -24, 0, 120, true);
+
+    this.startNewPhrase(synths[0], phrase1, 0, 0, 60, true);
+    this.startNewPhrase(synths[1], phrase2, 12, 0, 60, true);
 
   // drums are triggered differently.
   // Beats must be divided up and weighted before we can start.
@@ -133,73 +118,18 @@ Music.prototype.launchPart1 = function(){
   drums.setDivisions(120, 60, 30, 10, 2, 2, 3);
   // required arguments: max weights, stimulus scale, threshold,
   // bar weight, beat weight, subdiv weight, fine div weight.
-  drums.setWeights(18, 27, 25-level, 10, 10-level, 8, 8);
+  drums.setWeights(18, 27, 25, 10, 10, 8, 8);
 
   // set voices on and off
-  synth1.isPlaying = true;
-  synth2.isPlaying = true;
-  synth3.isPlaying = true;
+  for(var i=0; i<synths.length; i++){
+  synths[i].isPlaying = true;
+}
+
   drums.isPlaying = true;
   // reset musical time
   this.musicInc = 0;
 }
 
-// launchpart0()
-//
-// this is the loop heard during the level up menu screen
-// synth3 plays the same colour tones as before,
-// but not synths 1 and 2 loop through short phrases while
-// the drums are faster and more active
-
-Music.prototype.launchPart0 = function(){
-
-  // same as launchPart1()
-  // stop previous sound
-  this.stopSound();
-  // declare phrases and rhythms
-  var phrase1=[-5, -7, 3, 5];
-  var rhythm1=[20, 40, 30, 30];
-  var phrase2=[3, 2, 3, 7, 3, 9, 3, 7, 3, 5, 7, 3, 3, 2, 3, 9, 3, 10, 3, 9, 3, 5, 7, 3];
-  var phrase3=[0, 0, 0, -7];
-  var rhythm2=[40, 10, 60, 10]
-  // configure synth notes and rhythm
-  this.startNewPhrase(synth2, phrase1, 0, rhythm1, 0, true);
-  this.startNewPhrase(synth1, phrase2, 12, 0, 20, true);
-  this.startNewPhrase(synth3, phrase3, -24, rhythm2, 30, true);
-  // configure drums
-  drums.setDivisions(60, 20, 10, 5, 3, 2, 2);
-  drums.setWeights(18, 27, 24, 10, 10, 2, 8);
-  // switch voices on or off
-  synth1.isPlaying = true;
-  synth2.isPlaying = true;
-  synth3.isPlaying = true;
-  drums.isPlaying = true;
-  // reset musical time
-  this.musicInc = 0;
-}
-
-// launchpart2()
-//
-// this is the start screen and game over screen music.
-// synth3 plays the colour tones on its own.
-
-Music.prototype.launchPart2 = function(){
-
-  // same as launchpart1()
-  // stop previous sounds
-  this.stopSound();
-  // declare phrase to be played
-  var phrase2=[3, 2, 3, 7, 3, 9, 3, 7, 3, 5, 7, 3, 3, 2, 3, 9, 3, 10, 3, 9, 3, 5, 7, 3];
-  // configure synth notes and rhythm
-  this.startNewPhrase(synth1, phrase2, 12, 0, 20, true);
-  // turn voices on or off
-  synth1.isPlaying = true;
-  synth2.isPlaying = false;
-  synth3.isPlaying = false;
-  drums.isPlaying = false;
-  // reset musical time
-  this.musicInc = 0;
-}
 
 // startSFX()
 //
@@ -277,10 +207,11 @@ Music.prototype.startNewPhrase = function(synx, noteList, octave, rhythm, loop, 
 
 Music.prototype.stopSound= function(){
 
-  synth1.isPlaying =false;
-  synth2.isPlaying =false;
-  synth3.isPlaying = false;
+for (var i=0; i<synths.length; i++){
+  synths[i].isPlaying =false;
+}
   drums.isPlaying = false;
+  /*
   sfx.upFX=false;
   sfx.downFX=false;
   sfx.tremFX=false;
@@ -291,7 +222,7 @@ Music.prototype.stopSound= function(){
   sfx2.tremFX=false;
   sfx2.chirpFX=false;
   sfx2.downChirpFX=false;
-
+*/
 }
 
 // loadInstrument()

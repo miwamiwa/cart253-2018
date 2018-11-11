@@ -85,7 +85,7 @@ function setup() {
   // create objects:
   // framework objects
   actions = new Actions();
-  music = new Music();
+
   game = new Game();
   // bgm
   synth1 = new Synth('sine');
@@ -101,7 +101,7 @@ function setup() {
 
   // load the menu screen
   game.setupMenuScreen();
-
+  music = new Music();
   // setup audio effects parameters,
   // start audio
   music.setupInstruments();

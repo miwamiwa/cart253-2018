@@ -14,7 +14,18 @@ function Obstacle(index, obstacleindex){
 }
 
 Obstacle.prototype.display = function(){
-fill(75*this.type);
+  if(obsMode){
+    fill(75*this.type);
+  }
+  else {
+    if(this.type===0){
+      fill(0);
+    }
+    else {
+      fill(185);
+    }
+  }
+
   rect(this.x, this.y, this.size, this.size);
 }
 

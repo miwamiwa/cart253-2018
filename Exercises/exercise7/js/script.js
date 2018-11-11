@@ -5,12 +5,16 @@ var canvas;
 
 var obstacles = [];
 var totalobs = 0;
+var kindsOfObs = 3;
+var playerIsFullThreshold = 1;
+var droppings = [];
+var synths = [kindsOfObs-1];
 
 // number of obstacles on an axis
 var xobs = 0;
 var yobs = 0;
 
-var obsSize= 50;
+var obsSize= 15;
 
 // setup()
 //
@@ -25,10 +29,13 @@ function setup() {
   xobs = floor(width/obsSize);
   yobs = floor(height/obsSize);
 
+var obstacleindex =0;
   for (var i=0; i<xobs*yobs; i++){
     if(random()<0.2){
       totalobs+=1;
-      obstacles.push(new Obstacle(i));
+
+      obstacles.push(new Obstacle(i, obstacleindex));
+      obstacleindex +=1;
     }
   }
 
@@ -53,13 +60,26 @@ function runGame(){
 
   player.handleInput();
 
-  player.update();
+ player.update();
 
+player.digest();
+player.sniffOut();
   player.display();
+
+
+
+  if(droppings.length!=0){
+    for(var i=0; i<droppings.length; i++){
+      droppings[i].display();
+    }
+  }
+
+
 
 for(var i=0; i<obstacles.length; i++){
   obstacles[i].display();
 }
+
 
 }
 
@@ -68,5 +88,26 @@ for(var i=0; i<obstacles.length; i++){
 // a place to test functions
 
 function keyPressed(){
+switch(key){
+  case " ": playerIsFullThreshold +=1; break;
+}
+}
+
+function removeObstacle(index){
+console.log("OBSTACLEREMOVED");
+    // save length of balls array
+    var length = obstacles.length;
+    // unless this ball is the last ball on the list
+    if(index!=length){
+      // glue together parts of the list that come before and after this ball
+      obstacles = concat(subset(obstacles, 0, index), subset(obstacles, index+1, length));
+    }
+    // if it is the last ball
+    else{
+      // list becomes everything until the last ball
+      obstacles = subset(obstacles, 0, index);
+    }
+    // print new ball array size
+    console.log("balls: "+obstacles.length);
 
 }

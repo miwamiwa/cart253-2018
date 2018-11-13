@@ -21,7 +21,7 @@ function MovingObject(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   this.rightKey = rightKey;
   this.fireKey = shootKey;
 
-  // reload timer for shooting
+  // reload timer for eating again
   this.reloadTimer = 0;
   this.reloadLength = 2000;
 
@@ -30,6 +30,7 @@ function MovingObject(x,y,w,h,speed,downKey,upKey,leftKey, rightKey, shootKey) {
   this.green = random(125);
   this.blu = random(125);
 
+  //game mechanics
   this.foodInBelly = 0;
   this.isSick = false;
   this.smellRange = 200;
@@ -56,23 +57,14 @@ MovingObject.prototype.handleInput = function() {
   else if (keyIsDown(this.rightKey)) {
     this.vx = this.speed;
   }
-  // NEW : FIRE KEY
-  else if (keyIsDown(this.fireKey)) {
-    // shoot a bullet
-    this.shoot();
-    // start reload timer
-    this.reloadTimer = millis()+this.reloadLength;
-  }
+
   else {
     this.vy = 0;
     this.vx=0;
   }
 }
 
-
 MovingObject.prototype.update = function() {
-
-
   // check all obstacles
   for (var i=0; i<obstacles.length; i++){
 
@@ -88,7 +80,7 @@ if (obstacles[i].size>5){
     ){
     this.x=obstacles[i].x-this.size;
     this.vx =0;
-    console.log("collided with obstacle #"+i+", on its left side");
+
     this.eatObstacle(i);
   }
   //if close to right obstacle wall, can't move left.
@@ -101,7 +93,7 @@ if (obstacles[i].size>5){
   ){
   this.x=obstacles[i].x+obstacles[i].size;
   this.vx =0;
-  console.log("collided with obstacle #"+i+", on its right side");
+
     this.eatObstacle(i);
 }
   // if close to top wall, can't move down
@@ -114,7 +106,7 @@ if (obstacles[i].size>5){
   ){
   this.y=obstacles[i].y-this.size;
   this.vy =0;
-  console.log("collided with obstacle #"+i+", on its upper side");
+
     this.eatObstacle(i);
 }
   //if close to bottom obstacle wall, can't move up
@@ -127,7 +119,7 @@ if (obstacles[i].size>5){
   ){
   this.y=obstacles[i].y+obstacles[i].size;
   this.vy =0;
-  console.log("collided with obstacle #"+i+", on its bottom side");
+
   this.eatObstacle(i);
 }
 }
@@ -156,9 +148,6 @@ ellipse(this.x+this.size/2, this.y+this.size/2, this.smellRange, this.smellRange
 noStroke()
 }
 
-
-
-
 MovingObject.prototype.eatObstacle = function(index) {
   if(obstacles.length>0){
   if(this.reloadTimer<millis() && obstacles[index].edible){
@@ -167,7 +156,7 @@ if(obstacles[index].type === 2){
 this.isSick = true;
 }
 obstacles[index].getEaten();
-console.log("ate an object");
+
 this.reloadTimer = millis()+this.reloadLength;
 
 //update knowledge of object
@@ -179,14 +168,12 @@ for (var i=0; i<this.knownObjects.length; i++){
 }
 if(!alreadyKnown){
   this.knownObjects.push(obstacles[index].type);
-    console.log("new known objects");
 }
 if(obstacles[index].size<5){
   removeObstacle(index);
 }
 }
 }
-
 }
 
 MovingObject.prototype.digest = function () {
@@ -211,11 +198,8 @@ MovingObject.prototype.sniffOut = function () {
   var nextObject=false;
   //for all obstacles
   for (var i=0; i<obstacles.length; i++){
-
-
     var distance = dist(this.x+this.size/2, this.y+this.size/2, obstacles[i].x+obstacles[i].size/2, obstacles[i].y+obstacles[i].size/2);
     nextObject=false;
-
     // if this obstacle is in range
     if(distance<this.smellRange/2){
 var alreadysmelled = false;
@@ -224,11 +208,8 @@ var alreadysmelled = false;
 
         if (this.knownObjectsInRange[k]===obstacles[i].type){
           alreadysmelled = true;
-          console.log("already smelled")
         }
       }
-
-
     for (var j=0; j<this.knownObjects.length; j++){
       // if this is a known object
       if(this.knownObjects[j]===obstacles[i].type &&nextObject === false && !alreadysmelled){
@@ -240,9 +221,5 @@ var alreadysmelled = false;
     }
     }
   }
-
-  // express which objects are in range
-
-    console.log("objects in range: "+this.knownObjectsInRange);
 
 }

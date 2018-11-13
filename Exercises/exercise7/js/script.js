@@ -1,4 +1,51 @@
 
+/*
+Exercise 7
+Racoon Run ( prototype for Project 3 )
+by Samuel Paré-Chouinard
+
+in this game the player takes on the role of a racoon; he needs to
+scavenge for food that's safe to eat and run away from humans.
+
+all food objects look the same to your racoon eyes, yet some foods
+are good and others are bad. when the racoon eats a food object, he
+memorizes its "smell". If an object with a memorized smell falls within
+the player's smelling range, the player will hear a specific melodic
+line associated to the smell.
+The player will know whether or not food is good when his racoonlike
+digestive system expells droppings of a certain colour. He has to fill
+his belly first. The delay between hitting a food object and then knowing
+whether the food is good or not should hopefully make the game nice
+and confusing?
+
+TLDR Player must eat then poop to know if food is good. he also memorises
+the smell of what he eats (represented as music). he will smell things
+in range that's he's eaten previously. unsurprisingly, he doesn't smell
+his own poop and assumes it's normal.
+
+In this test version i only have 2 different foods. Could probably
+add more kinds of food (many good foods and many bad foods, each with
+different melodies) and/or have food objects move around once in a while.
+maybe humans move it or they change position when eaten.
+
+Human enemies wander around and rush towards the player if he's
+in range and the view is clear of obstacles. This part of the code is
+buggy but the core is there. It also feels pretty slow. Running multiple
+enemies is a problem unless i fix things there. The enemies also don't
+do anything so far when they run into the player, but the collision code
+is pretty much there.
+
+This game is going to need graphics and interesting sounds. Graphics
+should help the game be understandable without all this text.
+Game mechanics probably still need a bit of rethinking to make the game
+engaging but I think there's interesting stuff to work with here.
+I think to start I will look into adding a level progression that
+would introduce more foods and more enemies and have clear goals for
+the completion of a level; and I'll also look into having objects
+move a bit more on screen.
+
+
+*/
 var player;
 var enemy;
 

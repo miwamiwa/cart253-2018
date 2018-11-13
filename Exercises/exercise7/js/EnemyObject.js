@@ -1,9 +1,5 @@
 // EnemyObject
 //
-// A class that defines how a paddle behaves, including the ability
-// to specify the input keys to move it up and down
-
-// EDIT: paddles shoot fireballs.
 
 // EnemyObject constructor
 //
@@ -31,9 +27,6 @@ this.charging = false;
   this.bearing = "UP";
   this.newBearing("up");
 }
-
-
-
 
 EnemyObject.prototype.update = function() {
 
@@ -222,7 +215,7 @@ EnemyObject.prototype.checkObstacles = function(axis, direction, target){
   }
 }
 
-if(axis==="y"){
+else if(axis==="y"){
   var viewClear = true;
   // for all obstacles
   for(var i=0; i<obstacles.length; i++){

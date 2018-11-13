@@ -1,18 +1,10 @@
 /*
 SFX.js
-this object, as well as Drum and Synth are another edit
-of the music objects i've been working on in my exercises and projects.
-They all use pretty much the same constructor parameters and setup functions (trimmed to suit the object's needs)
-The differences lie mostly in the manner in which sound if triggered in playSFX(), handleDrums() and playMusic()
 
+copied in from project 2.
+no change.
+not used so far either but i have it here in case i want it.
 
-I copied in my sfx from project 1, edited them a bit and added two new ones.
-now sfx can accept either noise or an oscillator as input.
-
-This script handles:
-- creating an SFX object.
-- setting envelope, filter, delay
-- playing one of the sfx (namely up, down, chirp, downchirp, tremolo)
 */
 
 // SFX()

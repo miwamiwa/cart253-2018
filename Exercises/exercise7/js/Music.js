@@ -1,5 +1,8 @@
 /*
 Music.js()
+copied in from project 2.
+mostly no change, other than that instruments are set up with sounds and
+notes that are related to this project. 
 
 */
 

@@ -100,8 +100,9 @@ function setup() {
   leftPaddle = new Paddle(0,game.height/2,20,60,10,83,87, 65, 68, 49);
 
   // load the menu screen
-  game.setupMenuScreen();
   music = new Music();
+  game.setupMenuScreen();
+
   // setup audio effects parameters,
   // start audio
   music.setupInstruments();

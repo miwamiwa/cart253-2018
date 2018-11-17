@@ -178,6 +178,7 @@ Ant.prototype.display = function(){
     // display the item ant is carrying
     if(this.isCarrying){
       // if it's carrying something, display it.
+      stroke(85);
       fill(255);
       rect(this.x+this.size/2, this.y+this.size/2, 10, 10);
     }

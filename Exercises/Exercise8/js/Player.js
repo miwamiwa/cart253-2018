@@ -117,12 +117,12 @@ Player.prototype.display = function(){
   translate(-bodsize/2-legsize/2, +bodsize/4+legsize/2, legCos2-10);
   box(legsize);
   pop();
-  
+
 
 }
 
 Player.prototype.handleInput = function() {
-var angleSpeed = 0.5;
+var angleSpeed = 1.0;
 
   // up key
   if (keyIsDown(this.upKey)) {
@@ -145,23 +145,30 @@ var angleSpeed = 0.5;
   this.tailYAngle += this.legRate;
   this.tailXAngle =0;
   this.angle -= radians(angleSpeed*PI);
+  this.vx =0;
+  this.vy =0;
   }
   // right key
   else if (keyIsDown(this.rightKey)) {
 this.tailYAngle += this.legRate;
 this.tailXAngle =0;
     this.angle += radians(angleSpeed*PI);
+    this.vx =0;
+    this.vy =0;
+
   }
   else if (keyIsDown(this.strafeLeft)) {
 
       this.vy -= sin(this.angle);
       this.vx -= cos(this.angle);
 
+
   }
   else if (keyIsDown(this.strafeRight)) {
 
       this.vy+= sin(this.angle);
       this.vx += cos(this.angle);
+
   }
   // if no keys are pressed stop moving.
   else {
@@ -177,13 +184,21 @@ this.tailXAngle =0;
   this.x+=this.vx;
   this.y+=this.vy;
 
-  //update camera
-  var camReturnSpeed = 1;
   var playerFollowFactor = 1;
-  var camYAngle = -250;
 
-    camOffsetX = this.vx*playerFollowFactor;
-    camOffsetY = this.vy*playerFollowFactor;
-//  }
-  camera(this.x+camOffsetX, this.y-camYAngle+camOffsetY, (height/2.0) / tan(PI*30.0 / 180.0), this.x, this.y, 0, 0, 1, 0);
+if(this.vx!=0||this.vy!=0){
+  camOffsetX = this.vx*playerFollowFactor;
+  camOffsetY = this.vy*playerFollowFactor;
+  camOffsetZ = 0;
+}
+
+    this.setCam();
+
+
+}
+
+Player.prototype.setCam = function(){
+
+  camera(this.x+camOffsetX, this.y-camYAngle+camOffsetY,  (height/2.0) / tan(PI*30.0 / 180.0), this.x, this.y,0, 0 , 1, 0);
+
 }

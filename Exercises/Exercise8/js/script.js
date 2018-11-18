@@ -13,10 +13,13 @@ author, and this description to match your project!
 // Description of preload
 var camOffsetX = 0;
 var camOffsetY = 0;
+var camOffsetZ = 0;
 
 var obs = [];
 var player;
 var human;
+var changeCamView = false;
+  var camYAngle = -250;
 
 function preload() {
 
@@ -37,7 +40,7 @@ obs[4] = new Obs(200, 200);
 player = new Player(300, 200);
 human = new Human(400, 400);
 
-camera(player.x, player.y, (height/2.0) / tan(PI*30.0 / 180.0), player.x, player.y, 0, 0, 1, 0);
+
 }
 
 
@@ -56,7 +59,9 @@ obs[4].display();
 human.display();
 player.handleInput();
 player.display()
-
+if(mouseIsPressed){
+updateCam();
+}
 }
 
 function keyPressed(){
@@ -66,4 +71,12 @@ function keyPressed(){
     case "3": human.vx = 0; human.vy =1; break;
     case "4": human.vx = 0; human.vy =-1; break;
   }
+}
+
+function updateCam(){
+  changeCamView = true;
+//  camOffsetZ -= (mouseX-width/2)/width*10;
+  camOffsetY -= (mouseY-height/2)/height*10;
+//  camOffsetZ = constrain(camOffsetZ, -100, 100);
+  camOffsetY = constrain(camOffsetY, -300, 350);
 }

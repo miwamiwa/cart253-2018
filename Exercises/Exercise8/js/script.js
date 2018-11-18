@@ -18,8 +18,11 @@ var camOffsetZ = 0;
 var obs = [];
 var player;
 var human;
+var world;
 var changeCamView = false;
   var camYAngle = -250;
+var lightMotion =0;
+
 
 function preload() {
 
@@ -39,7 +42,7 @@ obs[3] = new Obs(100, 200);
 obs[4] = new Obs(200, 200);
 player = new Player(300, 200);
 human = new Human(400, 400);
-
+world = new World();
 
 }
 
@@ -49,8 +52,10 @@ human = new Human(400, 400);
 // Description of draw()
 
 function draw() {
+  background(255);
+setLight();
 
-background(255);
+world.display();
 obs[0].display();
 obs[1].display();
 obs[2].display();
@@ -62,8 +67,22 @@ player.display()
 if(mouseIsPressed){
 updateCam();
 }
-}
 
+}
+function setLight(){
+lightMotion+=0.001;
+noiseSeed(0);
+var lightX = noise(lightMotion)*world.w;
+noiseSeed(1);
+var lightY = noise(lightMotion)*world.h;
+noiseSeed(2);
+var lightZ = noise(lightMotion)*200;
+
+  ambientLight(85, 45, 45);
+  //directionalLight(125, 125, 125, 100, 100, 100);
+  pointLight(255, 255, 255, lightX, lightY, lightZ);
+  push();
+}
 function keyPressed(){
   switch(key){
     case "1": human.vx = 1; human.vy =0; break;

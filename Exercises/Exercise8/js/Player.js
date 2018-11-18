@@ -5,7 +5,7 @@ function Player(x, y){
   this.size = 50;
   this.vx =0;
   this.vy =0;
-  this.speed =10;
+  this.speed =6;
   this.angle =0;
 
   // key controls
@@ -49,16 +49,18 @@ Player.prototype.display = function(){
   var legCos2 = cos(this.legAngle+PI)*legTrans;
 
   // body
-  fill(125);
+
+
   translate(this.x, this.y, this.z);
   rotateZ(this.angle);
   push();
+  specularMaterial(125);
   box(bodsize);
   pop();
 
   // tail
   push();
-  fill(185);
+  specularMaterial(185);
   translate(0, bodsize/2+taillength/2, 0);
   box(tailsize, taillength, tailsize);
   translate(tailWiggleX, taillength, tailWiggleY);
@@ -68,11 +70,12 @@ Player.prototype.display = function(){
   // head
   push();
   translate(0, -bodsize/2-headsize/2, headBob);
+  specularMaterial(125);
   box(headsize);
 
   // ears
   push();
-  fill(125);
+  specularMaterial(125);
   translate(earsize, -headsize/6, headsize/2+earsize/2);
   box(earsize);
   translate(-2*earsize, 0, 0);
@@ -80,10 +83,10 @@ Player.prototype.display = function(){
   pop();
 
   //head stripes
-  fill(255);
+  specularMaterial(255);
   translate(0, -headsize/3, headsize/4);
   box(headsize+2, headsize/3+2, headsize/3);
-  fill(0);
+  specularMaterial(0);
   translate(0, 0, -headsize/2);
   box(headsize+2, headsize/3+2, headsize/3);
 
@@ -96,24 +99,28 @@ Player.prototype.display = function(){
 
   //frontright leg
   push();
+  specularMaterial(85);
   translate(bodsize/2+legsize/2, -bodsize/4-legsize/2, legSin-10);
   box(legsize);
   pop();
 
   //frontleft leg
   push();
+  specularMaterial(85);
   translate(-bodsize/2-legsize/2, -bodsize/4-legsize/2, legSin2-10);
   box(legsize);
   pop();
 
   //backright leg
   push();
+  specularMaterial(85);
   translate(bodsize/2+legsize/2, +bodsize/4+legsize/2, legCos-10);
   box(legsize);
   pop();
 
   //backleft leg
   push();
+  specularMaterial(85);
   translate(-bodsize/2-legsize/2, +bodsize/4+legsize/2, legCos2-10);
   box(legsize);
   pop();

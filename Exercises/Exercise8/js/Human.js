@@ -46,10 +46,11 @@ else if(this.vx===0&&this.vy===0){
   rotateZ(0);
 }
 
+
 push();
 // legs
 // leg1
-fill(this.pantscolor);
+  specularMaterial(this.pantscolor);
 translate(legw, leg1, legh/2);
 box(legw, legw, legh);
 // leg2
@@ -58,7 +59,7 @@ box(legw, legw, legh);
 pop();
 
 //bod
-fill(this.shirtcolor);
+  specularMaterial(this.shirtcolor);
 translate(0, 0, legh+bodsize/2);
 push();
 box(bodsize);
@@ -77,7 +78,7 @@ pop();
 
 // head
 push();
-fill(this.skincolor)
+  specularMaterial(this.skincolor);
 translate(0, 0, this.size);
 box(headsize);
 push();
@@ -89,21 +90,21 @@ pop();
 
 // eye1
 push();
-fill(this.eyecolor);
+  specularMaterial(this.eyecolor);
 translate(eyesize*2, headsize/2+eyesize/2, headsize/4);
 box(eyesize);
 pop();
 
 // eye1
 push()
-fill(this.eyecolor);
+  specularMaterial(this.eyecolor);
 translate(-eyesize*2, headsize/2+eyesize/2, headsize/4);
 box(eyesize);
 pop();
 
 // hair
 push()
-fill(this.haircolor);
+  specularMaterial(this.haircolor);
 translate(0, 0, 3*headsize/8);
 box(headsize+2, headsize+2, 2*headsize/8+2);
 pop();

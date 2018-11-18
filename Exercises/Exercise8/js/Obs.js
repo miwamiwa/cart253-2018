@@ -7,8 +7,8 @@ function Obs(x, y){
 
 Obs.prototype.display = function(){
 push();
-fill(0, 255, 0);
 translate(this.x, this.y, this.z);
+specularMaterial(0, 255, 0);
 box(this.size);
 pop();
 }

@@ -3,9 +3,9 @@ function Obs(x, y){
   this.y = y;
   this.z = 0;
   this.size = 50;
-  this.r = 0;
-  this.g = 255;
-  this.b = 0;
+  this.r = 185;
+  this.g = 0;
+  this.b = 185;
 
   if(random()<0.5){
     this.edible = true;

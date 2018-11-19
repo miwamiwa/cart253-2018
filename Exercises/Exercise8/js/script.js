@@ -28,11 +28,16 @@ var lightZ =0;
 var sunRotation=0;
 var yumTexture;
 var racTexture;
+var healthyTexture;
+var sickTexture;
+var droppings = [];
 
 
 function preload() {
 yumTexture = loadImage("images/yum.jpg");
 racTexture = loadImage("images/racoon.jpg");
+healthyTexture = loadImage("images/healthy.jpg");
+sickTexture = loadImage("images/sickly.jpg");
 }
 
 
@@ -47,6 +52,11 @@ obs[1] = new Obs(200, 100);
 obs[2] = new Obs(300, 100);
 obs[3] = new Obs(100, 200);
 obs[4] = new Obs(200, 200);
+droppings[0] = new Droppings(300, 300);
+droppings[1] = new Droppings(300, 350);
+droppings[2] = new Droppings(350, 300);
+droppings[3] = new Droppings(350, 350);
+droppings[4] = new Droppings(350, 400);
 player = new Player(300, 200);
 human = new Human(400, 400);
 world = new World();
@@ -63,11 +73,11 @@ function draw() {
 setLight();
 
 world.display();
-obs[0].display();
-obs[1].display();
-obs[2].display();
-obs[3].display();
-obs[4].display();
+
+for(var i=0; i<5; i++){
+  obs[i].display();
+  droppings[i].display();
+}
 human.display();
 player.handleInput();
 player.display()
@@ -78,7 +88,7 @@ updateCam();
 }
 function setLight(){
 
-ambientLight(85, 65, 45);
+ambientLight(125, 85, 65);
  displaySun();
 
 

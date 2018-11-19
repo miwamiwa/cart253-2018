@@ -18,6 +18,7 @@ function Player(x, y){
 
   // avatar animation variables
   this.legAngle = 0;
+  this.legAngle2 = 0;
   this.legRate =0.5;
   this.tailXAngle =0;
   this.tailYAngle =0;
@@ -37,24 +38,25 @@ Player.prototype.display = function(){
   var eyesize= this.size/10;
   var earsize = this.size/7;
   var legsize = this.size-35;
+  var nosesize = this.size-35;
 
   var tailWiggleX = sin(this.tailXAngle)*5;
   var tailWiggleY = sin(this.tailYAngle)*5;
   var headBob = sin(this.headWobble)*3;
 
   var legTrans = 10;
-  var legSin = sin(this.legAngle)*legTrans;
-  var legSin2 = sin(this.legAngle+PI)*legTrans;
+  var legSin = sin(this.legAngle2)*legTrans;
+  var legSin2 = sin(this.legAngle2+PI)*legTrans;
   var legCos = cos(this.legAngle)*legTrans;
   var legCos2 = cos(this.legAngle+PI)*legTrans;
 
   // body
-
-
   translate(this.x, this.y, this.z);
+  pointLight(145, 145, 215, this.x, this.y, this.size*1.5);
   rotateZ(this.angle);
   push();
-  specularMaterial(125);
+  //specularMaterial(125);
+  texture(racTexture);
   box(bodsize);
   pop();
 
@@ -70,8 +72,21 @@ Player.prototype.display = function(){
   // head
   push();
   translate(0, -bodsize/2-headsize/2, headBob);
-  specularMaterial(125);
+  //specularMaterial(125);
+  texture(racTexture);
   box(headsize);
+
+  // nose
+  push();
+  specularMaterial(125);
+  translate(0, -headsize/2-nosesize/2, 0);
+  box(nosesize);
+
+  // nose tip
+  specularMaterial(25);
+  translate(0, -5*nosesize/8, 0);
+  box(nosesize/4);
+  pop();
 
   // ears
   push();
@@ -137,6 +152,7 @@ var angleSpeed = 1.0;
     this.vy -= cos(this.angle);
     this.vx += sin(this.angle);
     this.legAngle += this.legRate;
+    this.legAngle2 += this.legRate;
     this.tailXAngle += this.legRate;
 
   }
@@ -145,6 +161,7 @@ var angleSpeed = 1.0;
     this.vy += cos(this.angle);
     this.vx -= sin(this.angle);
     this.legAngle += this.legRate;
+    this.legAngle2 += this.legRate;
     this.tailXAngle += this.legRate;
   }
   // left key
@@ -154,6 +171,7 @@ var angleSpeed = 1.0;
   this.angle -= radians(angleSpeed*PI);
   this.vx =0;
   this.vy =0;
+  this.legAngle2 += this.legRate;
   }
   // right key
   else if (keyIsDown(this.rightKey)) {
@@ -162,17 +180,18 @@ this.tailXAngle =0;
     this.angle += radians(angleSpeed*PI);
     this.vx =0;
     this.vy =0;
+    this.legAngle2 += this.legRate;
 
   }
   else if (keyIsDown(this.strafeLeft)) {
-
+this.legAngle2 += this.legRate;
       this.vy -= sin(this.angle);
       this.vx -= cos(this.angle);
 
 
   }
   else if (keyIsDown(this.strafeRight)) {
-
+this.legAngle2 += this.legRate;
       this.vy+= sin(this.angle);
       this.vx += cos(this.angle);
 

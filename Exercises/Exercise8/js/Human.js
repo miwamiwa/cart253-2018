@@ -8,10 +8,10 @@ function Human(x, y){
   this.vx =0;
   this.vy =0;
   this.eyecolor = color(45, 185, 45);
-  this.haircolor = color(185, 45, 45);
+  this.haircolor = color(random(125), random(185), random(255));
   this.skincolor = color(255, 213, 147);
   this.pantscolor = color(45);
-  this.shirtcolor = color(85, 65, 135);
+  this.shirtcolor = color(random(125), random(185), random(255));
 }
 
 Human.prototype.display = function(){
@@ -26,9 +26,8 @@ var legTranslate = 5;
 var leg1 = cos(this.legMotion)*legTranslate;
 
 
-
-
 translate(this.x, this.y, 0);
+pointLight(255, 0, 0, this.x, this.y, this.size*4);
 
 if(this.vx<0){
   rotateZ(3*PI/2)

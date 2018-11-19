@@ -22,10 +22,17 @@ var world;
 var changeCamView = false;
   var camYAngle = -250;
 var lightMotion =0;
+var lightX=0;
+var lightY =0;
+var lightZ =0;
+var sunRotation=0;
+var yumTexture;
+var racTexture;
 
 
 function preload() {
-
+yumTexture = loadImage("images/yum.jpg");
+racTexture = loadImage("images/racoon.jpg");
 }
 
 
@@ -43,7 +50,7 @@ obs[4] = new Obs(200, 200);
 player = new Player(300, 200);
 human = new Human(400, 400);
 world = new World();
-
+noStroke();
 }
 
 
@@ -70,18 +77,12 @@ updateCam();
 
 }
 function setLight(){
-lightMotion+=0.001;
-noiseSeed(0);
-var lightX = noise(lightMotion)*world.w;
-noiseSeed(1);
-var lightY = noise(lightMotion)*world.h;
-noiseSeed(2);
-var lightZ = noise(lightMotion)*200;
 
-  ambientLight(85, 45, 45);
-  //directionalLight(125, 125, 125, 100, 100, 100);
-  pointLight(255, 255, 255, lightX, lightY, lightZ);
-  push();
+ambientLight(85, 65, 45);
+ displaySun();
+
+
+
 }
 function keyPressed(){
   switch(key){
@@ -98,4 +99,42 @@ function updateCam(){
   camOffsetY -= (mouseY-height/2)/height*10;
 //  camOffsetZ = constrain(camOffsetZ, -100, 100);
   camOffsetY = constrain(camOffsetY, -300, 350);
+}
+
+function displaySun(){
+  sunRotation+=0.03;
+  var torusRotation = cos(sunRotation)/4;
+  var coneRotation = sin(sunRotation)*2*PI;
+
+  push();
+  translate(lightX, lightY, lightZ);
+  fill(200, 200, 25);
+  stroke(225, 225, 85);
+  cylinder(10, 10);
+  push();
+  rotateZ(-coneRotation);
+  rotateY(torusRotation);
+  torus(20, 5);
+  pop();
+
+  push();
+  rotateZ(coneRotation);
+  rotateX(0.5*PI);
+  translate(0, 25, 0);
+  cone(10, 30);
+  rotateX(PI);
+  translate(0, 50, 0);
+  cone(10, 30);
+
+  pop();
+  pop();
+
+  lightMotion+=0.001;
+  noiseSeed(0);
+  lightX = noise(lightMotion)*world.w;
+  noiseSeed(1);
+  lightY = noise(lightMotion)*world.h;
+  lightZ = 200;
+
+  pointLight(200, 200, 200, lightX, lightY, lightZ);
 }

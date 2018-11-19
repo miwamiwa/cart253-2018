@@ -2,15 +2,15 @@ function World() {
   this.x = width/2;
   this.y = height/2;
   this.z = -30;
-  this.w = width;
-  this.h = height;
+  this.w = width*2;
+  this.h = height*2;
 
 }
 
 World.prototype.display = function(){
   push();
   translate(this.x, this.y, this.z);
-  ambientMaterial(215);
-  box(width, height, 10);
+  ambientMaterial(255);
+  box(this.w, this.h, 10);
   pop();
 }

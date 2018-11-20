@@ -310,6 +310,14 @@ MovingObject.prototype.display = function() {
     // create spotlight over racoon
     pointLight(145, 145, 215, this.x, this.y, this.size*1.5);
 
+    // display an ellipse to help visualize smelling range
+    push()
+    fill(0);
+    torus(50, 2);
+    noStroke()
+    pop()
+
+
     // rotate racoon according to key controls
     rotateZ(this.angle);
     push();
@@ -407,11 +415,7 @@ MovingObject.prototype.display = function() {
     box(this.legSize);
     pop();
 
-  // display an ellipse to help visualize smelling range
-  noFill()
-  stroke(255, 0, 0);
-  ellipse(this.x+this.size/2, this.y+this.size/2, this.smellRange, this.smellRange);
-  noStroke()
+
 }
 
 // eatobstacle()

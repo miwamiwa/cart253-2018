@@ -46,6 +46,11 @@ function Obstacle(index, obstacleindex){
   } else {
     this.edible = true;
   }
+
+  // colour
+  this.r = 185;
+  this.g = 0;
+  this.b = 185;
 }
 
 // display()
@@ -56,23 +61,24 @@ function Obstacle(index, obstacleindex){
 
 Obstacle.prototype.display = function(){
 
-  // if obsMode is ON, fill becomes tied to obstacle type.
-  if(obsMode){
-    fill(75*this.type);
-  }
+    // move to this obstacle's position
+    push();
+    translate(this.x, this.y, this.z);
 
-  // if obsMode is OFF walls are displayed in black
-  // and all other objects get the same grey.
-  else {
-    if(this.type===0){
-      fill(0);
+    // pick correct texture or fill
+    if(this.edible){
+      texture(yumTexture);
     }
     else {
-      fill(185);
+      specularMaterial(this.r, this.g, this.b);
     }
-  }
-// display obstacle
-  rect(this.x, this.y, this.size, this.size);
+
+    // display obstacle
+    box(this.size);
+
+    // create spotlight over the obstacle
+    pointLight(this.r, this.g, this.b, this.x, this.y, this.size);
+    pop();
 }
 
 // getEaten()

@@ -12,6 +12,7 @@ this script displays racoon poop.
 function Droppings(x, y, goodOrBad, size){
   this.x = x;
   this.y = y;
+    this.z = 0;
   this.isHealthy = goodOrBad;
   this.size = 10+2*size;
 }
@@ -21,15 +22,19 @@ function Droppings(x, y, goodOrBad, size){
 // displays good and bad droppings with different colours.
 
 Droppings.prototype.display = function (){
+  // move to droppings position
+  push();
+  translate(this.x, this.y, this.z);
+
+  // pick appropriate texture
   if(this.isHealthy){
-    // green for healthy
-    fill(45, 185, 35);
+    texture(healthyTexture);
   }
   else {
-    // red for bad
-    fill(185, 35, 35);
+    texture(sickTexture);
   }
 
-  // display dropping
-  rect(this.x, this.y, this.size, this.size);
+  // display box
+  box(this.size);
+  pop();
 }

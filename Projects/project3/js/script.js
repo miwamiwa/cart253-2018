@@ -25,6 +25,32 @@ var yobs = 0;
 
 var obsSize= 15;
 
+// camera settings
+var camOffsetX = 0;
+var camOffsetY = 0;
+var camOffsetZ = 0;
+var changeCamView = false;
+var camYAngle = -250;
+
+// textures
+var yumTexture;
+var racTexture;
+var healthyTexture;
+var sickTexture;
+
+// preload()
+//
+// loads images to be used for textures
+
+function preload() {
+
+  // load images
+  yumTexture = loadImage("images/yum.jpg");
+  racTexture = loadImage("images/racoon.jpg");
+  healthyTexture = loadImage("images/healthy.jpg");
+  sickTexture = loadImage("images/sickly.jpg");
+}
+
 // setup()
 //
 // Creates the game objects
@@ -87,6 +113,8 @@ function setup() {
       obstacleindex +=1;
     }
   }
+
+  noStroke();
 }
 
 // draw()
@@ -107,19 +135,26 @@ function draw() {
 function runGame(){
 
   background(255);
+  world.display();
 
-  // PLAYER
 
-  // update player position
-  player.handleInput();
-  player.update();
-  // digest any foods eaten
-  player.digest();
-  // look out for recognized smells
-  player.sniffOut();
-  // display player object
-  player.display();
+  // OBSTACLES
 
+  // for all obstacles in play
+  for(var i=0; i<obstacles.length; i++){
+    // display
+    obstacles[i].display();
+  }
+
+  // DROPPINGS
+
+  // for all droppings in play (if any)
+  if(droppings.length!=0){
+    for(var i=0; i<droppings.length; i++){
+      // display
+      droppings[i].display();
+    }
+  }
   // ENEMIES
 
   // for all enemies in play
@@ -133,27 +168,28 @@ function runGame(){
     enemies[i].handlePlayerCollision(player);
   }
 
-  // DROPPINGS
+  // PLAYER
 
-  // for all droppings in play (if any)
-  if(droppings.length!=0){
-    for(var i=0; i<droppings.length; i++){
-      // display
-      droppings[i].display();
-    }
-  }
+  // update player position
+  player.handleInput();
+  player.update();
+  // digest any foods eaten
+  player.digest();
+  // look out for recognized smells
+  player.sniffOut();
+  // display player object
+  player.display();
 
-  // OBSTACLES
 
-  // for all obstacles in play
-  for(var i=0; i<obstacles.length; i++){
-    // display
-    obstacles[i].display();
-  }
+
+
 
   // display score over everything else
   //displayScore();
-
+  if(mouseIsPressed){
+    // trigger zoom out
+    updateCam();
+  }
 
 }
 
@@ -216,4 +252,18 @@ function toggleObsMode(){
   } else {
     obsMode = true;
   }
+}
+
+// udpateCam()
+//
+// zoom out function called upon clicking mouse.
+// click on top of screen to zoom in.
+// click on bottom of screen to zoom out.
+
+function updateCam(){
+  changeCamView = true;
+  //  camOffsetZ -= (mouseX-width/2)/width*10;
+  camOffsetY -= (mouseY-height/2)/height*10;
+  //  camOffsetZ = constrain(camOffsetZ, -100, 100);
+  camOffsetY = constrain(camOffsetY, -300, 350);
 }

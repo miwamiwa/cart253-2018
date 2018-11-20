@@ -106,68 +106,51 @@ MovingObject.prototype.update = function() {
     if (obstacles[i].size>5){
 
       if(
-        // if player is touching left obstacle wall
-        this.x+this.vx<obstacles[i].x
-        && this.x+this.vx+this.size>obstacles[i].x
-        && this.y+this.size>obstacles[i].y
-        && this.y<obstacles[i].y+obstacles[i].size
-        // and attempting to move right
-        && this.vx>0
+      collideLineRect(
+        obstacles[i].x,
+        obstacles[i].y,
+        obstacles[i].x,
+        obstacles[i].y+obstacles[i].size,
+        this.x+this.vx,
+        this.y+this.vy,
+        this.size,
+        this.size)
+        ||
+        collideLineRect(
+          obstacles[i].x+obstacles[i].size,
+          obstacles[i].y,
+          obstacles[i].x+obstacles[i].size,
+          obstacles[i].y+obstacles[i].size,
+          this.x+this.vx,
+          this.y+this.vy,
+          this.size,
+          this.size)
       ){
-
-        // overwrite x-pos so we don't accidentally move into the obstacle
-        this.x=obstacles[i].x-this.size;
-        // overwrite x velocity to stop moving
         this.vx =0;
-        // nibble on this obstacle
         this.eatObstacle(i);
       }
-
-      else if(
-        // if player is touching right obstacle wall
-        this.x+this.vx+this.size>obstacles[i].x+obstacles[i].size
-        && this.x+this.vx<obstacles[i].x+obstacles[i].size
-        && this.y+this.size>obstacles[i].y
-        && this.y<obstacles[i].y+obstacles[i].size
-        && this.vx<0
-      ){
-        // overwrite x-pos so we don't accidentally move into the obstacle
-        this.x=obstacles[i].x+obstacles[i].size;
-        // overwrite x velocity to stop moving
-        this.vx =0;
-        // nibble on this obstacle
-        this.eatObstacle(i);
-      }
-
       if(
-        // if player is touching top obstacle wall
-        this.y+this.vy<obstacles[i].y
-        && this.y+this.vy+this.size>obstacles[i].y
-        && this.x+this.size>obstacles[i].x
-        && this.x<obstacles[i].x+obstacles[i].size
-        && this.vy>0
+      collideLineRect(
+        obstacles[i].x,
+        obstacles[i].y,
+        obstacles[i].x+obstacles[i].size,
+        obstacles[i].y,
+        this.x+this.vx,
+        this.y+this.vy,
+        this.size,
+        this.size)
+        ||
+        collideLineRect(
+          obstacles[i].x,
+          obstacles[i].y+obstacles[i].size,
+          obstacles[i].x+obstacles[i].size,
+          obstacles[i].y+obstacles[i].size,
+          this.x+this.vx,
+          this.y+this.vy,
+          this.size,
+          this.size)
       ){
-        // overwrite y-pos so we don't accidentally move into the obstacle
-        this.y=obstacles[i].y-this.size;
-        // overwrite y velocity to stop moving
         this.vy =0;
-        // nibble on this obstacle
-        this.eatObstacle(i);
-      }
-
-      else if(
-        // if player is touching bottom obstacle wall
-        this.y+this.vy+this.size>obstacles[i].y+obstacles[i].size
-        && this.y+this.vy<obstacles[i].y+obstacles[i].size
-        && this.x+this.size>obstacles[i].x
-        && this.x<obstacles[i].x+obstacles[i].size
-        && this.vy<0
-      ){
-        // overwrite y-pos so we don't accidentally move into the obstacle
-        this.y=obstacles[i].y+obstacles[i].size;
-        // overwrite y velocity to stop moving
-        this.vy =0;
-        // nibble on this obstacle
         this.eatObstacle(i);
       }
     }

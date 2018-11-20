@@ -49,14 +49,17 @@ EnemyObject.prototype.update = function() {
 
       //if close to left obstacle wall and moving right
       if(
-        this.x+this.vx<obstacles[i].x
-        && this.x+this.vx+this.size>obstacles[i].x
-        && this.y+this.size>obstacles[i].y
-        && this.y<obstacles[i].y+obstacles[i].size
-        && this.vx>0
+        collideLineRect(
+          obstacles[i].x,
+          obstacles[i].y,
+          obstacles[i].x,
+          obstacles[i].y+obstacles[i].size,
+          this.x+this.vx,
+          this.y+this.vy,
+          this.size,
+          this.size)
       ){
         // can't move right.
-        this.x=obstacles[i].x-this.size;
         this.vx =0;
         // pick a new bearing
         this.newBearing(1, 1, 1, 0);
@@ -64,42 +67,51 @@ EnemyObject.prototype.update = function() {
 
       //if close to right obstacle wall and moving left
       else if(
-        this.x+this.vx+this.size>obstacles[i].x+obstacles[i].size
-        && this.x+this.vx<obstacles[i].x+obstacles[i].size
-        && this.y+this.size>obstacles[i].y
-        && this.y<obstacles[i].y+obstacles[i].size
-        && this.vx<0
+        collideLineRect(
+          obstacles[i].x+obstacles[i].size,
+          obstacles[i].y,
+          obstacles[i].x+obstacles[i].size,
+          obstacles[i].y+obstacles[i].size,
+          this.x+this.vx,
+          this.y+this.vy,
+          this.size,
+          this.size)
       ){
         // can't move left
-        this.x=obstacles[i].x+obstacles[i].size;
         this.vx =0;
         // pick a new bearing
         this.newBearing(1, 1, 0, 1);
       }
       // if close to top wall and moving down
       if(
-        this.y+this.vy<obstacles[i].y
-        && this.y+this.vy+this.size>obstacles[i].y
-        && this.x+this.size>obstacles[i].x
-        && this.x<obstacles[i].x+obstacles[i].size
-        && this.vy>0
+        collideLineRect(
+          obstacles[i].x,
+          obstacles[i].y,
+          obstacles[i].x+obstacles[i].size,
+          obstacles[i].y,
+          this.x+this.vx,
+          this.y+this.vy,
+          this.size,
+          this.size)
       ){
         // can't move down
-        this.y=obstacles[i].y-this.size;
         this.vy =0;
         // pick a new bearing
         this.newBearing(1, 0, 1, 1);
       }
       //if close to bottom obstacle wall and moving up
       else if(
-        this.y+this.vy+this.size>obstacles[i].y+obstacles[i].size
-        && this.y+this.vy<obstacles[i].y+obstacles[i].size
-        && this.x+this.size>obstacles[i].x
-        && this.x<obstacles[i].x+obstacles[i].size
-        && this.vy<0
+        collideLineRect(
+          obstacles[i].x,
+          obstacles[i].y+obstacles[i].size,
+          obstacles[i].x+obstacles[i].size,
+          obstacles[i].y+obstacles[i].size,
+          this.x+this.vx,
+          this.y+this.vy,
+          this.size,
+          this.size)
       ){
         // can't move up
-        this.y=obstacles[i].y+obstacles[i].size;
         this.vy =0;
         // pick a new bearing
         this.newBearing(0, 1, 1, 1);
@@ -147,11 +159,13 @@ EnemyObject.prototype.newBearing = function(a, b, c, d){
       // new bearing is along y-axis
       // use random() to pick direction
       this.vy = random(a*(-speed), b*speed);
+      this.vx=0;
     }
     else {
       // new bearing is along x-axis
       // use random() to pick direction
       this.vx = random(c*(-speed), d*speed);
+      this.vy=0;
     }
 
   this.charging = false;
@@ -312,14 +326,13 @@ if(viewClear){
 
 EnemyObject.prototype.handlePlayerCollision = function(target){
   // if enemy and player overlap on the x axis
-  if(this.x + this.size/2 > target.x && this.x+this.size/2 < target.x + target.size){
-    // if enemy and player overlap on the y axis
-    if(this.y + this.size/2 > target.y && this.y+this.size/2 < target.y + target.size){
+  if(collideRectRect(target.x, target.y, target.size, target.size, this.x, this.y, this.size, this.size)){
+
 
       // set new position
       this.x = random(width);
       // set new bearing
       this.newBearing("up");
     }
-  }
+
 }

@@ -1,19 +1,8 @@
 /*
 
 Synth.js
-This is what the three synths in the bgm are made of.
-this object, as well as Drum and SFX are another edit
-of the music objects i've been working on in my exercises and projects.
-They all use pretty much the same constructor parameters and setup functions (trimmed to suit the object's needs)
-The differences lie mostly in the manner in which sound if triggered in playSFX(), handleDrums() and playMusic()
-
-this script handles:
-- creating a Synth object
-- setting the envelope
-- setting the filter
-- setting the delay effect
-- setting the notes and rhythm to be played
-- playing this synth's list of notes with a given rhythm
+copied in from project 2.
+no change.
 
 */
 
@@ -109,7 +98,7 @@ Synth.prototype.playMusic = function(){
       if(this.rType==="array"){
         this.nextNote+=this.rhythm[this.loop];
       }
-      
+
     // increment appropriate loop
     this.loop+=1;
     // if loop has reached maximum limit reset loop

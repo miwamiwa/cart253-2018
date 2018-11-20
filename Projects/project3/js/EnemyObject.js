@@ -171,11 +171,31 @@ EnemyObject.prototype.newBearing = function(a, b, c, d){
   this.charging = false;
 }
 
+EnemyObject.prototype.charge = function(direction){
+  this.charging = true;
+  if(direction==="left"){
+    this.vx =-this.speed;
+    this.vy=0;
+  }
+  else   if(direction==="right"){
+      this.vx =this.speed;
+      this.vy=0;
+    }
+    else   if(direction==="up"){
+        this.vy =-this.speed;
+        this.vx=0;
+      }
+      else   if(direction==="down"){
+          this.vy =this.speed;
+          this.vx=0;
+        }
+}
+
 // setbearing()
 //
 // use to set a specific bearing when enemy rushes towards player.
 // accepts axis and direction and returns proper velocity.
-
+/*
 EnemyObject.prototype.setBearing = function(axis, direction){
   // set both velocities to 0.
   this.vx=0;
@@ -189,6 +209,7 @@ EnemyObject.prototype.setBearing = function(axis, direction){
     this.vy = -direction*this.speed;
   }
 }
+*/
 
 // display()
 //
@@ -211,28 +232,143 @@ EnemyObject.prototype.display = function() {
 // but it's a start.
 
 EnemyObject.prototype.lookOut = function(target){
+  // enemy not already charging
   if(!this.charging){
-  // if enemy and player are aligned on the x axis
-  if(
-    this.x  <= target.x + target.size
-    && this.x + this.size >= target.x
-  ){
-    // set direction which enemy will look towards
-    direction = (this.y-target.y)/abs(this.y-target.y);
-    // check for obstacles in the way
-    this.checkObstacles("y", direction, target);
+
+// enemy and player are aligned on the y axis
+if(collideLineRect(this.x, 0, this.x, world.h, target.x, target.y, target.size, target.size)){
+  // player is above and enemy is not heading down
+  if(target.y<this.y && this.vy<=0 ){
+    this.nearestHigherObstacle(target);
+    console.log("PLAYER ALIGNED ");
+  }
+  // player is below and enemy is not heading up
+  if(target.y>this.y && this.vy>=0 ){
+    this.nearestLowerObstacle(target);
+    console.log("PLAYER ALIGNED ");
   }
 
-  // if enemy and player are aligned on the y axis
-  else if(
-    this.y <= target.y + target.size
-    && this.y+this.size >= target.y
-  ){
-    direction = (this.x-target.x)/abs(this.x-target.x);
-    // check for obstacles in the way
-    this.checkObstacles("x", direction, target);
+}
+
+// enemy and player are aligned on the x axis
+if(collideLineRect(0, this.y, world.w, this.y, target.x, target.y, target.size, target.size)){
+  // player is to the left and enemy is not heading right
+  if(target.x<this.x && this.vx<=0 ){
+    this.nearestLeftObstacle(target);
+    console.log("PLAYER ALIGNED ");
+
+  }
+  // player is to the right and enemy is not heading left
+  if(target.x>this.x && this.vx>=0 ){
+    this.nearestRightObstacle(target);
+    console.log("PLAYER ALIGNED ");
   }
 }
+}
+
+}
+
+EnemyObject.prototype.nearestLeftObstacle = function(target){
+
+
+  var wayIsClear =true;
+
+  for(var i=0; i<obstacles.length; i++){
+    if(obstacles[i].x<this.x
+      && obstacles[i].x > target.x
+      && obstacles[i].y > this.y - this.size/2
+      && obstacles[i].y < this.y + this.size/2){
+
+
+      wayIsClear = false;
+    }
+  }
+
+  if(wayIsClear){
+    if(this.checkPlayerVisible(target, 0, this.y, this.x, this.size)){
+      this.charge("left");
+    }
+  }
+}
+
+EnemyObject.prototype.nearestRightObstacle = function(target){
+
+
+  var wayIsClear =true;
+
+  for(var i=0; i<obstacles.length; i++){
+    if(obstacles[i].x>this.x
+      && obstacles[i].x < target.x
+      && obstacles[i].y > this.y - this.size/2
+      && obstacles[i].y < this.y + this.size/2){
+
+
+      wayIsClear = false;
+    }
+  }
+
+  if(wayIsClear){
+    if(this.checkPlayerVisible(target, this.x, this.y, world.w, this.size)){
+      this.charge("right");
+    }
+  }
+}
+
+EnemyObject.prototype.nearestHigherObstacle = function(target){
+
+
+  var wayIsClear =true;
+
+  for(var i=0; i<obstacles.length; i++){
+    if(obstacles[i].y<this.y
+      && obstacles[i].y > target.y
+      && obstacles[i].x > this.x - this.size/2
+      && obstacles[i].x < this.x + this.size/2){
+
+
+      wayIsClear = false;
+    }
+  }
+
+  if(wayIsClear){
+    if(this.checkPlayerVisible(target, this.x, 0, this.size, world.h)){
+      this.charge("up");
+    }
+  }
+}
+
+EnemyObject.prototype.nearestLowerObstacle = function(target){
+
+    var wayIsClear =true;
+
+    for(var i=0; i<obstacles.length; i++){
+      if(obstacles[i].y>this.y
+        && obstacles[i].y < target.y
+        && obstacles[i].x > this.x - this.size/2
+        && obstacles[i].x < this.x + this.size/2){
+
+        wayIsClear = false;
+      }
+    }
+
+    if(wayIsClear){
+      if(this.checkPlayerVisible(target, this.x, 0, this.size, world.h)){
+        this.charge("down");
+      }
+    }
+}
+
+EnemyObject.prototype.checkPlayerVisible = function(target, x, y, w, h){
+
+  if(collideRectRect(x, y, w, h, target.x, target.y, target.size, target.size))
+  {
+    console.log("FOUND YE");
+
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 // checkobstacles()

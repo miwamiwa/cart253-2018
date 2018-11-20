@@ -3,7 +3,7 @@ var player;
 var enemy;
 
 var canvas;
-
+var world;
 var obstacles = [];
 var totalobs = 0;
 var kindsOfObs = 3;
@@ -32,11 +32,13 @@ var obsSize= 15;
 function setup() {
 
   // create canvas:
-  canvas = createCanvas(900, 450);
+  canvas = createCanvas(900, 450, WEBGL);
   canvas.parent('sketch-holder');
 
   // create new player objects
   player = new MovingObject(0,height/2,4,83,87, 65, 68);
+
+  world = new World();
 
   // create a given number of enemies
   for (var i=0; i<numEnemies; i++){
@@ -76,7 +78,7 @@ function setup() {
   // for each point on the grid
   for (var i=0; i<xobs*yobs; i++){
     // random chance of generating an obstacle object
-    if(random()<0.2){
+    if(random()<0.05){
       // count total obstacles
       totalobs+=1;
       // create a new obstacle at this point and give it an index number.
@@ -150,7 +152,7 @@ function runGame(){
   }
 
   // display score over everything else
-  displayScore();
+  //displayScore();
 
 
 }
@@ -180,12 +182,14 @@ function runSound(){
 // display number of healthy and unhealthy droppings
 
 function displayScore(){
+  /*
   // create a backdrop
   fill(185, 100, 100);
   rect(0, 0, 250, 15);
   // display text
   fill(0);
-  text("healthy droppings: "+player.healthydroppings+", sickly droppings: "+player.sickdroppings, 10, 10);
+  */
+  console.log("healthy droppings: "+player.healthydroppings+", sickly droppings: "+player.sickdroppings, 10, 10);
 }
 
 // TEST FUNCTIONS

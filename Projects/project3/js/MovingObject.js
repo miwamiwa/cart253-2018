@@ -16,8 +16,9 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
   // position and size
   this.x = x;
   this.y = y;
-  this.size = 20;
 
+  this.size = 50;
+this.z =this.size/2;
   // speed
   this.vx = 0;
   this.vy = 0;
@@ -35,6 +36,9 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
   // time until the player can eat again
   this.eatingTimer = 0;
   this.eatingTimerLength = 2000;
+  //
+  this.poopingTimer =0;
+  this.poopingTimerLength = 500;
 
   // fill
   this.red = random(215);
@@ -93,6 +97,15 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
     this.legSize = this.size-35;
     this.noseSize = this.size-35;
 
+    this.healthyFoodEaten = 0;
+    this.sicklyFoodEaten =0;
+
+    this.wasHitTimer =0;
+    this.wasHitTimerLength = 400;
+
+    this.ringOsc =0;
+    this.ringOscRate =0.08;
+
 }
 
 // handleInput()
@@ -130,17 +143,16 @@ MovingObject.prototype.handleInput = function() {
       this.legAngle += this.legRate;
       this.legAngle2 += this.legRate;
       this.tailXAngle += this.legRate;
-    }
-
+    }  // if no keys are pressed stop moving.
+      else {
+       this.vx=0;
+       this.vy=0;
+     }
     // left key is pressed
-    else if (keyIsDown(this.leftKey)) {
+     if (keyIsDown(this.leftKey)) {
 
       // rotate left
       this.angle -= radians(angleSpeed*PI);
-
-      // stop moving
-      this.vx =0;
-      this.vy =0;
 
       // trigger appropriate parts motion
       this.legAngle2 += this.legRate;
@@ -154,18 +166,15 @@ MovingObject.prototype.handleInput = function() {
       // rotate right
       this.angle += radians(angleSpeed*PI);
 
-      // stop moving
-      this.vx =0;
-      this.vy =0;
-
       // trigger appropriate parts motion
       this.legAngle2 += this.legRate;
       this.tailYAngle += this.legRate;
       this.tailXAngle =0;
     }
 
+
      // strafe left key is pressed
-    else if (keyIsDown(this.strafeLeft)) {
+    if (keyIsDown(this.strafeLeft)) {
 
       // trigger appropriate parts motion
       this.legAngle2 += this.legRate;
@@ -187,11 +196,7 @@ MovingObject.prototype.handleInput = function() {
 
     }
 
-    // if no keys are pressed stop moving.
-    else {
-      this.vy = 0;
-      this.vx=0;
-    }
+
 }
 
 // update()
@@ -204,8 +209,9 @@ MovingObject.prototype.update = function() {
   // check all obstacles
   for (var i=0; i<obstacles.length; i++){
 
-    // if obstacle is large enough to eat
-    if (obstacles[i].size>5){
+    // if obstacle is large enough to eat.
+    // also do not bother checking if obstacle isn't within 100px
+    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<80){
 
       if(
       collideLineRect(
@@ -266,6 +272,9 @@ MovingObject.prototype.update = function() {
   this.x+=this.vx;
   this.y+=this.vy;
 
+  this.x = constrain(this.x, -world.w/2, world.w/2)
+  this.y = constrain(this.y, -world.h/2, world.h/2)
+
   // set camera to match player position
   this.setCam();
 }
@@ -306,15 +315,37 @@ MovingObject.prototype.display = function() {
 
     // move to racoon position
     translate(this.x, this.y, this.z);
-
+    push();
+    translate(0, 0, this.size*3)
     // create spotlight over racoon
-    pointLight(145, 145, 215, this.x, this.y, this.size*1.5);
+    directionalLight(0, 0, 215,0, 0);
+    pop();
 
     // display an ellipse to help visualize smelling range
     push()
-    fill(0);
-    torus(50, 2);
-    noStroke()
+    ambientMaterial(45, 45, 185, 85);
+    if(this.eatingTimer>millis()){
+      ambientMaterial(45, 185, 45, 125);
+    }
+    if (this.poopingTimer>millis()){
+     ambientMaterial(185, 85, 65, 155);
+   }
+   if (this.wasHitTimer>millis()){
+    ambientMaterial(185, 185, 25, 155);
+  }
+  translate(0, 0, -this.size/2+5)
+  rotateX(PI/2)
+  cylinder(this.size*1.1, 2);
+
+  rotateX(-PI/2)
+  translate(0, 0, this.size*0.6)
+  this.ringOsc+=this.ringOscRate;
+  rotateY(cos(this.ringOsc)/50)
+  torus(this.smellRange-15, 8);
+  translate(0, 0, 10);
+  rotateY(-cos(this.ringOsc)/50)
+  rotateY(cos(this.ringOsc/2)/50)
+  torus(this.smellRange, 4);
     pop()
 
 
@@ -437,9 +468,10 @@ MovingObject.prototype.eatObstacle = function(index) {
       this.foodInBelly +=1;
 
       // if food item is a bad food
-      if(obstacles[index].type === 2){
-        // player is now sick
-        this.isSick = true;
+      switch(obstacles[index].type){
+        case 1: this.healthyFoodEaten ++; break;
+        case 2: this.sicklyFoodEaten ++; this.isSick = true; break;
+
       }
 
       // remove a bit of size off this specific obstacle
@@ -482,6 +514,9 @@ MovingObject.prototype.eatObstacle = function(index) {
 
       // reset amount of food inside belly
       this.foodInBelly = 0;
+
+      // shoot the pooping timer
+      this.poopingTimer = millis() + this.poopingTimerLength;
 
       // if player is sick because of what he ate
       if(this.isSick){

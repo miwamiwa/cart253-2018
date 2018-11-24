@@ -10,8 +10,9 @@ var kindsOfObs = 3;
 var playerIsFullThreshold = 1;
 var droppings = [];
 var enemies = [];
-var numEnemies = 3;
-
+var numEnemies = 10;
+var healthyobs =0;
+var sicklyobs =0;
 // sound
 var synths = [];
 var drums;
@@ -37,7 +38,7 @@ var yumTexture;
 var racTexture;
 var healthyTexture;
 var sickTexture;
-
+var backgroundImage ;
 // preload()
 //
 // loads images to be used for textures
@@ -49,6 +50,8 @@ function preload() {
   racTexture = loadImage("images/racoon.jpg");
   healthyTexture = loadImage("images/healthy.jpg");
   sickTexture = loadImage("images/sickly.jpg");
+  backgroundImage = loadImage("images/bg.jpg");
+  lowergroundImage = loadImage("images/beach.jpg");
 }
 
 // setup()
@@ -58,61 +61,19 @@ function preload() {
 function setup() {
 
   // create canvas:
-  canvas = createCanvas(900, 450, WEBGL);
+
+  canvas = createCanvas(windowWidth, windowHeight-100, WEBGL);
+
   canvas.parent('sketch-holder');
 
-  // create new player objects
-  player = new MovingObject(0,height/2,4,83,87, 65, 68);
-
-  world = new World();
-
-  // create a given number of enemies
-  for (var i=0; i<numEnemies; i++){
-    enemies[i] = new EnemyObject(random(width), random(height));
-  }
-
-  // create a new synthesizor object for each kind of food in play
-  for (var i=0; i<kindsOfObs-1; i++){
-    synths[i] = new Synth("sine");
-    console.log("new synth");
-  }
-
-  // load remaining music objects
+  // load music objects
   drums = new Drum("white");
   music = new Music();
   music.setupInstruments();
-  music.launchPart1();
 
-  // create a random array of obstacles.
-  // obstacles can be any type of food, or an actual obstacle
-  // this is determined randomly in the Obstacle() constructor
+  world = new World();
 
-  // let's start by creating a grid along which obstacles are placed.
-  // this way there are no overlaps
-
-  // calculate how many obstacles can fit into the grid
-  // on the x-axis
-  xobs = floor((width-50)/obsSize);
-  // on the y-axis
-  yobs = floor((height-50)/obsSize);
-
-  // create a var to index each obstacle.
-  // this way a specific obstacle can be found without having to search
-  // through the obstacles[] array.
-  var obstacleindex =0;
-
-  // for each point on the grid
-  for (var i=0; i<xobs*yobs; i++){
-    // random chance of generating an obstacle object
-    if(random()<0.05){
-      // count total obstacles
-      totalobs+=1;
-      // create a new obstacle at this point and give it an index number.
-      obstacles.push(new Obstacle(i, obstacleindex));
-      // increment index
-      obstacleindex +=1;
-    }
-  }
+  newLevel();
 
   noStroke();
 }
@@ -122,9 +83,9 @@ function setup() {
 // loops the main game elements
 
 function draw() {
-
+  console.log("healthy food sources: "+healthyobs+", unhealthy food sources: "+sicklyobs+", healthy food eaten: "+player.healthyFoodEaten+", unhealthy food eaten: "+player.sicklyFoodEaten);
   runGame();
-  runSound();
+//  runSound();
 
 }
 
@@ -266,4 +227,91 @@ function updateCam(){
   camOffsetY -= (mouseY-height/2)/height*10;
   //  camOffsetZ = constrain(camOffsetZ, -100, 100);
   camOffsetY = constrain(camOffsetY, -300, 350);
+}
+
+// findgoodposition()
+//
+// finds a random position for a player or enemy
+// avoids clipping them onto an obstacle.
+
+function findGoodPosition(target) {
+  var positionGood = false;
+  while (!positionGood){
+    target.x = random(-world.w/2, world.w/2);
+    target.y = random(-world.h/2, world.h/2);
+  var positionNoGood = false;
+  for(var i=0; i < obstacles.length; i++){
+    if(
+      target.x>=obstacles[i].x-obstacles[i].size/2-25
+    && target.x<=obstacles[i].x+obstacles[i].size/2+25
+    && target.y>=obstacles[i].y-obstacles[i].size/2-25
+    && target.y<=obstacles[i].y+obstacles[i].size/2+25
+  ){
+    positionNoGood=true;
+  }
+  }
+  if(!positionNoGood){
+    positionGood = true;
+  }
+}
+}
+
+function newLevel(){
+
+  // create new player objects
+  player = new MovingObject(0,height/2,3,83,87, 65, 68);
+
+  // create a given number of enemies
+  for (var i=0; i<numEnemies; i++){
+    enemies[i] = new EnemyObject(50, 50);
+  }
+
+  // create a new synthesizor object for each kind of food in play
+  for (var i=0; i<kindsOfObs-1; i++){
+    synths[i] = new Synth("sine");
+  }
+
+
+  // create a random array of obstacles.
+  // obstacles can be any type of food, or an actual obstacle
+  // this is determined randomly in the Obstacle() constructor
+
+  // let's start by creating a grid along which obstacles are placed.
+  // this way there are no overlaps
+
+  // calculate how many obstacles can fit into the grid
+  // on the x-axis
+  xobs = (world.w)/50;
+  // on the y-axis
+  yobs = (world.h)/50;
+
+  // create a var to index each obstacle.
+  // this way a specific obstacle can be found without having to search
+  // through the obstacles[] array.
+  var obstacleindex =0;
+  healthyobs =0;
+  sicklyobs =0;
+
+  // for each point on the grid
+
+  for (var i=0; i<xobs*yobs; i++){
+    // random chance of generating an obstacle object
+    if(random()<0.04){
+      // count total obstacles
+      totalobs+=1;
+      // create a new obstacle at this point and give it an index number.
+      obstacles.push(new Obstacle(i, obstacleindex));
+      // increment index
+      obstacleindex +=1;
+    }
+  }
+
+  // position player and enemies around obstacles.
+  findGoodPosition(player);
+  for (var i=0; i<numEnemies; i++){
+  findGoodPosition(enemies[i]);
+  }
+
+  // start sound
+    music.launchPart1();
 }

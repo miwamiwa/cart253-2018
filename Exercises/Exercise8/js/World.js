@@ -8,7 +8,7 @@
 
 // World()
 //
-// creates variables to hold world size, world position, and light motion. 
+// creates variables to hold world size, world position, and light motion.
 
 function World() {
 

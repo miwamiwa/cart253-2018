@@ -24,27 +24,33 @@ function Obstacle(index, obstacleindex){
   // this.size = random(2, 3)*obsSize;
 
   // object size
-  this.size = obsSize;
+  this.size = 50;
 
   // object position on the grid
   this.row = floor(index/xobs);
   this.column = index%xobs;
 
   // calculate x, y coordinates from grid position
-  this.x = this.column*this.size;
-  this.y = this.row*this.size;
+  this.x = map(this.column*this.size, 0, world.w, -world.w/2, world.w/2);
+  this.y = map(this.row*this.size, 0, world.h, -world.h/2, world.h/2);
+  this.z =this.size/2;
 
   // randomize object type.
   // right now 0 is an obstacle/wall, 1 is good food and 2 is bad food.
-
-  this.type = floor(random(kindsOfObs));
-
+  if(random()>0.25){
+    this.type =0;
+  }
+  else{
+  this.type = floor(random(kindsOfObs-1))+1;
+}
   // tell me if this object is edible or not
   // (an obstacle/wall is not edible, our racoon is not a rat)
-  if(this.type===0){
-    this.edible = false;
-  } else {
-    this.edible = true;
+  // also count up healthy and sickly obstacles
+
+  switch(this.type){
+    case 0: this.edible = false; break;
+    case 1: this.edible = true; healthyobs ++; break;
+    case 2: this.edible = true; sicklyobs ++; break;
   }
 
   // colour
@@ -62,6 +68,7 @@ function Obstacle(index, obstacleindex){
 Obstacle.prototype.display = function(){
 
     // move to this obstacle's position
+
     push();
     translate(this.x, this.y, this.z);
 

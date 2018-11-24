@@ -13,9 +13,10 @@ function EnemyObject(x,y) {
   // position and size
   this.x = x;
   this.y = y;
-    this.z = 0;
 
-  this.size = 15;
+
+  this.size = 50;
+  this.z = this.size/2;
   // speed
   this.vx = 0;
   this.vy = 0;
@@ -63,11 +64,17 @@ function EnemyObject(x,y) {
 // checks for obstacle collision and updates position according to bearing.
 
 EnemyObject.prototype.update = function() {
-
+if (this.charging){
+  this.legRate = 0.4;
+}
+else {
+  this.legRate = 0.2;
+}
   // check all obstacles
   for (var i=0; i<obstacles.length; i++){
-
-    if (obstacles[i].size>5){
+// if obstacle is large enough
+     // also do not bother checking if obstacle isn't within 100px
+    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<80){
 
       //if close to left obstacle wall and moving right
       if(
@@ -143,27 +150,28 @@ EnemyObject.prototype.update = function() {
 
   // Check for going off screen and set new bearing if so
   // if enemy hits the left wall
-  if (this.x <= 0 ) {
+  if (this.x <= -world.w/2 ) {
     this.newBearing(1, 1, 0, 1);
   }
   // if enemy hits the right wall
-  else if (this.x +this.size >= width ) {
+  else if (this.x +this.size >= world.w/2 ) {
     this.newBearing(1, 1, 1, 0);
   }
   // if enemy hits the top wall
-  else   if (this.y <= 0 ) {
+  else   if (this.y <= -world.h/2 ) {
     this.newBearing(0, 1, 1, 1);
   }
   // if enemy hits the bottom wall
-  else if (this.y +this.size >=height) {
+  else if (this.y +this.size >=world.h/2) {
     this.newBearing(1, 0, 1, 1);
   }
 
   // update and constrain x, y position
   this.y += this.vy;
-  this.y = constrain(this.y,0,height-this.size);
+  this.y = constrain(this.y,-world.h/2,world.h/2-this.size);
   this.x +=this.vx;
-  this.x = constrain(this.x,0,width-this.size);
+  this.x = constrain(this.x,-world.w/2,world.w/2-this.size);
+
 }
 
 // newbearing()
@@ -247,18 +255,18 @@ EnemyObject.prototype.display = function() {
   var leg1 = cos(this.legMotion)*legTranslate;
 
   // draw human
-
+ push();
   // move to player position
-  translate(this.x, this.y, 0);
+  translate(this.x, this.y, this.z);
 
   // place a red spotlight over the human
   pointLight(255, 0, 0, this.x, this.y, this.size*4);
 
   // rotate according to velocity
-  if(this.vx<0){
+  if(this.vx>0){
     rotateZ(3*PI/2)
   }
-  else if(this.vx>0){
+  else if(this.vx<0){
     rotateZ(PI/2)
   }
   else if(this.vy<0){
@@ -341,6 +349,10 @@ EnemyObject.prototype.display = function() {
   translate(0, 0, 3*this.headSize/8);
   box(this.headSize+2, this.headSize+2, 2*this.headSize/8+2);
   pop();
+  pop();
+  pop();
+  pop();
+
 }
 
 // lookout()
@@ -356,7 +368,7 @@ EnemyObject.prototype.lookOut = function(target){
   if(!this.charging){
 
 // enemy and player are aligned on the y axis
-if(collideLineRect(this.x, 0, this.x, world.h, target.x, target.y, target.size, target.size)){
+if(collideLineRect(this.x, -world.h/2, this.x, world.h/2, target.x, target.y, target.size, target.size)){
   // player is above and enemy is not heading down
   if(target.y<this.y && this.vy<=0 ){
     this.nearestHigherObstacle(target);
@@ -371,7 +383,7 @@ if(collideLineRect(this.x, 0, this.x, world.h, target.x, target.y, target.size, 
 }
 
 // enemy and player are aligned on the x axis
-if(collideLineRect(0, this.y, world.w, this.y, target.x, target.y, target.size, target.size)){
+if(collideLineRect(-world.w/2, this.y, world.w/2, this.y, target.x, target.y, target.size, target.size)){
   // player is to the left and enemy is not heading right
   if(target.x<this.x && this.vx<=0 ){
     this.nearestLeftObstacle(target);
@@ -405,7 +417,7 @@ EnemyObject.prototype.nearestLeftObstacle = function(target){
   }
 
   if(wayIsClear){
-    if(this.checkPlayerVisible(target, 0, this.y, this.x, this.size)){
+    if(this.checkPlayerVisible(target, -world.w/2, this.y, this.x+world.w/2, this.size)){
       this.charge("left");
     }
   }
@@ -428,7 +440,7 @@ EnemyObject.prototype.nearestRightObstacle = function(target){
   }
 
   if(wayIsClear){
-    if(this.checkPlayerVisible(target, this.x, this.y, world.w, this.size)){
+    if(this.checkPlayerVisible(target, this.x, this.y, world.w/2, this.size)){
       this.charge("right");
     }
   }
@@ -451,7 +463,7 @@ EnemyObject.prototype.nearestHigherObstacle = function(target){
   }
 
   if(wayIsClear){
-    if(this.checkPlayerVisible(target, this.x, 0, this.size, world.h)){
+    if(this.checkPlayerVisible(target, this.x, -world.h/2, this.size, this.y+world.h/2)){
       this.charge("up");
     }
   }
@@ -472,7 +484,7 @@ EnemyObject.prototype.nearestLowerObstacle = function(target){
     }
 
     if(wayIsClear){
-      if(this.checkPlayerVisible(target, this.x, 0, this.size, world.h)){
+      if(this.checkPlayerVisible(target, this.x, this.y, this.size, world.h/2)){
         this.charge("down");
       }
     }
@@ -578,7 +590,7 @@ if(viewClear){
 // handleplayercollision()
 //
 // check for overlap with player.
-// do something (right now all this does is teleport the enemy away)
+// teleports the player away
 
 EnemyObject.prototype.handlePlayerCollision = function(target){
   // if enemy and player overlap on the x axis
@@ -586,9 +598,11 @@ EnemyObject.prototype.handlePlayerCollision = function(target){
 
 
       // set new position
-      this.x = random(width);
+      findGoodPosition(player);
+      player.wasHitTimer = millis() + player.wasHitTimerLength;
+      this.charging = false;
       // set new bearing
-      this.newBearing("up");
+      this.newBearing(0, 1, 0, 0);
     }
 
 }

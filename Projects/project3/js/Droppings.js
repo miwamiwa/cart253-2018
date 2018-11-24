@@ -12,9 +12,10 @@ this script displays racoon poop.
 function Droppings(x, y, goodOrBad, size){
   this.x = x;
   this.y = y;
-    this.z = 0;
+
   this.isHealthy = goodOrBad;
-  this.size = 10+2*size;
+  this.size = 20+2*size;
+  this.z = this.size/2  ;
 }
 
 // display()

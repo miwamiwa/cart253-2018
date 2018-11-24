@@ -8,16 +8,16 @@
 
 // World()
 //
-// creates variables to hold world size, world position, and light motion. 
+// creates variables to hold world size, world position, and light motion.
 
 function World() {
 
   // world
 
   // position
-  this.x = width/2;
-  this.y = height/2;
-  this.z = -30;
+  this.x = 0;
+  this.y = 0;
+  this.z = 0;
   // size
   this.w = width*2;
   this.h = height*2;
@@ -40,11 +40,25 @@ function World() {
 
 World.prototype.display = function(){
 
+  push();
+  translate(0, 0, -200);
+
+  texture(lowergroundImage);
+  plane(width*10, height*8);
+
+  pop();
+  push();
+  rotateX(3*PI/2);
+  translate(0,0 , - height*4);
+  texture(backgroundImage);
+  plane(width*10, height*10);
+  pop();
+  push();
   // sets ambient light and sun
   this.setLight();
 
   // point to the middle of the canvas
-  push();
+
   translate(this.x, this.y, this.z);
 
   // create "world" as one big box
@@ -61,7 +75,7 @@ World.prototype.display = function(){
 World.prototype.setLight = function (){
 
 // ambient light
-  ambientLight(125, 85, 65);
+  ambientLight(175, 185, 165);
   // sun light
   this.displaySun();
 }
@@ -107,7 +121,8 @@ World.prototype.displaySun = function(){
   rotateX(PI);
   translate(0, 50, 0);
   cone(10, 30);
-
+  // create light
+  pointLight(200, 200, 200, this.lightX, this.lightY, 50);
   pop();
   pop();
 
@@ -117,13 +132,12 @@ World.prototype.displaySun = function(){
   this.lightMotion+=0.001;
   // x-motion
   noiseSeed(0);
-  this.lightX = noise(this.lightMotion)*this.w;
+  this.lightX = map(noise(this.lightMotion), 0, 1, -this.w/2, this.w/2);
   // y-motion
   noiseSeed(1);
-  this.lightY = noise(this.lightMotion)*this.h;
+  this.lightY = map(noise(this.lightMotion), 0, 1, -this.w/2, this.w/2);
   // z-position
-  this.lightZ = 200;
+  this.lightZ = 300;
 
-  // create light
-  pointLight(200, 200, 200, this.lightX, this.lightY, this.lightZ);
+
 }

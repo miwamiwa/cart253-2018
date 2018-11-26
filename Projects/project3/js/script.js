@@ -6,7 +6,8 @@ var canvas;
 var world;
 var obstacles = [];
 var totalobs = 0;
-var kindsOfObs = 3;
+// kinds of food + obstacle (foods + 1)
+var kindsOfObs = 7;
 
 var droppings = [];
 var enemies = [];
@@ -47,9 +48,13 @@ var healthyPoopBonus = 1;
 var unhealthyPoopPenalty = 1;
 var enemyCaughtPlayerPenalty = 1;
 var numEnemies = 5;
-var foodSize= 60;
+// food size affects grid size, and the goodposition() function
+var foodSize= 80;
 var obsSize = 50;
-
+var damageToObstacles =foodSize;
+var chanceForFood = 0.5;
+var obstacleDensity = 0.2;
+var pic1, pic2, pic3, pic4, pic5, pic6;
 // preload()
 //
 // loads images to be used for textures
@@ -66,6 +71,12 @@ function preload() {
   lowergroundImage = loadImage("images/lower.jpg");
   groundTexture = loadImage("images/ground.jpg");
   obsTexture = loadImage("images/xbox.jpg")
+  pic1 = loadImage("images/1.jpg")
+  pic2 = loadImage("images/2.jpg")
+  pic3 = loadImage("images/3.jpg")
+  pic4 = loadImage("images/4.jpg")
+  pic5 = loadImage("images/5.jpg")
+  pic6 = loadImage("images/6.jpg")
 }
 
 // setup()
@@ -83,11 +94,12 @@ function setup() {
   // load music objects
   drums = new Drum("white");
   music = new Music();
-  music.setupInstruments();
+
 
   world = new World();
 
   newLevel();
+  music.setupInstruments();
 
   noStroke();
 displayObstaclesLeft();
@@ -103,9 +115,9 @@ displayObstaclesLeft();
 function draw() {
 
   document.getElementById("7").innerHTML = player.roomLeft;
-  console.log("healthy food sources: "+healthyobs+", unhealthy food sources: "+sicklyobs+", healthy food eaten: "+player.healthyFoodEaten+", unhealthy food eaten: "+player.sicklyFoodEaten);
+      //console.log("healthy food sources: "+healthyobs+", unhealthy food sources: "+sicklyobs+", healthy food eaten: "+player.healthyFoodEaten+", unhealthy food eaten: "+player.sicklyFoodEaten);
   runGame();
-//  runSound();
+ runSound();
 }
 
 function displayHealth(){
@@ -191,6 +203,7 @@ function runSound(){
   // check for any known objects in range
   for (var i=0; i<player.knownObjectsInRange.length; i++){
     var whichobject = player.knownObjectsInRange[i]-1;
+    console.log("which object val"+whichobject)
     // toggle sound/smell of nearby known objects on and off
     synths[whichobject].playMusic();
   }
@@ -253,8 +266,10 @@ function updateCam(){
   changeCamView = true;
   //  camOffsetZ -= (mouseX-width/2)/width*10;
   camOffsetY -= (mouseY-height/2)/height*10;
+  camOffsetZ -= (mouseX-width/2)/width*10;
   //  camOffsetZ = constrain(camOffsetZ, -100, 100);
   camOffsetY = constrain(camOffsetY, -300, 350);
+  camOffsetZ = constrain(camOffsetZ, -300, 350);
 }
 
 // findgoodposition()
@@ -270,10 +285,10 @@ function findGoodPosition(target) {
   var positionNoGood = false;
   for(var i=0; i < obstacles.length; i++){
     if(
-      target.x>=obstacles[i].x-obstacles[i].size/2-obsSize/2
-    && target.x<=obstacles[i].x+obstacles[i].size/2+obsSize/2
-    && target.y>=obstacles[i].y-obstacles[i].size/2-obsSize/2
-    && target.y<=obstacles[i].y+obstacles[i].size/2+obsSize/2
+      target.x>=obstacles[i].x-obstacles[i].size/2-foodSize/2
+    && target.x<=obstacles[i].x+obstacles[i].size/2+foodSize/2
+    && target.y>=obstacles[i].y-obstacles[i].size/2-foodSize/2
+    && target.y<=obstacles[i].y+obstacles[i].size/2+foodSize/2
   ){
     positionNoGood=true;
   }
@@ -297,9 +312,9 @@ function newLevel(){
   // create a new synthesizor object for each kind of food in play
   for (var i=0; i<kindsOfObs-1; i++){
     synths[i] = new Synth("sine");
+    console.log("newsynth")
   }
-
-
+console.log("kinds of "+(kindsOfObs-1));
   // create a random array of obstacles.
   // obstacles can be any type of food, or an actual obstacle
   // this is determined randomly in the Obstacle() constructor
@@ -309,9 +324,9 @@ function newLevel(){
 
   // calculate how many obstacles can fit into the grid
   // on the x-axis
-  xobs = (world.w)/40;
+  xobs = (world.w)/foodSize;
   // on the y-axis
-  yobs = (world.h)/40;
+  yobs = (world.h)/foodSize;
 
   // create a var to index each obstacle.
   // this way a specific obstacle can be found without having to search
@@ -324,7 +339,7 @@ function newLevel(){
 
   for (var i=0; i<xobs*yobs; i++){
     // random chance of generating an obstacle object
-    if(random()<0.04){
+    if(random()<obstacleDensity){
       // count total obstacles
       totalobs+=1;
       // create a new obstacle at this point and give it an index number.
@@ -342,4 +357,9 @@ function newLevel(){
 
   // start sound
     music.launchPart1();
+}
+
+function windowResized(){
+    canvas = createCanvas(window.innerWidth, window.innerHeight-100, WEBGL);
+    noStroke();
 }

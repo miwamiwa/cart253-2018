@@ -74,7 +74,7 @@ else {
   for (var i=0; i<obstacles.length; i++){
 // if obstacle is large enough
      // also do not bother checking if obstacle isn't within 100px
-    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<80){
+    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<foodSize*1.6){
 
       //if close to left obstacle wall and moving right
       if(
@@ -253,7 +253,7 @@ EnemyObject.prototype.display = function() {
   var legTranslate = 5;
   // calculate change in leg position
   var leg1 = cos(this.legMotion)*legTranslate;
-
+stroke(85)
   // draw human
  push();
   // move to player position

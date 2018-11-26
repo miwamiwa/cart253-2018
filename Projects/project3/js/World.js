@@ -51,7 +51,7 @@ World.prototype.display = function(){
   rotateX(3*PI/2);
   translate(0,0 , - height*4);
   texture(backgroundImage);
-  plane(width*10, height*2);
+  plane(width*10, height*3.5);
   pop();
   push();
   // sets ambient light and sun

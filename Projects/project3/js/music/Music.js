@@ -2,7 +2,7 @@
 Music.js()
 copied in from project 2.
 mostly no change, other than that instruments are set up with sounds and
-notes that are related to this project. 
+notes that are related to this project.
 
 */
 
@@ -27,7 +27,9 @@ function Music(){
 // instruments' sound are declared.
 
 Music.prototype.setupInstruments = function(){
+  console.log("we here")
 for(var i=0; i<synths.length; i++){
+  console.log("synth loaded");
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
   synths[i].setEnvelope(0.01, 0.4, 0.001, 0.5, 0.32, 0);
   // function(filterType, frequency)
@@ -100,6 +102,10 @@ Music.prototype.launchPart1 = function(){
 
   var phrase1=[0, 1];
   var phrase2=[4, 6];
+  var phrase3 =[3, 7]
+  var phrase4 = [2, 8, 5]
+  var phrase5 = [1, 2, 3]
+  var phrase6 = [7, 2, 4]
 
   // while rhythm values are expressed in frames
   // var rhythm1=[60, 40, 20, 40, 20, 40, 20, 40, 120, 80];
@@ -110,7 +116,11 @@ Music.prototype.launchPart1 = function(){
 
 
     this.startNewPhrase(synths[0], phrase1, 0, 0, 60, true);
-    this.startNewPhrase(synths[1], phrase2, 12, 0, 60, true);
+    this.startNewPhrase(synths[1], phrase2, 12, 0, 40, true);
+    this.startNewPhrase(synths[2], phrase3, 0, 0, 50, true);
+    this.startNewPhrase(synths[3], phrase4, -5, 0, 30, true);
+    this.startNewPhrase(synths[4], phrase5, +5, 0, 20, true);
+    this.startNewPhrase(synths[5], phrase6, 0, 0, 70, true);
 
   // drums are triggered differently.
   // Beats must be divided up and weighted before we can start.
@@ -118,10 +128,10 @@ Music.prototype.launchPart1 = function(){
 
   // required arguments: bar length, beat length, subdiv length,
   // finediv length, beats per bar, subdivs per beat, finedivs per subdiv.
-  drums.setDivisions(120, 60, 30, 10, 2, 2, 3);
+  drums.setDivisions(120, 60, 20, 5, 2, 3, 4);
   // required arguments: max weights, stimulus scale, threshold,
   // bar weight, beat weight, subdiv weight, fine div weight.
-  drums.setWeights(18, 27, 25, 10, 10, 8, 8);
+  drums.setWeights(18, 27, 22, 10, 10, 8, 2);
 
   // set voices on and off
   for(var i=0; i<synths.length; i++){

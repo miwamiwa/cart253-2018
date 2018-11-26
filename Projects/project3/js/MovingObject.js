@@ -34,6 +34,7 @@ this.z =this.size/2;
   this.rightKey = rightKey;
   this.strafeLeft = 81;
   this.strafeRight = 69;
+  this.eatKey = 70;
 
   // time until the player can eat again
   this.eatingTimer = 0;
@@ -215,7 +216,7 @@ MovingObject.prototype.update = function() {
 
     // if obstacle is large enough to eat.
     // also do not bother checking if obstacle isn't within 100px
-    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<80){
+    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<foodSize*1.6){
 
       if(
       collideLineRect(
@@ -289,7 +290,7 @@ MovingObject.prototype.update = function() {
 
 MovingObject.prototype.setCam = function(){
 
-  camera(this.x+camOffsetX, this.y-camYAngle+camOffsetY,  (height/2.0) / tan(PI*30.0 / 180.0), this.x, this.y,0, 0 , 1, 0);
+  camera(this.x+camOffsetX, this.y-camYAngle+camOffsetY,  (height/2.0) / tan(PI*30.0 / 180.0)+camOffsetZ, this.x, this.y,0, 0 , 1, 0);
 
 }
 // display()
@@ -328,14 +329,22 @@ MovingObject.prototype.display = function() {
     // display an ellipse to help visualize smelling range
     push()
     ambientMaterial(45, 45, 185, 85);
+    stroke(95, 95, 185);
     if(this.eatingTimer>millis()){
-      ambientMaterial(45, 185, 45, 125);
+      ambientMaterial(45, 185, 45, 205);
+      stroke(45, 185, 45);
     }
     if (this.poopingTimer>millis()){
-     ambientMaterial(185, 85, 65, 155);
+     ambientMaterial(185, 85, 65, 205);
+     stroke(185, 85, 65);
    }
    if (this.wasHitTimer>millis()){
-    ambientMaterial(185, 185, 25, 155);
+    ambientMaterial(185, 185, 25, 205);
+    stroke(185, 185, 25);
+  }
+  if(keyIsDown(this.eatKey)){
+    ambientMaterial(185, 185, 225, 205);
+    stroke(185, 185, 225);
   }
   translate(0, 0, -this.size/2+5)
   rotateX(PI/2)
@@ -428,7 +437,7 @@ MovingObject.prototype.display = function() {
     translate(this.bodSize/2+this.legSize/2, -this.bodSize/4-this.legSize/2, legSin-10);
     box(this.legSize);
     pop();
-
+    stroke(125);
     //frontleft leg
     push();
     specularMaterial(85);
@@ -466,7 +475,9 @@ MovingObject.prototype.eatObstacle = function(index) {
 
   if(obstacles.length>0
     &&this.eatingTimer<millis()
-    && obstacles[index].edible){
+    && obstacles[index].edible
+  && keyIsDown(
+this.eatKey)){
 
       // add to total food in belly
       this.foodInBelly +=1;
@@ -474,28 +485,12 @@ MovingObject.prototype.eatObstacle = function(index) {
       // remove a bit of size off this specific obstacle
       obstacles[index].getEaten();
       // if food item is a bad food
-      switch(obstacles[index].type){
+      switch(obstacles[index].healthy){
 
-        case 1:
-        this.healthyFoodEaten ++;
-        this.health+=healthyPoopBonus;
-        if (obstacles[index].size===0){
-          healthyobs -=1
-        }
-        break;
-
-        case 2:
-        this.sicklyFoodEaten ++;
-        this.health-=unhealthyPoopPenalty;
-        this.isSick = true;
-        console.log("blabla "+obstacles[index].size)
-        if (obstacles[index].size===0){
-          sicklyobs -=1
-        }
-        break;
+        case true: this.healthyObsEaten(index); break;
+        case false: this.unhealthyObsEaten(index); break;
 
       }
-      displayObstaclesLeft();
 
 
 
@@ -522,6 +517,25 @@ MovingObject.prototype.eatObstacle = function(index) {
       }
     }
   }
+MovingObject.prototype.healthyObsEaten = function(index){
+  this.healthyFoodEaten ++;
+  this.health+=healthyPoopBonus;
+  if (obstacles[index].size<=0){
+    healthyobs -=1
+  }
+}
+
+
+MovingObject.prototype.unhealthyObsEaten = function(index){
+  this.sicklyFoodEaten ++;
+  this.health-=unhealthyPoopPenalty;
+  this.isSick = true;
+  console.log("blabla "+obstacles[index].size)
+  if (obstacles[index].size<=0){
+    sicklyobs -=1;
+  }
+}
+
 
   // digest()
   //
@@ -542,6 +556,7 @@ MovingObject.prototype.eatObstacle = function(index) {
       // update score text
       document.getElementById("3").innerHTML = player.healthyFoodEaten;
       document.getElementById("4").innerHTML = player.sicklyFoodEaten;
+      displayObstaclesLeft();
 
       // shoot the pooping timer
       this.poopingTimer = millis() + this.poopingTimerLength;
@@ -599,7 +614,7 @@ MovingObject.prototype.eatObstacle = function(index) {
       var distance = dist(this.x+this.size/2, this.y+this.size/2, obstacles[i].x+obstacles[i].size/2, obstacles[i].y+obstacles[i].size/2);
 
       // if this obstacle is in range
-      if(distance<this.smellRange/2){
+      if(distance<this.smellRange && obstacles[i].size>0){
 
         // we only want one voice to play per type of object, so this boonlean
         // will prevent multiple objects of the same type to be added to the

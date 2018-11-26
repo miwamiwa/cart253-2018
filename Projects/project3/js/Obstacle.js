@@ -29,6 +29,7 @@ function Obstacle(index, obstacleindex){
   // object position on the grid
   this.row = floor(index/xobs);
   this.column = index%xobs;
+  this.healthy = true;
 
   // calculate x, y coordinates from grid position
   this.x = map(this.column*this.size, 0, world.w, -world.w/2, world.w/2);
@@ -37,7 +38,7 @@ function Obstacle(index, obstacleindex){
 
   // randomize object type.
   // right now 0 is an obstacle/wall, 1 is good food and 2 is bad food.
-  if(random()>0.25){
+  if(random()>chanceForFood){
     this.type =0;
   }
   else{
@@ -49,8 +50,17 @@ function Obstacle(index, obstacleindex){
 
   switch(this.type){
     case 0: this.edible = false; this.size = obsSize; break;
-    case 1: this.edible = true; healthyobs ++; break;
-    case 2: this.edible = true; sicklyobs ++; break;
+    case 1: this.loadHealthyObs(); break;
+    case 2: this.loadUnhealthyObs(); break;
+    case 3: this.loadUnhealthyObs(); break;
+    case 4: this.loadHealthyObs(); break;
+    case 5: this.loadHealthyObs(); break;
+    case 6: this.loadUnhealthyObs(); break;
+    case 7: this.loadUnhealthyObs(); break;
+    case 8: this.loadHealthyObs(); break;
+    case 9: this.loadUnhealthyObs(); break;
+    case 10: this.loadHealthyObs(); break;
+    case 11: this.loadUnhealthyObs(); break;
   }
 
   // colour
@@ -59,6 +69,17 @@ function Obstacle(index, obstacleindex){
   this.b = 185;
 }
 
+
+Obstacle.prototype.loadHealthyObs = function(){
+   this.edible = true;
+   this.healthy = true;
+   healthyobs ++;
+}
+Obstacle.prototype.loadUnhealthyObs = function(){
+  this.edible = true;
+  this.healthy = false;
+  sicklyobs ++;
+}
 // display()
 //
 // set fill according to ObsMode (which toggles whether or not we can
@@ -71,10 +92,21 @@ Obstacle.prototype.display = function(){
 
     push();
     translate(this.x, this.y, this.z);
-
+  stroke(0);
     // pick correct texture or fill
     if(this.edible){
       texture(yumTexture);
+      if(obsMode){
+        switch(this.type){
+          case 1: texture(pic1); break;
+          case 2: texture(pic2); break;
+          case 3: texture(pic3); break;
+          case 4: texture(pic4); break;
+          case 5: texture(pic5); break;
+          case 6: texture(pic6); break;
+
+        }
+      }
     }
     else {
       texture(obsTexture)
@@ -95,5 +127,5 @@ Obstacle.prototype.display = function(){
 // remove a bit of size from this obstacle.
 
 Obstacle.prototype.getEaten = function(){
-  this.size-=20;
+  this.size-=damageToObstacles;
 }

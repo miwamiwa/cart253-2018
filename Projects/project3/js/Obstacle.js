@@ -24,7 +24,7 @@ function Obstacle(index, obstacleindex){
   // this.size = random(2, 3)*obsSize;
 
   // object size
-  this.size = 50;
+  this.size = foodSize;
 
   // object position on the grid
   this.row = floor(index/xobs);
@@ -48,7 +48,7 @@ function Obstacle(index, obstacleindex){
   // also count up healthy and sickly obstacles
 
   switch(this.type){
-    case 0: this.edible = false; break;
+    case 0: this.edible = false; this.size = obsSize; break;
     case 1: this.edible = true; healthyobs ++; break;
     case 2: this.edible = true; sicklyobs ++; break;
   }
@@ -77,7 +77,7 @@ Obstacle.prototype.display = function(){
       texture(yumTexture);
     }
     else {
-      specularMaterial(this.r, this.g, this.b);
+      texture(obsTexture)
     }
 
     // display obstacle
@@ -86,6 +86,8 @@ Obstacle.prototype.display = function(){
     // create spotlight over the obstacle
     pointLight(this.r, this.g, this.b, this.x, this.y, this.size);
     pop();
+
+
 }
 
 // getEaten()
@@ -93,5 +95,5 @@ Obstacle.prototype.display = function(){
 // remove a bit of size from this obstacle.
 
 Obstacle.prototype.getEaten = function(){
-  this.size-=10;
+  this.size-=20;
 }

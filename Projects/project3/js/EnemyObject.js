@@ -599,7 +599,10 @@ EnemyObject.prototype.handlePlayerCollision = function(target){
 
       // set new position
       findGoodPosition(player);
+
       player.wasHitTimer = millis() + player.wasHitTimerLength;
+      player.health -= enemyCaughtPlayerPenalty;
+      displayHealth();
       this.charging = false;
       // set new bearing
       this.newBearing(0, 1, 0, 0);

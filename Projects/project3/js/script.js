@@ -7,10 +7,10 @@ var world;
 var obstacles = [];
 var totalobs = 0;
 var kindsOfObs = 3;
-var playerIsFullThreshold = 1;
+
 var droppings = [];
 var enemies = [];
-var numEnemies = 10;
+
 var healthyobs =0;
 var sicklyobs =0;
 // sound
@@ -24,8 +24,6 @@ var obsMode = false;
 var xobs = 0;
 var yobs = 0;
 
-var obsSize= 15;
-
 // camera settings
 var camOffsetX = 0;
 var camOffsetY = 0;
@@ -36,9 +34,22 @@ var camYAngle = -250;
 // textures
 var yumTexture;
 var racTexture;
+var racTexture2;
 var healthyTexture;
 var sickTexture;
 var backgroundImage ;
+var groundTexture ;
+var obsTexture;
+
+var playerIsFullThreshold = 2;
+var initialHealth =10;
+var healthyPoopBonus = 1;
+var unhealthyPoopPenalty = 1;
+var enemyCaughtPlayerPenalty = 1;
+var numEnemies = 5;
+var foodSize= 60;
+var obsSize = 50;
+
 // preload()
 //
 // loads images to be used for textures
@@ -46,12 +57,15 @@ var backgroundImage ;
 function preload() {
 
   // load images
-  yumTexture = loadImage("images/yum.jpg");
-  racTexture = loadImage("images/racoon.jpg");
+  yumTexture = loadImage("images/yum2.jpg");
+  racTexture = loadImage("images/racoon2.jpg");
+  racTexture2 = loadImage("images/racoon3.jpg");
   healthyTexture = loadImage("images/healthy.jpg");
   sickTexture = loadImage("images/sickly.jpg");
-  backgroundImage = loadImage("images/bg.jpg");
-  lowergroundImage = loadImage("images/beach.jpg");
+  backgroundImage = loadImage("images/far.jpg");
+  lowergroundImage = loadImage("images/lower.jpg");
+  groundTexture = loadImage("images/ground.jpg");
+  obsTexture = loadImage("images/xbox.jpg")
 }
 
 // setup()
@@ -62,7 +76,7 @@ function setup() {
 
   // create canvas:
 
-  canvas = createCanvas(windowWidth, windowHeight-100, WEBGL);
+  canvas = createCanvas(window.innerWidth, window.innerHeight-100, WEBGL);
 
   canvas.parent('sketch-holder');
 
@@ -76,6 +90,10 @@ function setup() {
   newLevel();
 
   noStroke();
+displayObstaclesLeft();
+  document.getElementById("3").innerHTML = player.healthyFoodEaten;
+  document.getElementById("4").innerHTML = player.sicklyFoodEaten;
+  displayHealth();
 }
 
 // draw()
@@ -83,10 +101,20 @@ function setup() {
 // loops the main game elements
 
 function draw() {
+
+  document.getElementById("7").innerHTML = player.roomLeft;
   console.log("healthy food sources: "+healthyobs+", unhealthy food sources: "+sicklyobs+", healthy food eaten: "+player.healthyFoodEaten+", unhealthy food eaten: "+player.sicklyFoodEaten);
   runGame();
 //  runSound();
+}
 
+function displayHealth(){
+  document.getElementById("6").innerHTML = player.health;
+}
+
+function displayObstaclesLeft(){
+  document.getElementById("1").innerHTML = healthyobs;
+  document.getElementById("2").innerHTML = sicklyobs;
 }
 
 // rungame()
@@ -242,10 +270,10 @@ function findGoodPosition(target) {
   var positionNoGood = false;
   for(var i=0; i < obstacles.length; i++){
     if(
-      target.x>=obstacles[i].x-obstacles[i].size/2-25
-    && target.x<=obstacles[i].x+obstacles[i].size/2+25
-    && target.y>=obstacles[i].y-obstacles[i].size/2-25
-    && target.y<=obstacles[i].y+obstacles[i].size/2+25
+      target.x>=obstacles[i].x-obstacles[i].size/2-obsSize/2
+    && target.x<=obstacles[i].x+obstacles[i].size/2+obsSize/2
+    && target.y>=obstacles[i].y-obstacles[i].size/2-obsSize/2
+    && target.y<=obstacles[i].y+obstacles[i].size/2+obsSize/2
   ){
     positionNoGood=true;
   }
@@ -281,9 +309,9 @@ function newLevel(){
 
   // calculate how many obstacles can fit into the grid
   // on the x-axis
-  xobs = (world.w)/50;
+  xobs = (world.w)/40;
   // on the y-axis
-  yobs = (world.h)/50;
+  yobs = (world.h)/40;
 
   // create a var to index each obstacle.
   // this way a specific obstacle can be found without having to search

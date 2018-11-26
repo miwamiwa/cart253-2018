@@ -25,6 +25,8 @@ this.z =this.size/2;
   this.speed = speed;
   this.angle =0;
 
+  this.health = initialHealth;
+
   // key controls
   this.downKey = downKey;
   this.upKey = upKey;
@@ -105,6 +107,8 @@ this.z =this.size/2;
 
     this.ringOsc =0;
     this.ringOscRate =0.08;
+    this.roomLeft = 0;
+    this.updateRoomLeft();
 
 }
 
@@ -116,7 +120,7 @@ this.z =this.size/2;
 MovingObject.prototype.handleInput = function() {
 
     // player left-right rotation speed
-    var angleSpeed = 1.0;
+    var angleSpeed = 5.0;
 
     // up key is pressed
     if (keyIsDown(this.upKey)) {
@@ -152,7 +156,7 @@ MovingObject.prototype.handleInput = function() {
      if (keyIsDown(this.leftKey)) {
 
       // rotate left
-      this.angle -= radians(angleSpeed*PI);
+      this.angle -= radians(angleSpeed);
 
       // trigger appropriate parts motion
       this.legAngle2 += this.legRate;
@@ -164,7 +168,7 @@ MovingObject.prototype.handleInput = function() {
     else if (keyIsDown(this.rightKey)) {
 
       // rotate right
-      this.angle += radians(angleSpeed*PI);
+      this.angle += radians(angleSpeed);
 
       // trigger appropriate parts motion
       this.legAngle2 += this.legRate;
@@ -362,7 +366,7 @@ MovingObject.prototype.display = function() {
 
     // tail
     push();
-    specularMaterial(185);
+    texture(racTexture2);
     // inmost tail part
     translate(0, this.bodSize/2+this.tailLength/2, 0);
     box(this.tailSize, this.tailLength, this.tailSize);
@@ -466,16 +470,35 @@ MovingObject.prototype.eatObstacle = function(index) {
 
       // add to total food in belly
       this.foodInBelly +=1;
-
-      // if food item is a bad food
-      switch(obstacles[index].type){
-        case 1: this.healthyFoodEaten ++; break;
-        case 2: this.sicklyFoodEaten ++; this.isSick = true; break;
-
-      }
-
+      this.updateRoomLeft();
       // remove a bit of size off this specific obstacle
       obstacles[index].getEaten();
+      // if food item is a bad food
+      switch(obstacles[index].type){
+
+        case 1:
+        this.healthyFoodEaten ++;
+        this.health+=healthyPoopBonus;
+        if (obstacles[index].size===0){
+          healthyobs -=1
+        }
+        break;
+
+        case 2:
+        this.sicklyFoodEaten ++;
+        this.health-=unhealthyPoopPenalty;
+        this.isSick = true;
+        console.log("blabla "+obstacles[index].size)
+        if (obstacles[index].size===0){
+          sicklyobs -=1
+        }
+        break;
+
+      }
+      displayObstaclesLeft();
+
+
+
 
       // start eating timer
       this.eatingTimer = millis()+this.eatingTimerLength;
@@ -514,6 +537,11 @@ MovingObject.prototype.eatObstacle = function(index) {
 
       // reset amount of food inside belly
       this.foodInBelly = 0;
+     this.updateRoomLeft();
+     displayHealth();
+      // update score text
+      document.getElementById("3").innerHTML = player.healthyFoodEaten;
+      document.getElementById("4").innerHTML = player.sicklyFoodEaten;
 
       // shoot the pooping timer
       this.poopingTimer = millis() + this.poopingTimerLength;
@@ -537,6 +565,10 @@ MovingObject.prototype.eatObstacle = function(index) {
 
       this.isSick = false;
     }
+  }
+
+  MovingObject.prototype.updateRoomLeft = function(){
+    this.roomLeft = playerIsFullThreshold-this.foodInBelly;
   }
 
   // sniffout()

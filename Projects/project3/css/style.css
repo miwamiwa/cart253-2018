@@ -5,14 +5,62 @@ In this case it's just padding and margin to 0
 so the canvas is flush with the top left corner.
 
 **********************************************/
-
+@import url('https://fonts.googleapis.com/css?family=Alfa+Slab+One|Monoton');
+/*
+font-family: 'Alfa Slab One', cursive;
+font-family: 'Monoton', cursive;
+*/
 body {
   padding: 0;
   margin: 0;
+  width:100%;
+  height:100%;
 }
 
 #sketch-holder{
   position:fixed;
   top:0;
   left:0;
+}
+#menu{
+  background:white;
+  position:absolute;
+  bottom:0px;
+  left:0;
+  height:99px;
+  width:100%;
+  display: flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+article{
+  background:white;
+  font-family: 'Alfa Slab One', cursive;
+  padding:10px;
+  height:99px;
+  width:100%;
+  display: flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+#leftarticle{
+  display: flex;
+  flex-direction:column;
+  flex-basis: 30%;
+}
+
+h1{
+  font-family: 'Monoton', cursive;
+  font-size: 25px;
+  width:100%;
+  flex-basis: 20%;
+}
+div{
+  font-family: 'Alfa Slab One', cursive;
+}
+
+.displayit{
+  font-family: 'Monoton', cursive;
+  font-size: 25px;
+padding:10px;
 }

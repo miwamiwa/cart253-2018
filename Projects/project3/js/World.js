@@ -17,7 +17,7 @@ function World() {
   // position
   this.x = 0;
   this.y = 0;
-  this.z = 0;
+  this.z = -25;
   // size
   this.w = width*2;
   this.h = height*2;
@@ -51,7 +51,7 @@ World.prototype.display = function(){
   rotateX(3*PI/2);
   translate(0,0 , - height*4);
   texture(backgroundImage);
-  plane(width*10, height*10);
+  plane(width*10, height*2);
   pop();
   push();
   // sets ambient light and sun
@@ -60,10 +60,9 @@ World.prototype.display = function(){
   // point to the middle of the canvas
 
   translate(this.x, this.y, this.z);
-
   // create "world" as one big box
-  ambientMaterial(255);
-  box(this.w, this.h, 10);
+  texture(groundTexture);
+  box(this.w, this.h, -50);
 
   pop();
 }
@@ -75,7 +74,7 @@ World.prototype.display = function(){
 World.prototype.setLight = function (){
 
 // ambient light
-  ambientLight(175, 185, 165);
+  ambientLight(190, 210, 185);
   // sun light
   this.displaySun();
 }

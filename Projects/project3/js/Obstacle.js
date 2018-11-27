@@ -127,5 +127,7 @@ Obstacle.prototype.display = function(){
 // remove a bit of size from this obstacle.
 
 Obstacle.prototype.getEaten = function(){
+    music.startSFX(sfx, "downchirp");
   this.size-=damageToObstacles;
+player.increaseSize();
 }

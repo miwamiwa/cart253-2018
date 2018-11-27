@@ -604,6 +604,7 @@ EnemyObject.prototype.handlePlayerCollision = function(target){
       player.health -= enemyCaughtPlayerPenalty;
       displayHealth();
       this.charging = false;
+          music.startSFX(sfx, "trem");
       // set new bearing
       this.newBearing(0, 1, 0, 0);
     }

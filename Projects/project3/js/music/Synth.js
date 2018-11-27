@@ -77,18 +77,23 @@ Synth.prototype.playMusic = function(){
 
     // if voice is playing
     if(this.isPlaying){
+
       // apply octave transposition to note and convert to a frequency value
       var newNote =midiToFreq(music.rootNote+this.oct+this.notes[this.loop]);
       // set envelope
       this.env.setADSR(this.attackTime, this.decayTime, this.susLevel, this.releaseTime);
       this.env.setRange(this.attackLevel, this.releaseLevel);
+      this.filter.freq(300+abs(player.vx*player.vy)*1000);
       // if rhythm is an array, update decay length to deflect time until next note
       if(this.rType==="array"){
         this.env.setADSR(this.attackTime, this.rhythm[this.loop]/100*this.decayTime, this.susLevel, this.releaseTime);
         this.env.setRange(this.attackLevel, this.releaseLevel);
       }
+      if(this.type!="white"){
+        console.log("yo")
       // assign frequency
       this.thisSynth.freq(newNote);
+    }
       // play note
       this.env.play();
 

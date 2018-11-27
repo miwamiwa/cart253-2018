@@ -92,13 +92,13 @@ this.z =this.size/2;
     // part sizes
 
     this.bodSize = this.size;
-    this.headSize = this.size-20;
-    this.tailSize = this.size-40;
-    this.tailLength = this.size-30;
+    this.headSize = this.size*0.6;
+    this.tailSize = this.size*0.2;
+    this.tailLength = this.size*0.4;
     this.eyeSize= this.size/10;
     this.earSize = this.size/7;
-    this.legSize = this.size-35;
-    this.noseSize = this.size-35;
+    this.legSize = this.size*0.3;
+    this.noseSize = this.size*0.3;
 
     this.healthyFoodEaten = 0;
     this.sicklyFoodEaten =0;
@@ -201,6 +201,11 @@ MovingObject.prototype.handleInput = function() {
 
     }
 
+    if((this.vx>0 || this.vy>0) && music.musicInc % (sfx2.downChirpFXlength+10)===0){
+        music.startSFX(sfx2, "downchirp");
+    }
+
+
 
 }
 
@@ -216,7 +221,7 @@ MovingObject.prototype.update = function() {
 
     // if obstacle is large enough to eat.
     // also do not bother checking if obstacle isn't within 100px
-    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<foodSize*1.6){
+    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<(foodSize+this.size)*1.1){
 
       if(
       collideLineRect(
@@ -554,8 +559,7 @@ MovingObject.prototype.unhealthyObsEaten = function(index){
      this.updateRoomLeft();
      displayHealth();
       // update score text
-      document.getElementById("3").innerHTML = player.healthyFoodEaten;
-      document.getElementById("4").innerHTML = player.sicklyFoodEaten;
+displayScore();
       displayObstaclesLeft();
 
       // shoot the pooping timer
@@ -648,3 +652,16 @@ MovingObject.prototype.unhealthyObsEaten = function(index){
         }
       }
     }
+
+
+MovingObject.prototype.increaseSize = function(){
+    this.size += playerSizeIncrease;
+    this.bodSize = this.size;
+    this.headSize = this.size*0.6;
+    this.tailSize = this.size*0.2;
+    this.tailLength = this.size*0.4;
+    this.eyeSize= this.size/10;
+    this.earSize = this.size/7;
+    this.legSize = this.size*0.3;
+    this.noseSize = this.size*0.3;
+}

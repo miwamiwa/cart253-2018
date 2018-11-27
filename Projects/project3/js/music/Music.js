@@ -29,65 +29,78 @@ function Music(){
 Music.prototype.setupInstruments = function(){
   console.log("we here")
 for(var i=0; i<synths.length; i++){
-  console.log("synth loaded");
+  // console.log("synth loaded");
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
   synths[i].setEnvelope(0.01, 0.4, 0.001, 0.5, 0.32, 0);
   // function(filterType, frequency)
-  synths[i].setFilter("LP", 400);
+  synths[i].setFilter("BP", i*500);
   // function(delayIsOn, length, feedback, filterFrequency)
-  synths[i].setDelay(true, 0.5, 0.55, 400)
+  synths[i].setDelay(true, i*0.1, 0.55, 400)
 
   this.loadInstrument(synths[i]);
 
 }
-/*
-  // sfx setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  sfx.setEnvelope(0.001, 0.6, 0.0, 0.4, 0.4, 0);
-  // function(filterType, frequency)
-  sfx.setFilter("LP", 500);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  sfx.setDelay(false, 0, 0, 0);
-  // function(noteList, octave, loopLength)
-
-  // sfx2 setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  sfx2.setEnvelope(0.001, 0.6, 0.0, 0.2, 0.2, 0);
-  // function(filterType, frequency)
-  sfx2.setFilter("LP", 500);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  sfx2.setDelay(false, 0, 0, 0);
-  // function(noteList, octave, loopLength)
-
-  // drum setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  drums.setEnvelope(0.005, 0.3, 0.2, 0.9, 0.4, 0.0);
-  // function(filterType, frequency)
-  drums.setFilter("BP", 400);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  drums.setDelay(false, 0, 0, 0);
-  //drums.setDivisions(bar, beat, subdiv, finediv, beatsperbar, divsperbeat, fineperdiv)
 
 
 
-  // load it!
-  // these functions create envelope, filter and delay objects
-  // and plugs in the audio.
+// sfx setup
+// envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
+sfx.setEnvelope(0.001, 0.6, 0.0, 0.4, 0.4, 0);
+// function(filterType, frequency)
+sfx.setFilter("LP", 500);
+// function(delayIsOn, length, feedback, filterFrequency)
+sfx.setDelay(false, 0, 0, 0);
+this.loadInstrument(sfx);
+
+// sfx2 setup
+// envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
+sfx2.setEnvelope(0.001, 0.6, 0.5, 0.4, 0.8, 0);
+// function(filterType, frequency)
+sfx2.setFilter("LP", 500);
+// function(delayIsOn, length, feedback, filterFrequency)
+sfx2.setDelay(false, 0, 0, 0);
+this.loadInstrument(sfx2);
+
+// envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
+bass.setEnvelope(0.01, 0.8, 0.2, 0.8, 0.62, 0);
+// function(filterType, frequency)
+bass.setFilter("LP", 500);
+// function(delayIsOn, length, feedback, filterFrequency)
+bass.setDelay(false, 0.5, 0.55, 400)
+
+this.loadInstrument(bass);
 
 
-  this.loadInstrument(sfx);
-  this.loadInstrument(sfx2);
-  */
-  // drum setup
-  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  drums.setEnvelope(0.05, 0.1, 0.2, 0.9, 0.7, 0.0);
-  // function(filterType, frequency)
-  drums.setFilter("BP", 400);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  drums.setDelay(true, 0.105, 0.15, 15000);
-  //drums.setDivisions(bar, beat, subdiv, finediv, beatsperbar, divsperbeat, fineperdiv)
-  this.loadInstrument(drums);
+}
 
+
+// startSFX()
+//
+// prepares a given SFX for playing.
+
+Music.prototype.startSFX = function(thissfx, sfxType){
+
+  // stop any currently played sfx
+  thissfx.upFX = false;
+  thissfx.downFX = false;
+  thissfx.tremFX = false;
+  thissfx.chirpFX = false;
+  thissfx.downChirpFX = false;
+
+  // reset time
+  thissfx.FXinc = 0;
+  // reset frequency
+  thissfx.baseFreq = thissfx.defaultFreq;
+  // launch the thissfx
+
+  // given the sfx type, assign the correct fx duration and trigger the sfx.
+  switch(sfxType){
+    case "up": thissfx.upFX = true; thissfx.FXtimer = this.musicInc+thissfx.upFXlength; break;
+    case "down": thissfx.downFX = true;   thissfx.FXtimer = this.musicInc+thissfx.downFXlength; break;
+    case "trem": thissfx.tremFX = true;   thissfx.FXtimer = this.musicInc+thissfx.tremFXlength; break;
+    case "chirp": thissfx.chirpFX = true;   thissfx.FXtimer = this.musicInc+thissfx.chirpFXlength; break;
+    case "downchirp": thissfx.downChirpFX = true;   thissfx.FXtimer = this.musicInc+thissfx.downChirpFXlength; break;
+  }
 }
 
 // launchpart1()
@@ -107,12 +120,16 @@ Music.prototype.launchPart1 = function(){
   // phrase and rhythm
   // phrase values are (midi) intervals over the root note
 
-  var phrase1=[0, 1];
+  var phrase1=[0, 13, 8];
   var phrase2=[4, 6];
   var phrase3 =[3, 7]
   var phrase4 = [2, 8, 5]
   var phrase5 = [1, 2, 3]
   var phrase6 = [7, 2, 4]
+
+
+  var bassPhrase = [0, 0, 3, -7, -7, -5];
+  var bassRhythm = [16, 16, 16, 24, 8, 16];
 
   // while rhythm values are expressed in frames
   // var rhythm1=[60, 40, 20, 40, 20, 40, 20, 40, 120, 80];
@@ -122,32 +139,49 @@ Music.prototype.launchPart1 = function(){
   // see Synth.js for how this stuff works
 
 
-    this.startNewPhrase(synths[0], phrase1, 0, 0, 60, true);
+    this.startNewPhrase(synths[0], phrase1, 0, 0, 24, true);
     this.startNewPhrase(synths[1], phrase2, 12, 0, 40, true);
-    this.startNewPhrase(synths[2], phrase3, 0, 0, 50, true);
-    this.startNewPhrase(synths[3], phrase4, -5, 0, 30, true);
-    this.startNewPhrase(synths[4], phrase5, +5, 0, 20, true);
-    this.startNewPhrase(synths[5], phrase6, 0, 0, 70, true);
+    if(level>0){
+      this.startNewPhrase(synths[2], phrase3, 0, 0, 50, true);
+    }
+    if(level>1){
+      this.startNewPhrase(synths[3], phrase4, -5, 0, 30, true);
+    }
+    if(level>2){
+      this.startNewPhrase(synths[4], phrase5, +5, 0, 20, true);
+    }
+    if(level>3){
+      this.startNewPhrase(synths[5], phrase6, 0, 0, 70, true);
+    }
 
-  // drums are triggered differently.
-  // Beats must be divided up and weighted before we can start.
-  // see Drums.js for how this stuff works
 
-  // required arguments: bar length, beat length, subdiv length,
-  // finediv length, beats per bar, subdivs per beat, finedivs per subdiv.
-  drums.setDivisions(80, 20, 10, 5, 4, 2, 2);
-  // required arguments: max weights, stimulus scale, threshold,
-  // bar weight, beat weight, subdiv weight, fine div weight.
-  drums.setWeights(20, 25, 20, 5, 5, 10, 6);
+
+
+
+    this.startNewPhrase(bass, bassPhrase, -24, bassRhythm, 0, true);
+
+
 
   // set voices on and off
   for(var i=0; i<synths.length; i++){
   synths[i].isPlaying = true;
 }
+  bass.isPlaying = true;
+
 
   drums.isPlaying = true;
   // reset musical time
   this.musicInc = 0;
+
+  drums.nextKick = drums.firstKick;
+  drums.nextClap = drums.firstClap;
+  drums.nextBell = drums.firstBell;
+  drums.nextTick = drums.firstTick;
+
+  drums.kickNum =0;
+  drums.clapNum =0;
+  drums.bellNum =0;
+  drums.tickNum =0;
 }
 
 
@@ -231,7 +265,7 @@ for (var i=0; i<synths.length; i++){
   synths[i].isPlaying =false;
 }
   drums.isPlaying = false;
-  /*
+
   sfx.upFX=false;
   sfx.downFX=false;
   sfx.tremFX=false;
@@ -242,7 +276,7 @@ for (var i=0; i<synths.length; i++){
   sfx2.tremFX=false;
   sfx2.chirpFX=false;
   sfx2.downChirpFX=false;
-*/
+
 }
 
 // loadInstrument()
@@ -267,6 +301,9 @@ Music.prototype.loadInstrument = function(instrument){
   // if the filter attribute says LP then create a low pass filter
   if(instrument.filtAtt==="LP"){
     instrument.filter=new p5.LowPass();
+  }
+  if(instrument.filtAtt==="HP"){
+    instrument.filter=new p5.HighPass();
   }
   // set filter frequency
   instrument.filter.freq(instrument.fFreq);

@@ -9,6 +9,8 @@ var totalobs = 0;
 // kinds of food + obstacle (foods + 1)
 var kindsOfObs = 7;
 
+var level =0;
+
 var droppings = [];
 var enemies = [];
 
@@ -54,7 +56,19 @@ var obsSize = 50;
 var damageToObstacles =foodSize;
 var chanceForFood = 0.5;
 var obstacleDensity = 0.2;
+var playerSizeIncrease = 3;
+
+
 var pic1, pic2, pic3, pic4, pic5, pic6;
+var perc = [];
+
+var sfx;
+var sfx2;
+
+var levelComplete = false;
+var levelTarget = level+3;
+
+
 // preload()
 //
 // loads images to be used for textures
@@ -77,6 +91,10 @@ function preload() {
   pic4 = loadImage("images/4.jpg")
   pic5 = loadImage("images/5.jpg")
   pic6 = loadImage("images/6.jpg")
+  clap = loadSound("sound/clap.mp3");
+  kick = loadSound("sound/kick.mp3");
+  cowbell = loadSound("sound/cowbell.mp3");
+  tick = loadSound("sound/tick.mp3");
 }
 
 // setup()
@@ -92,14 +110,18 @@ function setup() {
   canvas.parent('sketch-holder');
 
   // load music objects
-  drums = new Drum("white");
+  drums = new Drum();
   music = new Music();
+  bass = new Synth("square");
+  // sfx
+  sfx = new SFX('sine', 400);
+  sfx2 = new SFX('white', 400);
 
 
   world = new World();
 
   newLevel();
-  music.setupInstruments();
+
 
   noStroke();
 displayObstaclesLeft();
@@ -137,6 +159,7 @@ function runGame(){
 
   background(255);
   world.display();
+  checkLevelComplete();
 
 
   // OBSTACLES
@@ -181,10 +204,6 @@ function runGame(){
   // display player object
   player.display();
 
-
-
-
-
   // display score over everything else
   //displayScore();
   if(mouseIsPressed){
@@ -210,6 +229,12 @@ function runSound(){
 
   // play drums
   drums.handleDrums();
+  bass.playMusic();
+
+
+  // sfx:
+  sfx.playSFX();
+  sfx2.playSFX();
   // increment musical time
   music.musicInc+=music.musicSpeed;
 }
@@ -227,7 +252,29 @@ function displayScore(){
   // display text
   fill(0);
   */
+
+  document.getElementById("3").innerHTML = player.healthyFoodEaten;
+  document.getElementById("4").innerHTML = levelTarget;
   console.log("healthy droppings: "+player.healthydroppings+", sickly droppings: "+player.sickdroppings, 10, 10);
+}
+
+function checkLevelComplete(){
+// level is complete when 80% of the food is eaten
+  //var levelTarget = floor(0.8*healthyobs)
+
+
+
+  console.log("target "+levelTarget)
+  console.log("healthy droppings "+player.healthydroppings)
+
+if(player.healthydroppings >= levelTarget){
+  console.log("target reached")
+  levelComplete = true;
+  level +=1;
+  newLevel();
+}
+
+
 }
 
 // TEST FUNCTIONS
@@ -239,7 +286,9 @@ function displayScore(){
 function keyPressed(){
   switch(key){
     case " ": playerIsFullThreshold +=1; break;
-    case "q": toggleObsMode(); break;
+    case "z": toggleObsMode(); break;
+    // player stuck key
+    case "x": findGoodPosition(player); break;
   }
 }
 
@@ -301,6 +350,10 @@ function findGoodPosition(target) {
 
 function newLevel(){
 
+  levelComplete = false;
+  kindsOfObs = level+3;
+
+
   // create new player objects
   player = new MovingObject(0,height/2,3,83,87, 65, 68);
 
@@ -335,6 +388,8 @@ console.log("kinds of "+(kindsOfObs-1));
   healthyobs =0;
   sicklyobs =0;
 
+  obstacles = [];
+
   // for each point on the grid
 
   for (var i=0; i<xobs*yobs; i++){
@@ -349,14 +404,17 @@ console.log("kinds of "+(kindsOfObs-1));
     }
   }
 
+  levelTarget = floor(healthyobs/2-2);
+
   // position player and enemies around obstacles.
   findGoodPosition(player);
   for (var i=0; i<numEnemies; i++){
   findGoodPosition(enemies[i]);
   }
-
+music.setupInstruments();
   // start sound
     music.launchPart1();
+    displayScore();
 }
 
 function windowResized(){

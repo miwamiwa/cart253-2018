@@ -59,12 +59,14 @@ function SFX(oscType, frequency){
   this.downFXlength= 45;
   this.tremFXlength= 45;
   this.chirpFXlength =10;
-  this.downChirpFXlength =10;
+  this.downChirpFXlength =30;
 
   // timer signaling that sfx is over
   this.FXtimer= 0;
   // increment sfx timer
   this.FXinc = 0;
+
+  this.extraStep= random(15, 30);
 
 
 }
@@ -140,6 +142,7 @@ SFX.prototype.playSFX = function(){
     // if downChirpFX is triggered
 
     else if(this.downChirpFX){
+
       // set envelope
       this.env.setADSR(0.001, 0.1, 0.0, 0.01);
       this.env.setRange(1, 0);
@@ -148,14 +151,12 @@ SFX.prototype.playSFX = function(){
 
         console.log("downChirpfx");
         // use FXinc(rement) to keep track of time during the FX
-        if(this.FXinc%4===0){
+        if(this.FXinc===11 || this.FXinc === round(this.extraStep)){
           // if input is noise set filter frequency
           if(this.synthType==="white"){
-            // make this sfx shorter if noise is involved;
-            // since this is the ball-wall collision sfx i don't want it too long.
-            this.FXtimer = 6;
+
             // set filter frequency
-            this.filter.freq(15000-100*this.FXinc);
+            this.filter.freq(random(500, 1500));
             // set noise volume
             this.env.setRange(0.4, 0);
           }
@@ -169,6 +170,7 @@ SFX.prototype.playSFX = function(){
       } else {
         // if timer is over stop this
         this.downChirpFX=false;
+          this.extraStep= random(15, 30);
       }
     }
 

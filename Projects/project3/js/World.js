@@ -19,8 +19,8 @@ function World() {
   this.y = 0;
   this.z = -25;
   // size
-  this.w = width*2;
-  this.h = height*2;
+  this.w = 1500;
+  this.h = 1500;
 
   // light
 

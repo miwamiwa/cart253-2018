@@ -142,7 +142,7 @@ Drum.prototype.handleDrums = function(){
       // map filter frequency to beat salience too
       this.filter.freq( 18150-decayTime*18000 );
       // set envelope
-      this.env.setADSR(this.attackTime, 0.10*decayTime, this.susPercent, this.releaseTime);
+      this.env.setADSR(this.attackTime, this.decayTime, this.susPercent, this.releaseTime);
       this.env.setRange(this.attackLevel, this.releaseLevel);
       // play sound
       this.env.play();

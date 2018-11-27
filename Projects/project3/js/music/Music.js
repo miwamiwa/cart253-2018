@@ -78,7 +78,14 @@ for(var i=0; i<synths.length; i++){
   this.loadInstrument(sfx);
   this.loadInstrument(sfx2);
   */
-
+  // drum setup
+  // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
+  drums.setEnvelope(0.05, 0.1, 0.2, 0.9, 0.7, 0.0);
+  // function(filterType, frequency)
+  drums.setFilter("BP", 400);
+  // function(delayIsOn, length, feedback, filterFrequency)
+  drums.setDelay(true, 0.105, 0.15, 15000);
+  //drums.setDivisions(bar, beat, subdiv, finediv, beatsperbar, divsperbeat, fineperdiv)
   this.loadInstrument(drums);
 
 }
@@ -128,10 +135,10 @@ Music.prototype.launchPart1 = function(){
 
   // required arguments: bar length, beat length, subdiv length,
   // finediv length, beats per bar, subdivs per beat, finedivs per subdiv.
-  drums.setDivisions(120, 60, 20, 5, 2, 3, 4);
+  drums.setDivisions(80, 20, 10, 5, 4, 2, 2);
   // required arguments: max weights, stimulus scale, threshold,
   // bar weight, beat weight, subdiv weight, fine div weight.
-  drums.setWeights(18, 27, 22, 10, 10, 8, 2);
+  drums.setWeights(20, 25, 20, 5, 5, 10, 6);
 
   // set voices on and off
   for(var i=0; i<synths.length; i++){

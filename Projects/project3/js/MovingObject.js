@@ -18,7 +18,7 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
   this.y = y;
 
   this.size = 50;
-this.z =this.size/2;
+  this.z =this.size/2;
   // speed
   this.vx = 0;
   this.vy = 0;
@@ -73,43 +73,43 @@ this.z =this.size/2;
   this.sickdroppings = 0;
 
 
-    // animation variables
+  // animation variables
 
-    // back leg motion
-    this.legAngle = 0;
-    // front leg motion
-    this.legAngle2 = 0;
-    // leg motion speed
-    this.legRate =0.5;
-    // tail motion along x and y axis
-    this.tailXAngle =0;
-    this.tailYAngle =0;
-    // head bob
-    this.headWobble = 0;
-    // head bob speed
-    this.wobbleRate = 0.2;
+  // back leg motion
+  this.legAngle = 0;
+  // front leg motion
+  this.legAngle2 = 0;
+  // leg motion speed
+  this.legRate =0.5;
+  // tail motion along x and y axis
+  this.tailXAngle =0;
+  this.tailYAngle =0;
+  // head bob
+  this.headWobble = 0;
+  // head bob speed
+  this.wobbleRate = 0.2;
 
-    // part sizes
+  // part sizes
 
-    this.bodSize = this.size;
-    this.headSize = this.size*0.6;
-    this.tailSize = this.size*0.2;
-    this.tailLength = this.size*0.4;
-    this.eyeSize= this.size/10;
-    this.earSize = this.size/7;
-    this.legSize = this.size*0.3;
-    this.noseSize = this.size*0.3;
+  this.bodSize = this.size;
+  this.headSize = this.size*0.6;
+  this.tailSize = this.size*0.2;
+  this.tailLength = this.size*0.4;
+  this.eyeSize= this.size/10;
+  this.earSize = this.size/7;
+  this.legSize = this.size*0.3;
+  this.noseSize = this.size*0.3;
 
-    this.healthyFoodEaten = 0;
-    this.sicklyFoodEaten =0;
+  this.healthyFoodEaten = 0;
+  this.sicklyFoodEaten =0;
 
-    this.wasHitTimer =0;
-    this.wasHitTimerLength = 400;
+  this.wasHitTimer =0;
+  this.wasHitTimerLength = 400;
 
-    this.ringOsc =0;
-    this.ringOscRate =0.08;
-    this.roomLeft = 0;
-    this.updateRoomLeft();
+  this.ringOsc =0;
+  this.ringOscRate =0.08;
+  this.roomLeft = 0;
+  this.updateRoomLeft();
 
 }
 
@@ -120,90 +120,90 @@ this.z =this.size/2;
 
 MovingObject.prototype.handleInput = function() {
 
-    // player left-right rotation speed
-    var angleSpeed = 5.0;
+  // player left-right rotation speed
+  var angleSpeed = 5.0;
 
-    // up key is pressed
-    if (keyIsDown(this.upKey)) {
+  // up key is pressed
+  if (keyIsDown(this.upKey)) {
 
-      // update x and y velocity according to current bearing
-      this.vy -= cos(this.angle);
-      this.vx += sin(this.angle);
+    // update x and y velocity according to current bearing
+    this.vy -= cos(this.angle);
+    this.vx += sin(this.angle);
 
-      // trigger appropriate parts motion
-      this.legAngle += this.legRate;
-      this.legAngle2 += this.legRate;
-      this.tailXAngle += this.legRate;
+    // trigger appropriate parts motion
+    this.legAngle += this.legRate;
+    this.legAngle2 += this.legRate;
+    this.tailXAngle += this.legRate;
 
-    }
+  }
 
-    // down key is pressed
-    else if (keyIsDown(this.downKey)) {
+  // down key is pressed
+  else if (keyIsDown(this.downKey)) {
 
-      // update x and y velocity according to current bearing
-      this.vy += cos(this.angle);
-      this.vx -= sin(this.angle);
+    // update x and y velocity according to current bearing
+    this.vy += cos(this.angle);
+    this.vx -= sin(this.angle);
 
-      // trigger appropriate parts motion
-      this.legAngle += this.legRate;
-      this.legAngle2 += this.legRate;
-      this.tailXAngle += this.legRate;
-    }  // if no keys are pressed stop moving.
-      else {
-       this.vx=0;
-       this.vy=0;
-     }
-    // left key is pressed
-     if (keyIsDown(this.leftKey)) {
+    // trigger appropriate parts motion
+    this.legAngle += this.legRate;
+    this.legAngle2 += this.legRate;
+    this.tailXAngle += this.legRate;
+  }  // if no keys are pressed stop moving.
+  else {
+    this.vx=0;
+    this.vy=0;
+  }
+  // left key is pressed
+  if (keyIsDown(this.leftKey)) {
 
-      // rotate left
-      this.angle -= radians(angleSpeed);
+    // rotate left
+    this.angle -= radians(angleSpeed);
 
-      // trigger appropriate parts motion
-      this.legAngle2 += this.legRate;
-      this.tailYAngle += this.legRate;
-      this.tailXAngle =0;
-    }
+    // trigger appropriate parts motion
+    this.legAngle2 += this.legRate;
+    this.tailYAngle += this.legRate;
+    this.tailXAngle =0;
+  }
 
-    // right key is pressed
-    else if (keyIsDown(this.rightKey)) {
+  // right key is pressed
+  else if (keyIsDown(this.rightKey)) {
 
-      // rotate right
-      this.angle += radians(angleSpeed);
+    // rotate right
+    this.angle += radians(angleSpeed);
 
-      // trigger appropriate parts motion
-      this.legAngle2 += this.legRate;
-      this.tailYAngle += this.legRate;
-      this.tailXAngle =0;
-    }
+    // trigger appropriate parts motion
+    this.legAngle2 += this.legRate;
+    this.tailYAngle += this.legRate;
+    this.tailXAngle =0;
+  }
 
 
-     // strafe left key is pressed
-    if (keyIsDown(this.strafeLeft)) {
+  // strafe left key is pressed
+  if (keyIsDown(this.strafeLeft)) {
 
-      // trigger appropriate parts motion
-      this.legAngle2 += this.legRate;
+    // trigger appropriate parts motion
+    this.legAngle2 += this.legRate;
 
-      // update x and y velocity according to bearing
-      this.vy -= sin(this.angle);
-      this.vx -= cos(this.angle);
-    }
+    // update x and y velocity according to bearing
+    this.vy -= sin(this.angle);
+    this.vx -= cos(this.angle);
+  }
 
-    // strafe right key is pressed
-    else if (keyIsDown(this.strafeRight)) {
+  // strafe right key is pressed
+  else if (keyIsDown(this.strafeRight)) {
 
-      // trigger appropriate parts motion
-      this.legAngle2 += this.legRate;
+    // trigger appropriate parts motion
+    this.legAngle2 += this.legRate;
 
-      // update x and y velocity according to bearing
-      this.vy += sin(this.angle);
-      this.vx += cos(this.angle);
+    // update x and y velocity according to bearing
+    this.vy += sin(this.angle);
+    this.vx += cos(this.angle);
 
-    }
+  }
 
-    if((this.vx>0 || this.vy>0) && music.musicInc % (sfx2.downChirpFXlength+10)===0){
-        music.startSFX(sfx2, "downchirp");
-    }
+  if((this.vx>0 || this.vy>0) && music.musicInc % (sfx2.downChirpFXlength+10)===0){
+    music.startSFX(sfx2, "downchirp");
+  }
 
 
 
@@ -216,103 +216,140 @@ MovingObject.prototype.handleInput = function() {
 
 MovingObject.prototype.update = function() {
 
-  // check all obstacles
+  // check for collision with any obstacle
+
+  // check through all obstacles
   for (var i=0; i<obstacles.length; i++){
 
-    // if obstacle is large enough to eat.
-    // also do not bother checking if obstacle isn't within 100px
+// don't bother checking if:
+// obstacle isn't within close range,
+// obstacle's size too small
     if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<(foodSize+this.size)*1.1){
 
+// if obstacle's left or right walls are hit, stop moving along the x axis
       if(
-      collideLineRect(
-        obstacles[i].x,
-        obstacles[i].y,
-        obstacles[i].x,
-        obstacles[i].y+obstacles[i].size,
-        this.x+this.vx,
-        this.y+this.vy,
-        this.size,
-        this.size)
-        ||
-        collideLineRect(
-          obstacles[i].x+obstacles[i].size,
+        (collideLineRect(
+          obstacles[i].x,
           obstacles[i].y,
-          obstacles[i].x+obstacles[i].size,
-          obstacles[i].y+obstacles[i].size,
-          this.x+this.vx,
-          this.y+this.vy,
-          this.size,
-          this.size)
-      ){
-        this.vx =0;
-        this.eatObstacle(i);
-      }
-      if(
-      collideLineRect(
-        obstacles[i].x,
-        obstacles[i].y,
-        obstacles[i].x+obstacles[i].size,
-        obstacles[i].y,
-        this.x+this.vx,
-        this.y+this.vy,
-        this.size,
-        this.size)
-        ||
-        collideLineRect(
           obstacles[i].x,
           obstacles[i].y+obstacles[i].size,
-          obstacles[i].x+obstacles[i].size,
-          obstacles[i].y+obstacles[i].size,
           this.x+this.vx,
           this.y+this.vy,
           this.size,
           this.size)
-      ){
-        this.vy =0;
-        this.eatObstacle(i);
-      }
-    }
+          && this.vx>0)
+          || (collideLineRect(
+            obstacles[i].x+obstacles[i].size,
+            obstacles[i].y,
+            obstacles[i].x+obstacles[i].size,
+            obstacles[i].y+obstacles[i].size,
+            this.x+this.vx,
+            this.y+this.vy,
+            this.size,
+            this.size)
+            && this.vx<0)
+            ||
+            (collideLineRect(
+              obstacles[i].x,
+              obstacles[i].y,
+              obstacles[i].x+obstacles[i].size,
+              obstacles[i].y,
+              this.x+this.vx,
+              this.y+this.vy,
+              this.size,
+              this.size)
+              && this.vy>0)
+              || (collideLineRect(
+                obstacles[i].x,
+                obstacles[i].y+obstacles[i].size,
+                obstacles[i].x+obstacles[i].size,
+                obstacles[i].y+obstacles[i].size,
+                this.x+this.vx,
+                this.y+this.vy,
+                this.size,
+                this.size)
+                && this.vy<0)
+          ){
+            this.vx =0;
+            this.vy =0;
+            this.eatObstacle(i);
+          }
+            }
+          }
+
+    // constrain velocity to fit speed
+    this.vx = constrain(this.vx, -this.speed, this.speed);
+    this.vy = constrain(this.vy, -this.speed, this.speed);
+
+    //update position
+    this.x+=this.vx;
+    this.y+=this.vy;
+
+    this.x = constrain(this.x, -world.w/2, world.w/2)
+    this.y = constrain(this.y, -world.h/2, world.h/2)
+
+    // set camera to match player position
+    this.setCam();
   }
 
-  // constrain velocity to fit speed
-  this.vx = constrain(this.vx, -this.speed, this.speed);
-  this.vy = constrain(this.vy, -this.speed, this.speed);
+  // setcam()
+  //
+  // sets camera's x, y position and x, y direction to match player position
 
-  //update position
-  this.x+=this.vx;
-  this.y+=this.vy;
+  MovingObject.prototype.setCam = function(){
 
-  this.x = constrain(this.x, -world.w/2, world.w/2)
-  this.y = constrain(this.y, -world.h/2, world.h/2)
+    camera(this.x+camOffsetX, this.y-camYAngle+camOffsetY,  (height/2.0) / tan(PI*30.0 / 180.0)+camOffsetZ, this.x, this.y,0, 0 , 1, 0);
 
-  // set camera to match player position
-  this.setCam();
-}
+  }
 
-// setcam()
+  // display()
+  //
+  // draws the racoon..
+
+  MovingObject.prototype.display = function() {
+
+    // move to racoon position
+    translate(this.x, this.y, this.z);
+
+    // create spotlight over racoon
+    this.createSpotLight();
+
+    // display a hoop representing smell range and game events such as:
+    // player/human collision, eating, chewing, pooping.
+    this.displaySmellRange();
+
+    // rotate racoon according to key controls
+    rotateZ(this.angle);
+
+    // update tail, legs and head position
+    this.updateParts();
+    // display racoon
+    this.displayRacoon();
+  }
+
+// createspotlight()
 //
-// sets camera's x, y position and x, y direction to match player position
+// creates a light that follows the player
 
-MovingObject.prototype.setCam = function(){
+  MovingObject.prototype.createSpotLight = function(){
+    push();
+    translate(0, 0, this.size*3)
+    directionalLight(0, 0, 215,0, 0);
+    pop();
+  }
 
-  camera(this.x+camOffsetX, this.y-camYAngle+camOffsetY,  (height/2.0) / tan(PI*30.0 / 180.0)+camOffsetZ, this.x, this.y,0, 0 , 1, 0);
+  // updateparts()
+  //
+  // update position of racoon parts using oscillators
 
-}
-// display()
-//
-// Draw the paddle as a rectangle on the screen
-
-MovingObject.prototype.display = function() {
-
-    // calculate change in animated parts' position
-
-    // increment head bob
-    this.headWobble += this.wobbleRate;
+  MovingObject.prototype.updateParts = function(){
 
     // calculate change in tail position
     var tailWiggleX = sin(this.tailXAngle)*5;
     var tailWiggleY = sin(this.tailYAngle)*5;
 
+    // increment head bob
+    this.headWobble += this.wobbleRate;
     // calculate change in head position
     var headBob = sin(this.headWobble)*3;
 
@@ -322,58 +359,18 @@ MovingObject.prototype.display = function() {
     var legSin2 = sin(this.legAngle2+PI)*legTrans;
     var legCos = cos(this.legAngle)*legTrans;
     var legCos2 = cos(this.legAngle+PI)*legTrans;
-
-    // move to racoon position
-    translate(this.x, this.y, this.z);
-    push();
-    translate(0, 0, this.size*3)
-    // create spotlight over racoon
-    directionalLight(0, 0, 215,0, 0);
-    pop();
-
-    // display an ellipse to help visualize smelling range
-    push()
-    ambientMaterial(45, 45, 185, 85);
-    stroke(95, 95, 185);
-    if(this.eatingTimer>millis()){
-      ambientMaterial(45, 185, 45, 205);
-      stroke(45, 185, 45);
-    }
-    if (this.poopingTimer>millis()){
-     ambientMaterial(185, 85, 65, 205);
-     stroke(185, 85, 65);
-   }
-   if (this.wasHitTimer>millis()){
-    ambientMaterial(185, 185, 25, 205);
-    stroke(185, 185, 25);
   }
-  if(keyIsDown(this.eatKey)){
-    ambientMaterial(185, 185, 225, 205);
-    stroke(185, 185, 225);
-  }
-  translate(0, 0, -this.size/2+5)
-  rotateX(PI/2)
-  cylinder(this.size*1.1, 2);
 
-  rotateX(-PI/2)
-  translate(0, 0, this.size*0.6)
-  this.ringOsc+=this.ringOscRate;
-  rotateY(cos(this.ringOsc)/50)
-  torus(this.smellRange-15, 8);
-  translate(0, 0, 10);
-  rotateY(-cos(this.ringOsc)/50)
-  rotateY(cos(this.ringOsc/2)/50)
-  torus(this.smellRange, 4);
-    pop()
+ // displayracoon();
+ //
+ // display the boxes that make up the racoon
 
-
-    // rotate racoon according to key controls
-    rotateZ(this.angle);
-    push();
+  MovingObject.prototype.displayRacoon = function(){
 
     // draw racoon
 
     // body
+    push();
     texture(racTexture);
     box(this.bodSize);
     pop();
@@ -463,205 +460,254 @@ MovingObject.prototype.display = function() {
     translate(-this.bodSize/2-this.legSize/2, +this.bodSize/4+this.legSize/2, legCos2-10);
     box(this.legSize);
     pop();
+  }
 
-
-}
-
-// eatobstacle()
+// displaysmellrange()
 //
-// check if a given obstacle is edible.
-// eat it and suffer the consequences (or benefits)
+// draw a hoop around the player that indicates smell range,
+// with a colour that reflects certain game events
 
-MovingObject.prototype.eatObstacle = function(index) {
+  MovingObject.prototype.displaySmellRange = function(){
 
-  // if obstacle is large enough to eat
-  // and player is done eating
-  // and obstacle is edible
+    push()
+    ambientMaterial(45, 45, 185, 85);
+    stroke(95, 95, 185);
 
-  if(obstacles.length>0
-    &&this.eatingTimer<millis()
-    && obstacles[index].edible
-  && keyIsDown(
-this.eatKey)){
-
-      // add to total food in belly
-      this.foodInBelly +=1;
-      this.updateRoomLeft();
-      // remove a bit of size off this specific obstacle
-      obstacles[index].getEaten();
-      // if food item is a bad food
-      switch(obstacles[index].healthy){
-
-        case true: this.healthyObsEaten(index); break;
-        case false: this.unhealthyObsEaten(index); break;
-
-      }
-
-
-
-
-      // start eating timer
-      this.eatingTimer = millis()+this.eatingTimerLength;
-
-      // gain knowledge of this food object
-
-      var alreadyKnown = false;
-      // look through all known objects to check if you already know about this one
-      for (var i=0; i<this.knownObjects.length; i++){
-        // if you already know about it,
-        if (this.knownObjects[i] === obstacles[index].type){
-          // this boolean will turn the next if() statement off.
-          alreadyKnown = true;
-        }
-      }
-
-      // if this isn't a known object
-      if(!alreadyKnown){
-        // learn about it by adding its type to the knownObjects array.
-        this.knownObjects.push(obstacles[index].type);
-      }
+    // change the hoop's fill depending on player status
+    // if player is chewing
+    if(this.eatingTimer>millis()){
+      ambientMaterial(45, 185, 45, 205);
+      stroke(45, 185, 45);
     }
-  }
-MovingObject.prototype.healthyObsEaten = function(index){
-  this.healthyFoodEaten ++;
-  this.health+=healthyPoopBonus;
-  if (obstacles[index].size<=0){
-    healthyobs -=1
-  }
-}
-
-
-MovingObject.prototype.unhealthyObsEaten = function(index){
-  this.sicklyFoodEaten ++;
-  this.health-=unhealthyPoopPenalty;
-  this.isSick = true;
-  console.log("blabla "+obstacles[index].size)
-  if (obstacles[index].size<=0){
-    sicklyobs -=1;
-  }
-}
-
-
-  // digest()
-  //
-  // check if player is full and trigger digestion
-  // digest any food inside player's belly and output droppings :)
-  // resets amount of food inside belly.
-  // this is part of the runGame() loop.
-
-  MovingObject.prototype.digest = function () {
-
-    // if player is full and done eating
-    if(this.foodInBelly >= playerIsFullThreshold && this.eatingTimer<millis()){
-
-      // reset amount of food inside belly
-      this.foodInBelly = 0;
-     this.updateRoomLeft();
-     displayHealth();
-      // update score text
-displayScore();
-      displayObstaclesLeft();
-
-      // shoot the pooping timer
-      this.poopingTimer = millis() + this.poopingTimerLength;
-
-      // if player is sick because of what he ate
-      if(this.isSick){
-        // create a new sickly dropping and add to total count.
-        droppings.push(new Droppings(this.x, this.y, false, playerIsFullThreshold));
-        this.sickdroppings+=1;
-      }
-      else {
-        // if the player is health, create and count a healthy dropping.
-        droppings.push(new Droppings(this.x, this.y, true, playerIsFullThreshold));
-        this.healthydroppings+=1;
-      }
-
-      // player is no longer sick.
-      // right now this happens whenever the player has digested, but the game
-      // could be made more interesting (and challenging) if the player had to
-      // pickup an antidote or drink some water or anything like that.
-
-      this.isSick = false;
+    // if player is pooping
+    if (this.poopingTimer>millis()){
+      ambientMaterial(185, 85, 65, 205);
+      stroke(185, 85, 65);
     }
+    // if player's just been hit
+    if (this.wasHitTimer>millis()){
+      ambientMaterial(185, 185, 25, 205);
+      stroke(185, 185, 25);
+    }
+    // if eating key is pressed
+    if(keyIsDown(this.eatKey)){
+      ambientMaterial(185, 185, 225, 205);
+      stroke(185, 185, 225);
+    }
+    // display a cylinder of this colour below the player,
+    translate(0, 0, -this.size/2+5)
+    rotateX(PI/2)
+    cylinder(this.size*1.1, 2);
+    rotateX(-PI/2)
+    // and display the hoop
+    translate(0, 0, this.size*0.6)
+    this.ringOsc+=this.ringOscRate;
+    rotateY(cos(this.ringOsc)/50)
+    torus(this.smellRange-15, 8);
+    translate(0, 0, 10);
+    rotateY(-cos(this.ringOsc)/50)
+    rotateY(cos(this.ringOsc/2)/50)
+    torus(this.smellRange, 4);
+    pop()
   }
 
-  MovingObject.prototype.updateRoomLeft = function(){
-    this.roomLeft = playerIsFullThreshold-this.foodInBelly;
-  }
-
-  // sniffout()
+  // eatobstacle()
   //
-  // identify things in range that you can recognize using your racoonlike
-  // smelling ability.
-  // this is part of the runGame() loop.
-  // this function checks through a bunch of data everytime draw() is called,
-  // so i tried to shorten it by inserting booleans that interrupt the search
-  // once appropriate matches are found.
+  // check if a given obstacle is edible.
+  // eat it and suffer the consequences (or benefits)
 
-  MovingObject.prototype.sniffOut = function () {
+  MovingObject.prototype.eatObstacle = function(index) {
 
-    // reset array containing objects in range
-    this.knownObjectsInRange = [];
+    // if obstacle is large enough to eat
+    // and player is done eating
+    // and obstacle is edible
 
-    // nextObject is used to stop searching through known objects
-    // when a match is found, allowing the code to skip right to the next object.
-    var nextObject=false;
+    if(obstacles.length>0
+      &&this.eatingTimer<millis()
+      && obstacles[index].edible
+      && keyIsDown(
+        this.eatKey)){
 
-    //for all obstacles
-    for (var i=0; i<obstacles.length; i++){
+          // add to total food in belly
+          this.foodInBelly +=1;
+          this.updateRoomLeft();
+          // remove a bit of size off this specific obstacle
+          obstacles[index].getEaten();
+          // if food item is a bad food
+          switch(obstacles[index].healthy){
 
-      // reset nextObject trigger
-      nextObject=false;
+            case true: this.healthyObsEaten(index); break;
+            case false: this.unhealthyObsEaten(index); break;
 
-      // calculate distance to player
-      var distance = dist(this.x+this.size/2, this.y+this.size/2, obstacles[i].x+obstacles[i].size/2, obstacles[i].y+obstacles[i].size/2);
+          }
 
-      // if this obstacle is in range
-      if(distance<this.smellRange && obstacles[i].size>0){
 
-        // we only want one voice to play per type of object, so this boonlean
-        // will prevent multiple objects of the same type to be added to the
-        // knownObjectsInRange array.
 
-        var alreadysmelled = false;
 
-        // for any object already recognized
-        for (var k=0; k<this.knownObjectsInRange.length; k++){
-          // if an object matches the object which is currently being examined,
-          // indicate that we already know this object is within range.
-          if (this.knownObjectsInRange[k]===obstacles[i].type){
-            alreadysmelled = true;
+          // start eating timer
+          this.eatingTimer = millis()+this.eatingTimerLength;
+
+          // gain knowledge of this food object
+
+          var alreadyKnown = false;
+          // look through all known objects to check if you already know about this one
+          for (var i=0; i<this.knownObjects.length; i++){
+            // if you already know about it,
+            if (this.knownObjects[i] === obstacles[index].type){
+              // this boolean will turn the next if() statement off.
+              alreadyKnown = true;
+            }
+          }
+
+          // if this isn't a known object
+          if(!alreadyKnown){
+            // learn about it by adding its type to the knownObjects array.
+            this.knownObjects.push(obstacles[index].type);
           }
         }
+        player.digest();
+        document.getElementById("7").innerHTML = player.roomLeft;
+      }
+      MovingObject.prototype.healthyObsEaten = function(index){
+        this.healthyFoodEaten ++;
+        this.health+=healthyPoopBonus;
+        if (obstacles[index].size<=0){
+          healthyobs -=1
+        }
+      }
 
 
-        for (var j=0; j<this.knownObjects.length; j++){
-          // if this is a known object
-          if(this.knownObjects[j]===obstacles[i].type
-            // and we haven't added this object to the array yet
-            &&nextObject === false
-            // and we haven't smelled an object of the same type
-            && !alreadysmelled){
-              // then add this object to knownObjectsInRange array, and move on to
-              // next object
-              this.knownObjectsInRange.push(this.knownObjects[j]);
-              nextObject = true;
+      MovingObject.prototype.unhealthyObsEaten = function(index){
+        this.sicklyFoodEaten ++;
+        this.health-=unhealthyPoopPenalty;
+        this.isSick = true;
+        console.log("blabla "+obstacles[index].size)
+        if (obstacles[index].size<=0){
+          sicklyobs -=1;
+        }
+      }
+
+
+      // digest()
+      //
+      // check if player is full and trigger digestion
+      // digest any food inside player's belly and output droppings :)
+      // resets amount of food inside belly.
+      // this is part of the runGame() loop.
+
+      MovingObject.prototype.digest = function () {
+
+        // if player is full and done eating
+        if(this.foodInBelly >= playerIsFullThreshold && this.eatingTimer<millis()){
+
+          // reset amount of food inside belly
+          this.foodInBelly = 0;
+          this.updateRoomLeft();
+          displayHealth();
+          // update score text
+          displayScore();
+          displayObstaclesLeft();
+
+          // shoot the pooping timer
+          this.poopingTimer = millis() + this.poopingTimerLength;
+
+          // if player is sick because of what he ate
+          if(this.isSick){
+            // create a new sickly dropping and add to total count.
+            droppings.push(new Droppings(this.x, this.y, false, playerIsFullThreshold));
+            this.sickdroppings+=1;
+          }
+          else {
+            // if the player is health, create and count a healthy dropping.
+            droppings.push(new Droppings(this.x, this.y, true, playerIsFullThreshold));
+            this.healthydroppings+=1;
+          }
+
+          // player is no longer sick.
+          // right now this happens whenever the player has digested, but the game
+          // could be made more interesting (and challenging) if the player had to
+          // pickup an antidote or drink some water or anything like that.
+
+          this.isSick = false;
+        }
+      }
+
+      MovingObject.prototype.updateRoomLeft = function(){
+        this.roomLeft = playerIsFullThreshold-this.foodInBelly;
+      }
+
+      // sniffout()
+      //
+      // identify things in range that you can recognize using your racoonlike
+      // smelling ability.
+      // this is part of the runGame() loop.
+      // this function checks through a bunch of data everytime draw() is called,
+      // so i tried to shorten it by inserting booleans that interrupt the search
+      // once appropriate matches are found.
+
+      MovingObject.prototype.sniffOut = function () {
+
+        // reset array containing objects in range
+        this.knownObjectsInRange = [];
+
+        // nextObject is used to stop searching through known objects
+        // when a match is found, allowing the code to skip right to the next object.
+        var nextObject=false;
+
+        //for all obstacles
+        for (var i=0; i<obstacles.length; i++){
+
+          // reset nextObject trigger
+          nextObject=false;
+
+          // calculate distance to player
+          var distance = dist(this.x+this.size/2, this.y+this.size/2, obstacles[i].x+obstacles[i].size/2, obstacles[i].y+obstacles[i].size/2);
+
+          // if this obstacle is in range
+          if(distance<this.smellRange && obstacles[i].size>0){
+
+            // we only want one voice to play per type of object, so this boonlean
+            // will prevent multiple objects of the same type to be added to the
+            // knownObjectsInRange array.
+
+            var alreadysmelled = false;
+
+            // for any object already recognized
+            for (var k=0; k<this.knownObjectsInRange.length; k++){
+              // if an object matches the object which is currently being examined,
+              // indicate that we already know this object is within range.
+              if (this.knownObjectsInRange[k]===obstacles[i].type){
+                alreadysmelled = true;
+              }
+            }
+
+
+            for (var j=0; j<this.knownObjects.length; j++){
+              // if this is a known object
+              if(this.knownObjects[j]===obstacles[i].type
+                // and we haven't added this object to the array yet
+                &&nextObject === false
+                // and we haven't smelled an object of the same type
+                && !alreadysmelled){
+                  // then add this object to knownObjectsInRange array, and move on to
+                  // next object
+                  this.knownObjectsInRange.push(this.knownObjects[j]);
+                  nextObject = true;
+                }
+              }
             }
           }
         }
-      }
-    }
 
 
-MovingObject.prototype.increaseSize = function(){
-    this.size += playerSizeIncrease;
-    this.bodSize = this.size;
-    this.headSize = this.size*0.6;
-    this.tailSize = this.size*0.2;
-    this.tailLength = this.size*0.4;
-    this.eyeSize= this.size/10;
-    this.earSize = this.size/7;
-    this.legSize = this.size*0.3;
-    this.noseSize = this.size*0.3;
-}
+        MovingObject.prototype.increaseSize = function(){
+          this.size += playerSizeIncrease;
+          this.bodSize = this.size;
+          this.headSize = this.size*0.6;
+          this.tailSize = this.size*0.2;
+          this.tailLength = this.size*0.4;
+          this.eyeSize= this.size/10;
+          this.earSize = this.size/7;
+          this.legSize = this.size*0.3;
+          this.noseSize = this.size*0.3;
+        }

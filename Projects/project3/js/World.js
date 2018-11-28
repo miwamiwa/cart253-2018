@@ -1,8 +1,7 @@
 // World.js
 //
 // contains the world constructor.
-// displays the world platform (right now in 1 color but could be textured
-// or made up of different tiles)
+// displays the game platform, and background planes
 // sets ambient light
 // creates a "sun" that wanders around
 
@@ -13,7 +12,6 @@
 function World() {
 
   // world
-
   // position
   this.x = 0;
   this.y = 0;
@@ -23,7 +21,6 @@ function World() {
   this.h = 1500;
 
   // light
-
   // sun position
   this.lightX=0;
   this.lightY =0;
@@ -36,34 +33,44 @@ function World() {
 
 // display()
 //
-// trigger light effects and display world platform
+// handle displaying world and lights
 
 World.prototype.display = function(){
 
+  // display textured planes in the background
+  this.displayBackground();
+
+  // sets ambient light and sun
+  push();
+  this.setLight();
+
+  // point to the middle of the canvas
+  translate(this.x, this.y, this.z);
+  // create game platform
+  texture(groundTexture);
+  box(this.w, this.h, -50);
+  pop();
+}
+
+// displaybackground()
+//
+// displays background planes
+
+World.prototype.displayBackground = function(){
+
+  // display plane below the game platform
   push();
   translate(0, 0, -200);
-
   texture(lowergroundImage);
   plane(width*10, height*8);
-
   pop();
+
+  // display plane in the horizon
   push();
   rotateX(3*PI/2);
   translate(0,0 , - height*4);
   texture(backgroundImage);
   plane(width*10, height*3.5);
-  pop();
-  push();
-  // sets ambient light and sun
-  this.setLight();
-
-  // point to the middle of the canvas
-
-  translate(this.x, this.y, this.z);
-  // create "world" as one big box
-  texture(groundTexture);
-  box(this.w, this.h, -50);
-
   pop();
 }
 
@@ -84,7 +91,9 @@ World.prototype.setLight = function (){
 // display the sun's static and spinning parts:
 //   a cylinder, two cones and a torus.
 // move the sun
-// create sunlight
+// create "sunlight". tbh this doesn't do much, just a small point of light
+// on the screen but i kept it because having the sun move around makes the
+// game more alive
 
 World.prototype.displaySun = function(){
 
@@ -125,8 +134,7 @@ World.prototype.displaySun = function(){
   pop();
   pop();
 
-  // get new sun position using noise()
-
+  // update sun's position using noise()
   // increment noise
   this.lightMotion+=0.001;
   // x-motion
@@ -137,6 +145,4 @@ World.prototype.displaySun = function(){
   this.lightY = map(noise(this.lightMotion), 0, 1, -this.w/2, this.w/2);
   // z-position
   this.lightZ = 300;
-
-
 }

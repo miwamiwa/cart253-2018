@@ -1,31 +1,29 @@
-
-var player;
-var enemy;
-
+// game screen
 var canvas;
+
+// game objects
 var world;
+var player;
 var obstacles = [];
-var totalobs = 0;
-// kinds of food + obstacle (foods + 1)
-var kindsOfObs = 7;
-
-var level =0;
-
 var droppings = [];
 var enemies = [];
-
-var healthyobs =0;
-var sicklyobs =0;
 // sound
 var synths = [];
 var drums;
 var music;
-
-var obsMode = false;
+var perc = [];
+var sfx;
+var sfx2;
 
 // number of obstacles on an axis
 var xobs = 0;
 var yobs = 0;
+var obsMode = false;
+var healthyobs =0;
+var sicklyobs =0;
+var obsSize = 50;
+// kinds of food + obstacle (foods + 1)
+var kindsOfObs = 7;
 
 // camera settings
 var camOffsetX = 0;
@@ -43,7 +41,9 @@ var sickTexture;
 var backgroundImage ;
 var groundTexture ;
 var obsTexture;
+var pic1, pic2, pic3, pic4, pic5, pic6;
 
+// game settings
 var playerIsFullThreshold = 2;
 var initialHealth =10;
 var healthyPoopBonus = 1;
@@ -52,26 +52,18 @@ var enemyCaughtPlayerPenalty = 1;
 var numEnemies = 5;
 // food size affects grid size, and the goodposition() function
 var foodSize= 80;
-var obsSize = 50;
-var damageToObstacles =foodSize;
+var damageToObstacles = foodSize;
 var chanceForFood = 0.5;
-var obstacleDensity = 0.2;
+var obstacleDensity = 0.1;
 var playerSizeIncrease = 3;
-
-
-var pic1, pic2, pic3, pic4, pic5, pic6;
-var perc = [];
-
-var sfx;
-var sfx2;
-
-var levelComplete = false;
 var levelTarget = level+3;
-
+// start level
+var level =0;
+var levelComplete = false;
 
 // preload()
 //
-// loads images to be used for textures
+// loads texture images and drum sounds
 
 function preload() {
 
@@ -91,10 +83,12 @@ function preload() {
   pic4 = loadImage("images/4.jpg")
   pic5 = loadImage("images/5.jpg")
   pic6 = loadImage("images/6.jpg")
+  // load drums sounds
   clap = loadSound("sound/clap.mp3");
   kick = loadSound("sound/kick.mp3");
   cowbell = loadSound("sound/cowbell.mp3");
   tick = loadSound("sound/tick.mp3");
+
 }
 
 // setup()
@@ -104,30 +98,31 @@ function preload() {
 function setup() {
 
   // create canvas:
-
   canvas = createCanvas(window.innerWidth, window.innerHeight-100, WEBGL);
-
   canvas.parent('sketch-holder');
 
   // load music objects
   drums = new Drum();
   music = new Music();
   bass = new Synth("square");
-  // sfx
   sfx = new SFX('sine', 400);
   sfx2 = new SFX('white', 400);
 
-
+  // create world
   world = new World();
 
+  // create this level and its objects
   newLevel();
 
-
-  noStroke();
-displayObstaclesLeft();
+  // display info below screen
+  displayObstaclesLeft();
   document.getElementById("3").innerHTML = player.healthyFoodEaten;
   document.getElementById("4").innerHTML = player.sicklyFoodEaten;
+  document.getElementById("7").innerHTML = player.roomLeft;
   displayHealth();
+
+  // set no stroke by default
+  noStroke();
 }
 
 // draw()
@@ -136,20 +131,12 @@ displayObstaclesLeft();
 
 function draw() {
 
-  document.getElementById("7").innerHTML = player.roomLeft;
-      //console.log("healthy food sources: "+healthyobs+", unhealthy food sources: "+sicklyobs+", healthy food eaten: "+player.healthyFoodEaten+", unhealthy food eaten: "+player.sicklyFoodEaten);
   runGame();
- runSound();
+  runSound();
+
 }
 
-function displayHealth(){
-  document.getElementById("6").innerHTML = player.health;
-}
 
-function displayObstaclesLeft(){
-  document.getElementById("1").innerHTML = healthyobs;
-  document.getElementById("2").innerHTML = sicklyobs;
-}
 
 // rungame()
 //
@@ -157,133 +144,130 @@ function displayObstaclesLeft(){
 
 function runGame(){
 
-  background(255);
+  // display world
   world.display();
-  checkLevelComplete();
 
+  // display all obstacles (food and actual obstacles)
 
-  // OBSTACLES
-
-  // for all obstacles in play
   for(var i=0; i<obstacles.length; i++){
-    // display
     obstacles[i].display();
   }
 
-  // DROPPINGS
+  // display droppings
 
-  // for all droppings in play (if any)
   if(droppings.length!=0){
     for(var i=0; i<droppings.length; i++){
-      // display
       droppings[i].display();
     }
   }
-  // ENEMIES
 
-  // for all enemies in play
+  // update and display enemies
+
   for (var i=0; i<numEnemies; i++){
-    // update position and display
     enemies[i].update();
     enemies[i].display();
     // look out for the player
     enemies[i].lookOut(player);
-    // listen for collision with player
     enemies[i].handlePlayerCollision(player);
   }
 
-  // PLAYER
+  // update and display player,
+  // "sniff out" any known smells
 
-  // update player position
   player.handleInput();
   player.update();
-  // digest any foods eaten
-  player.digest();
-  // look out for recognized smells
   player.sniffOut();
-  // display player object
   player.display();
 
-  // display score over everything else
-  //displayScore();
+  // handle dragging mouse to update camera position
   if(mouseIsPressed){
-    // trigger zoom out
     updateCam();
   }
 
+  // check if this level is complete
+  checkLevelComplete();
 }
 
 // runsound()
 //
-// a place to toggle voices on and off
+// checks which known objects are in range,
+// play that object type's voice.
+// play drums and bass.
+// play sfx
+// keep track of time
 
 function runSound(){
 
   // check for any known objects in range
   for (var i=0; i<player.knownObjectsInRange.length; i++){
     var whichobject = player.knownObjectsInRange[i]-1;
-    console.log("which object val"+whichobject)
-    // toggle sound/smell of nearby known objects on and off
+    // play sound
     synths[whichobject].playMusic();
   }
 
-  // play drums
+  // play bgm
   drums.handleDrums();
   bass.playMusic();
 
-
-  // sfx:
+  // play sfx:
   sfx.playSFX();
   sfx2.playSFX();
+
   // increment musical time
   music.musicInc+=music.musicSpeed;
 }
 
+// displayhealth()
+//
+// update health displayed below game screen
+
+function displayHealth(){
+
+  document.getElementById("6").innerHTML = player.health;
+}
+
+// displayobstaclesleft()
+//
+// update how many healthy and unhealthy obstacles are left,
+// below the game screen
+
+function displayObstaclesLeft(){
+
+  document.getElementById("1").innerHTML = healthyobs;
+  document.getElementById("2").innerHTML = sicklyobs;
+}
 
 // displayscore()
 //
-// display number of healthy and unhealthy droppings
+// update number of healthy and unhealthy droppings below the game screen
 
 function displayScore(){
-  /*
-  // create a backdrop
-  fill(185, 100, 100);
-  rect(0, 0, 250, 15);
-  // display text
-  fill(0);
-  */
 
   document.getElementById("3").innerHTML = player.healthyFoodEaten;
   document.getElementById("4").innerHTML = levelTarget;
   console.log("healthy droppings: "+player.healthydroppings+", sickly droppings: "+player.sickdroppings, 10, 10);
 }
 
+// checklevelcomplete()
+//
+// check if level object is met, then trigger a new level.
+
 function checkLevelComplete(){
-// level is complete when 80% of the food is eaten
-  //var levelTarget = floor(0.8*healthyobs)
 
-
-
-  console.log("target "+levelTarget)
-  console.log("healthy droppings "+player.healthydroppings)
-
-if(player.healthydroppings >= levelTarget){
-  console.log("target reached")
-  levelComplete = true;
-  level +=1;
-  newLevel();
+  if(player.healthydroppings >= levelTarget){
+    levelComplete = true;
+    level +=1;
+    newLevel();
+  }
 }
-
-
-}
-
-// TEST FUNCTIONS
 
 // keypressed()
 //
-// a place to test functions
+// a place to test stuff,
+// but also handles pressing x to teleport the player out of an obstacle
 
 function keyPressed(){
+
   switch(key){
     case " ": playerIsFullThreshold +=1; break;
     case "z": toggleObsMode(); break;
@@ -295,9 +279,10 @@ function keyPressed(){
 // toggleObsMode()
 //
 // for testing purposes
-// display different foods with a different colour (or not)
+// toggle cheat mode where obstacle types are visible
 
 function toggleObsMode(){
+
   if(obsMode){
     obsMode = false;
   } else {
@@ -308,58 +293,107 @@ function toggleObsMode(){
 // udpateCam()
 //
 // zoom out function called upon clicking mouse.
-// click on top of screen to zoom in.
-// click on bottom of screen to zoom out.
+// click on top or bottom of screen to update camera Y offset
+// click on left or right of screen to update camera Z offset
+// camera() function is called inside MovingObject.js
 
 function updateCam(){
+
   changeCamView = true;
-  //  camOffsetZ -= (mouseX-width/2)/width*10;
   camOffsetY -= (mouseY-height/2)/height*10;
   camOffsetZ -= (mouseX-width/2)/width*10;
-  //  camOffsetZ = constrain(camOffsetZ, -100, 100);
   camOffsetY = constrain(camOffsetY, -300, 350);
   camOffsetZ = constrain(camOffsetZ, -300, 350);
 }
 
 // findgoodposition()
 //
-// finds a random position for a player or enemy
-// avoids clipping them onto an obstacle.
+// finds a random position for a player or enemy that's not inside an obstacle
 
 function findGoodPosition(target) {
+
   var positionGood = false;
+  // repeat until a good position is found
   while (!positionGood){
+    // pick a new position
     target.x = random(-world.w/2, world.w/2);
     target.y = random(-world.h/2, world.h/2);
-  var positionNoGood = false;
-  for(var i=0; i < obstacles.length; i++){
-    if(
-      target.x>=obstacles[i].x-obstacles[i].size/2-foodSize/2
-    && target.x<=obstacles[i].x+obstacles[i].size/2+foodSize/2
-    && target.y>=obstacles[i].y-obstacles[i].size/2-foodSize/2
-    && target.y<=obstacles[i].y+obstacles[i].size/2+foodSize/2
-  ){
-    positionNoGood=true;
-  }
-  }
-  if(!positionNoGood){
-    positionGood = true;
+    var positionNoGood = false;
+    // check if target would overlap with any obstacles
+    for(var i=0; i < obstacles.length; i++){
+      if(
+        target.x>=obstacles[i].x-obstacles[i].size/2-foodSize/2
+        && target.x<=obstacles[i].x+obstacles[i].size/2+foodSize/2
+        && target.y>=obstacles[i].y-obstacles[i].size/2-foodSize/2
+        && target.y<=obstacles[i].y+obstacles[i].size/2+foodSize/2
+      ){
+        positionNoGood=true;
+      }
+    }
+    // if the position answers the criteria above, stop looping
+    if(!positionNoGood){
+      positionGood = true;
+    }
   }
 }
-}
+
+// newlevel()
+//
+// start a new level: load player, enemies, obstacles.
+// set this level's target, based on number of obstacles in play
+// load an oscillator for each type of obstacle in the level
+// place the player and enemies away from obstacles
+// update info below the screen
 
 function newLevel(){
 
   levelComplete = false;
+
+  // add an additional type of food for each level
   kindsOfObs = level+3;
 
-
-  // create new player objects
+  // load player
   player = new MovingObject(0,height/2,3,83,87, 65, 68);
 
-  // create a given number of enemies
+  // load enemies
   for (var i=0; i<numEnemies; i++){
     enemies[i] = new EnemyObject(50, 50);
+  }
+
+  // create a random array of obstacles.
+  // new obstacles have a chance to be a wall-type object or a food object.
+
+  // create a grid based on size of food objects
+  xobs = (world.w)/foodSize;
+  yobs = (world.h)/foodSize;
+
+  // reset obstacles array, number of healthy obstacles and number
+  // of unhealthy obstacles.
+  healthyobs =0;
+  sicklyobs =0;
+  obstacles = [];
+
+  // a variable to index obstacle position on the grid
+  var obstacleindex =0;
+
+  // for each point on the grid
+  for (var i=0; i<xobs*yobs; i++){
+    // random chance of generating an obstacle object
+    if(random()<obstacleDensity){
+      obstacles.push(new Obstacle(i, obstacleindex));
+      // increment index
+      obstacleindex +=1;
+    }
+  }
+
+  // get this level's target (objective) based on number of
+  // healthy obstacles in play
+  levelTarget = floor(healthyobs/2-2);
+
+  // position player and enemies around obstacles.
+  findGoodPosition(player);
+  for (var i=0; i<numEnemies; i++){
+    findGoodPosition(enemies[i]);
   }
 
   // create a new synthesizor object for each kind of food in play
@@ -367,57 +401,21 @@ function newLevel(){
     synths[i] = new Synth("sine");
     console.log("newsynth")
   }
-console.log("kinds of "+(kindsOfObs-1));
-  // create a random array of obstacles.
-  // obstacles can be any type of food, or an actual obstacle
-  // this is determined randomly in the Obstacle() constructor
-
-  // let's start by creating a grid along which obstacles are placed.
-  // this way there are no overlaps
-
-  // calculate how many obstacles can fit into the grid
-  // on the x-axis
-  xobs = (world.w)/foodSize;
-  // on the y-axis
-  yobs = (world.h)/foodSize;
-
-  // create a var to index each obstacle.
-  // this way a specific obstacle can be found without having to search
-  // through the obstacles[] array.
-  var obstacleindex =0;
-  healthyobs =0;
-  sicklyobs =0;
-
-  obstacles = [];
-
-  // for each point on the grid
-
-  for (var i=0; i<xobs*yobs; i++){
-    // random chance of generating an obstacle object
-    if(random()<obstacleDensity){
-      // count total obstacles
-      totalobs+=1;
-      // create a new obstacle at this point and give it an index number.
-      obstacles.push(new Obstacle(i, obstacleindex));
-      // increment index
-      obstacleindex +=1;
-    }
-  }
-
-  levelTarget = floor(healthyobs/2-2);
-
-  // position player and enemies around obstacles.
-  findGoodPosition(player);
-  for (var i=0; i<numEnemies; i++){
-  findGoodPosition(enemies[i]);
-  }
-music.setupInstruments();
+  // setup instruments
+  music.setupInstruments();
   // start sound
-    music.launchPart1();
-    displayScore();
+  music.launchPart1();
+
+  // update info below screen
+  displayScore();
 }
 
+// windowresized()
+//
+// resize canvas upon resizing screen
+
 function windowResized(){
-    canvas = createCanvas(window.innerWidth, window.innerHeight-100, WEBGL);
-    noStroke();
+
+  canvas = createCanvas(window.innerWidth, window.innerHeight-100, WEBGL);
+  noStroke();
 }

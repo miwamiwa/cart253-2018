@@ -58,6 +58,8 @@ World.prototype.display = function(){
 
 World.prototype.displayBackground = function(){
 
+  // display background
+  background(255);
   // display plane below the game platform
   push();
   translate(0, 0, -200);

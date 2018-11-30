@@ -176,6 +176,8 @@ function runGame(){
 
   player.handleInput();
   player.update();
+  // trigger digestion
+  player.digest();
   player.sniffOut();
   player.display();
 
@@ -409,6 +411,8 @@ function newLevel(){
   // update info below screen
   displayScore();
 }
+
+
 
 // windowresized()
 //

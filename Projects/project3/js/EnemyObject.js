@@ -10,49 +10,37 @@ prototype. will have to revisit that part for sure.
 */
 
 function EnemyObject(x,y) {
-  // position and size
+
+  // position
   this.x = x;
   this.y = y;
+  this.z = 0;
 
-
+  // size
   this.size = 50;
-  this.z = this.size/2;
-  // speed
+  this.legW= this.size/2-5;
+  this.legH = this.size;
+  this.bodSize = this.size;
+  this.headSize= this.size-10;
+  this.armSize = this.size-25;
+  this.eyeSize = this.size/10;
+
+  // motion
   this.vx = 0;
   this.vy = 0;
   this.speed = 5;
-
-  // fill
-  this.red = random(215);
-  this.green = random(125);
-  this.blu = random(125);
-
-  // a boonlean to indicate enemy is charging towards the player
   this.charging = false;
-
-  // pick a new bearing on load
   this.newBearing(0, 1, 1, 1);
+  // parts motion
+  this.legRate = 0.2;
+  this.legMotion = 0;
 
-
-    // colours
-    // some are random, some are set.
-    this.eyeColor = color(45, 185, 45);
-    this.hairColor = color(random(125), random(185), random(255));
-    this.skinColor = color(255, 213, 147);
-    this.pantsColor = color(45);
-    this.shirtColor = color(random(125), random(185), random(255));
-
-    // motion
-    this.legRate = 0.2;
-    this.legMotion = 0;
-
-    // part sizes
-    this.legW= this.size/2-5;
-    this.legH = this.size;
-    this.bodSize = this.size;
-    this.headSize= this.size-10;
-    this.armSize = this.size-25;
-    this.eyeSize = this.size/10;
+  // colours
+  this.eyeColor = color(45, 185, 45);
+  this.hairColor = color(random(125), random(185), random(255));
+  this.skinColor = color(255, 213, 147);
+  this.pantsColor = color(45);
+  this.shirtColor = color(random(125), random(185), random(255));
 }
 
 // update()
@@ -64,16 +52,16 @@ function EnemyObject(x,y) {
 // checks for obstacle collision and updates position according to bearing.
 
 EnemyObject.prototype.update = function() {
-if (this.charging){
-  this.legRate = 0.4;
-}
-else {
-  this.legRate = 0.2;
-}
+  if (this.charging){
+    this.legRate = 0.4;
+  }
+  else {
+    this.legRate = 0.2;
+  }
   // check all obstacles
   for (var i=0; i<obstacles.length; i++){
-// if obstacle is large enough
-     // also do not bother checking if obstacle isn't within 100px
+    // if obstacle is large enough
+    // also do not bother checking if obstacle isn't within 100px
     if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<foodSize*1.6){
 
       //if close to left obstacle wall and moving right
@@ -86,7 +74,9 @@ else {
           this.x+this.vx,
           this.y+this.vy,
           this.size,
-          this.size)
+          this.size
+        )
+        && this.vx > 0
       ){
         // can't move right.
         this.vx =0;
@@ -104,7 +94,9 @@ else {
           this.x+this.vx,
           this.y+this.vy,
           this.size,
-          this.size)
+          this.size
+        )
+        && this.vx < 0
       ){
         // can't move left
         this.vx =0;
@@ -121,7 +113,9 @@ else {
           this.x+this.vx,
           this.y+this.vy,
           this.size,
-          this.size)
+          this.size
+        )
+        && this.vy > 0
       ){
         // can't move down
         this.vy =0;
@@ -138,7 +132,9 @@ else {
           this.x+this.vx,
           this.y+this.vy,
           this.size,
-          this.size)
+          this.size
+        )
+        && this.vy < 0
       ){
         // can't move up
         this.vy =0;
@@ -148,7 +144,8 @@ else {
     }
   }
 
-  // Check for going off screen and set new bearing if so
+  // Check for going off screen and set new bearing
+
   // if enemy hits the left wall
   if (this.x <= -world.w/2 ) {
     this.newBearing(1, 1, 0, 1);
@@ -184,62 +181,55 @@ EnemyObject.prototype.newBearing = function(a, b, c, d){
 
   var speed = this.speed/2;
 
-    // chance that new follows either x or y axis
-    if(random()<0.5){
-      // new bearing is along y-axis
-      // use random() to pick direction
-      this.vy = random(a*(-speed), b*speed);
-      this.vx=0;
-    }
-    else {
-      // new bearing is along x-axis
-      // use random() to pick direction
-      this.vx = random(c*(-speed), d*speed);
-      this.vy=0;
-    }
-
+  // chance that new follows either x or y axis
+  if(random()<0.5){
+    // new bearing is along y-axis
+    // use random() to pick direction
+    this.vy = random(a*(-speed), b*speed);
+    // add minimum velocity
+    this.vy = this.vy + 2*abs(this.vy)/this.vy;
+    this.vx=0;
+  }
+  else {
+    // new bearing is along x-axis
+    // use random() to pick direction
+    this.vx = random(c*(-speed), d*speed);
+    // add minimum velocity
+    this.vx = this.vx + 2*abs(this.vx)/this.vx;
+    this.vy=0;
+  }
+  // reset charging
   this.charging = false;
 }
 
+// charge(direction)
+//
+// charge towards a given direction
+
 EnemyObject.prototype.charge = function(direction){
+
   this.charging = true;
+  // charge left
   if(direction==="left"){
     this.vx =-this.speed;
     this.vy=0;
   }
+  // charge right
   else   if(direction==="right"){
-      this.vx =this.speed;
-      this.vy=0;
-    }
-    else   if(direction==="up"){
-        this.vy =-this.speed;
-        this.vx=0;
-      }
-      else   if(direction==="down"){
-          this.vy =this.speed;
-          this.vx=0;
-        }
-}
-
-// setbearing()
-//
-// use to set a specific bearing when enemy rushes towards player.
-// accepts axis and direction and returns proper velocity.
-/*
-EnemyObject.prototype.setBearing = function(axis, direction){
-  // set both velocities to 0.
-  this.vx=0;
-  this.vy =0;
-
-  // pick axis, then set velocity to match direction.
-  if (axis==="x"){
-    this.vx = -direction*this.speed;
+    this.vx =this.speed;
+    this.vy=0;
   }
-  else if (axis ==="y"){
-    this.vy = -direction*this.speed;
+  // charge up
+  else   if(direction==="up"){
+    this.vy =-this.speed;
+    this.vx=0;
+  }
+  // charge down
+  else   if(direction==="down"){
+    this.vy =this.speed;
+    this.vx=0;
   }
 }
-*/
 
 // display()
 //
@@ -253,9 +243,9 @@ EnemyObject.prototype.display = function() {
   var legTranslate = 5;
   // calculate change in leg position
   var leg1 = cos(this.legMotion)*legTranslate;
-stroke(85)
+  stroke(85)
   // draw human
- push();
+  push();
   // move to player position
   translate(this.x, this.y, this.z);
 
@@ -357,46 +347,42 @@ stroke(85)
 
 // lookout()
 //
-// modified obstacle collision function
-// this is supposed to allow the enemy to spot the player if they align
-// along either axis.
-// doesn't entirely work (i think right now only one side of each axis works),
-// but it's a start.
+// this is the first function of a chain that allows enemies to seek out
 
 EnemyObject.prototype.lookOut = function(target){
   // enemy not already charging
   if(!this.charging){
 
-// enemy and player are aligned on the y axis
-if(collideLineRect(this.x, -world.h/2, this.x, world.h/2, target.x, target.y, target.size, target.size)){
-  // player is above and enemy is not heading down
-  if(target.y<this.y && this.vy<=0 ){
-    this.nearestHigherObstacle(target);
-    console.log("PLAYER ALIGNED ");
-  }
-  // player is below and enemy is not heading up
-  if(target.y>this.y && this.vy>=0 ){
-    this.nearestLowerObstacle(target);
-    console.log("PLAYER ALIGNED ");
-  }
+    // enemy and player are aligned on the y axis
+    if(collideLineRect(this.x, -world.h/2, this.x, world.h/2, target.x, target.y, target.size, target.size)){
+      // player is above and enemy is not heading down
+      if(target.y<this.y && this.vy<=0 ){
+        this.nearestHigherObstacle(target);
+        console.log("PLAYER ALIGNED ");
+      }
+      // player is below and enemy is not heading up
+      if(target.y>this.y && this.vy>=0 ){
+        this.nearestLowerObstacle(target);
+        console.log("PLAYER ALIGNED ");
+      }
 
-}
+    }
 
-// enemy and player are aligned on the x axis
-if(collideLineRect(-world.w/2, this.y, world.w/2, this.y, target.x, target.y, target.size, target.size)){
-  // player is to the left and enemy is not heading right
-  if(target.x<this.x && this.vx<=0 ){
-    this.nearestLeftObstacle(target);
-    console.log("PLAYER ALIGNED ");
+    // enemy and player are aligned on the x axis
+    if(collideLineRect(-world.w/2, this.y, world.w/2, this.y, target.x, target.y, target.size, target.size)){
+      // player is to the left and enemy is not heading right
+      if(target.x<this.x && this.vx<=0 ){
+        this.nearestLeftObstacle(target);
+        console.log("PLAYER ALIGNED ");
 
+      }
+      // player is to the right and enemy is not heading left
+      if(target.x>this.x && this.vx>=0 ){
+        this.nearestRightObstacle(target);
+        console.log("PLAYER ALIGNED ");
+      }
+    }
   }
-  // player is to the right and enemy is not heading left
-  if(target.x>this.x && this.vx>=0 ){
-    this.nearestRightObstacle(target);
-    console.log("PLAYER ALIGNED ");
-  }
-}
-}
 
 }
 
@@ -412,201 +398,117 @@ EnemyObject.prototype.nearestLeftObstacle = function(target){
       && obstacles[i].y < this.y + this.size/2){
 
 
-      wayIsClear = false;
-    }
-  }
-
-  if(wayIsClear){
-    if(this.checkPlayerVisible(target, -world.w/2, this.y, this.x+world.w/2, this.size)){
-      this.charge("left");
-    }
-  }
-}
-
-EnemyObject.prototype.nearestRightObstacle = function(target){
-
-
-  var wayIsClear =true;
-
-  for(var i=0; i<obstacles.length; i++){
-    if(obstacles[i].x>this.x
-      && obstacles[i].x < target.x
-      && obstacles[i].y > this.y - this.size/2
-      && obstacles[i].y < this.y + this.size/2){
-
-
-      wayIsClear = false;
-    }
-  }
-
-  if(wayIsClear){
-    if(this.checkPlayerVisible(target, this.x, this.y, world.w/2, this.size)){
-      this.charge("right");
-    }
-  }
-}
-
-EnemyObject.prototype.nearestHigherObstacle = function(target){
-
-
-  var wayIsClear =true;
-
-  for(var i=0; i<obstacles.length; i++){
-    if(obstacles[i].y<this.y
-      && obstacles[i].y > target.y
-      && obstacles[i].x > this.x - this.size/2
-      && obstacles[i].x < this.x + this.size/2){
-
-
-      wayIsClear = false;
-    }
-  }
-
-  if(wayIsClear){
-    if(this.checkPlayerVisible(target, this.x, -world.h/2, this.size, this.y+world.h/2)){
-      this.charge("up");
-    }
-  }
-}
-
-EnemyObject.prototype.nearestLowerObstacle = function(target){
-
-    var wayIsClear =true;
-
-    for(var i=0; i<obstacles.length; i++){
-      if(obstacles[i].y>this.y
-        && obstacles[i].y < target.y
-        && obstacles[i].x > this.x - this.size/2
-        && obstacles[i].x < this.x + this.size/2){
-
         wayIsClear = false;
       }
     }
 
     if(wayIsClear){
-      if(this.checkPlayerVisible(target, this.x, this.y, this.size, world.h/2)){
-        this.charge("down");
-      }
+      
+        this.charge("left");
+
     }
-}
-
-EnemyObject.prototype.checkPlayerVisible = function(target, x, y, w, h){
-
-  if(collideRectRect(x, y, w, h, target.x, target.y, target.size, target.size))
-  {
-    console.log("FOUND YE");
-
-    return true;
   }
-  else {
-    return false;
-  }
-}
 
-// checkobstacles()
-//
-// should the enemy detect the player on, check if any obstacles are
-// in the way.
-// this doesn't always work either (obstacles not always detected
-// though they are in the way), but it's also a starting point.
-// might also be an issue with only one side being checked.
-// maybe it's just an issue with lookOut().
+  EnemyObject.prototype.nearestRightObstacle = function(target){
 
-// also i'm pretty sure i'm doing something complicated here for no reason, but
-// i just wanted this to work somewhat for the prototype.
-// will revisit this code.
 
-EnemyObject.prototype.checkObstacles = function(axis, direction, target){
+    var wayIsClear =true;
 
-  // check obstacles on the x axis
-  if(axis==="x"){
-
-    // viewClear indicates whether or not obstacles are in the way
-    var viewClear = true;
-    // for all obstacles
     for(var i=0; i<obstacles.length; i++){
-      // if the obstacle is aligned with enemy along the y axis
-      if(
-        ( this.y < obstacles[i].y
-        && this.y+this.size > obstacles[i].y )
-        ||
-        ( this.y + this.size > obstacles[i].y + obstacles[i].size
-        && this.y < obstacles[i].y + obstacles[i].size )
-      ){   if (
-        // and if this obstacle is closer than the player along the x-axis
-        (this.x - obstacles[i].x < this.x - target.x && direction ===1)
-        || (this.x - obstacles[i].x > this.x - target.x && direction ===-1)
-      ){
-        console.log("OBSTACLES IN THE WAY")
-        // if there are any obstacles, set view to NOT clear.
-        viewClear = false;
+      if(obstacles[i].x>this.x
+        && obstacles[i].x < target.x
+        && obstacles[i].y > this.y - this.size/2
+        && obstacles[i].y < this.y + this.size/2){
+
+
+          wayIsClear = false;
+        }
+      }
+
+      if(wayIsClear){
+
+          this.charge("right");
+
       }
     }
-  }
 
-  // if view is clear (there are no obstacles in the way),
-  // send the enemy charging towards the player.
-
-  if(viewClear){
-    // toggle charging mode
-    this.charging = true;
-    // set a specific bearing
-    this.setBearing(axis, direction);
-  }
-}
-
-// DO THE SAME CHECKUP FOR THE Y-AXIS.
-
-else if(axis==="y"){
-  var viewClear = true;
-  // for all obstacles
-  for(var i=0; i<obstacles.length; i++){
-    // if the obstacle is aligned with enemy along the y axis
-    if(
-      ( this.x < obstacles[i].x
-      && this.x+this.size > obstacles[i].x )
-      ||
-      ( this.x + this.size > obstacles[i].x + obstacles[i].size
-      && this.x < obstacles[i].x + obstacles[i].size )
-    ){   if (
-      // and if this obstacle is closer than the player along the x-axis
-      (this.y - obstacles[i].y < this.y - target.y && direction ===1)
-      || (this.y - obstacles[i].y > this.y - target.y && direction ===-1)
-    ){
-        console.log("OBSTACLES IN THE WAY")
-      viewClear = false;
-    }
-  }
-}
-
-// If view is clear send the enemy charging towards the player.
-if(viewClear){
-  this.charging = true;
-  this.setBearing(axis, direction);
-}
-}
-}
-
-// handleplayercollision()
-//
-// check for overlap with player.
-// teleports the player away
-
-EnemyObject.prototype.handlePlayerCollision = function(target){
-  // if enemy and player overlap on the x axis
-  if(collideRectRect(target.x, target.y, target.size, target.size, this.x, this.y, this.size, this.size)){
+    EnemyObject.prototype.nearestHigherObstacle = function(target){
 
 
-      // set new position
-      findGoodPosition(player);
+      var wayIsClear =true;
 
-      player.wasHitTimer = millis() + player.wasHitTimerLength;
-      player.health -= enemyCaughtPlayerPenalty;
-      displayHealth();
-      this.charging = false;
-          music.startSFX(sfx, "trem");
-      // set new bearing
-      this.newBearing(0, 1, 0, 0);
-    }
+      for(var i=0; i<obstacles.length; i++){
+        if(obstacles[i].y<this.y
+          && obstacles[i].y > target.y
+          && obstacles[i].x > this.x - this.size/2
+          && obstacles[i].x < this.x + this.size/2){
 
-}
+
+            wayIsClear = false;
+          }
+        }
+
+        if(wayIsClear){
+
+            this.charge("up");
+
+        }
+      }
+
+      EnemyObject.prototype.nearestLowerObstacle = function(target){
+
+        var wayIsClear =true;
+
+        for(var i=0; i<obstacles.length; i++){
+          if(obstacles[i].y>this.y
+            && obstacles[i].y < target.y
+            && obstacles[i].x > this.x - this.size/2
+            && obstacles[i].x < this.x + this.size/2){
+
+              wayIsClear = false;
+            }
+          }
+
+          if(wayIsClear){
+
+              this.charge("down");
+
+          }
+        }
+
+        EnemyObject.prototype.checkPlayerVisible = function(target, x, y, w, h){
+
+          if(collideRectRect(x, y, w, h, target.x, target.y, target.size, target.size))
+          {
+            console.log("FOUND YE");
+
+            return true;
+          }
+          else {
+            return false;
+          }
+        }
+
+            // handleplayercollision()
+            //
+            // check for overlap with player.
+            // teleports the player away
+
+            EnemyObject.prototype.handlePlayerCollision = function(target){
+              // if enemy and player overlap on the x axis
+              if(collideRectRect(target.x, target.y, target.size, target.size, this.x, this.y, this.size, this.size)){
+
+
+                // set new position
+                findGoodPosition(player);
+
+                player.wasHitTimer = millis() + player.wasHitTimerLength;
+                player.health -= enemyCaughtPlayerPenalty;
+                displayHealth();
+                this.charging = false;
+                music.startSFX(sfx, "trem");
+                // set new bearing
+                this.newBearing(0, 1, 0, 0);
+              }
+
+            }

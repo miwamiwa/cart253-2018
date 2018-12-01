@@ -49,7 +49,7 @@ var initialHealth =10;
 var healthyPoopBonus = 1;
 var unhealthyPoopPenalty = 1;
 var enemyCaughtPlayerPenalty = 1;
-var numEnemies = 5;
+var numEnemies = 0;
 // food size affects grid size, and the goodposition() function
 var foodSize= 80;
 var damageToObstacles = foodSize;
@@ -60,6 +60,10 @@ var levelTarget = level+3;
 // start level
 var level =0;
 var levelComplete = false;
+var titleimg, gameoverimg, nextlvlimg, startimg, controlsimg, instructionsimg;
+var gameOn = false;
+var obsCol = [];
+var obsRow = [];
 
 // preload()
 //
@@ -88,6 +92,12 @@ function preload() {
   kick = loadSound("sound/kick.mp3");
   cowbell = loadSound("sound/cowbell.mp3");
   tick = loadSound("sound/tick.mp3");
+  titleimg = loadImage("images/title.jpg");
+  gameoverimg = loadImage("images/gameover.jpg")
+  nextlvlimg = loadImage("images/nextlevel.jpg");
+  startimg = loadImage("images/start.jpg");
+  controlsimg = loadImage("images/controls.jpg");
+  instructionsimg = loadImage("images/instructions.jpg");
 
 }
 
@@ -123,6 +133,15 @@ function setup() {
 
   // set no stroke by default
   noStroke();
+  setupMenu();
+}
+
+function setupMenu(){
+
+  menu1 = new MenuObject(200, -30, instructionsimg, false);
+  menu2 = new MenuObject(-200, 00, controlsimg, false);
+  menu3 = new MenuObject(00, 30, titleimg, true);
+
 }
 
 // draw()
@@ -130,13 +149,45 @@ function setup() {
 // loops the main game elements
 
 function draw() {
+  if(gameOn){
+    runGame();
+  }
+  else {
+    runMenu();
+  }
 
-  runGame();
   runSound();
 
 }
 
+function menuAction(){
+  gameOn = true;
+}
+ function setupLevelMenu(){
 
+   menu1 = new MenuObject(200, -30, instructionsimg, false);
+   menu2 = new MenuObject(-200, 00, controlsimg, false);
+   menu3 = new MenuObject(00, 30, nextlvlimg, true);
+
+ }
+
+function runMenu(){
+  background(255);
+  camera();
+  menu1.update();
+  menu2.update();
+  menu3.update();
+
+}
+
+function mousePressed(){
+  if(!gameOn){
+    menu1.check();
+    menu2.check();
+    menu3.check();
+  }
+
+}
 
 // rungame()
 //
@@ -186,8 +237,6 @@ function runGame(){
     updateCam();
   }
 
-  // check if this level is complete
-  checkLevelComplete();
 }
 
 // runsound()
@@ -260,6 +309,8 @@ function checkLevelComplete(){
     levelComplete = true;
     level +=1;
     newLevel();
+    setupLevelMenu();
+    gameOn = false;
   }
 }
 
@@ -353,6 +404,7 @@ function newLevel(){
 
   // add an additional type of food for each level
   kindsOfObs = level+3;
+  numEnemies +=1;
 
   // load player
   player = new MovingObject(0,height/2,3,83,87, 65, 68);

@@ -601,7 +601,7 @@ MovingObject.prototype.eatObstacle = function(index) {
     // gain knowledge of this food object
     this.checkKnownObjects(index);
 
-  
+
   }
 }
 
@@ -673,6 +673,7 @@ MovingObject.prototype.unhealthyObsEaten = function(index){
 // check if player is full and trigger digestion
 // digest any food inside player's belly and create poop :)
 // resets amount of food inside belly.
+// checks if level is complete
 
 MovingObject.prototype.digest = function () {
 
@@ -701,6 +702,9 @@ MovingObject.prototype.digest = function () {
       droppings.push(new Droppings(this.x, this.y, true, playerIsFullThreshold));
       this.healthydroppings+=1;
     }
+
+    // check if this level is complete
+    checkLevelComplete();
 
     // player is no longer sick once he's digested (realistic i know)
     this.isSick = false;

@@ -208,27 +208,28 @@ EnemyObject.prototype.newBearing = function(a, b, c, d){
 
 EnemyObject.prototype.charge = function(direction){
 
-  this.charging = true;
+
   // charge left
-  if(direction==="left"){
+  if(direction==="left"&&!this.charging){
     this.vx =-this.speed;
     this.vy=0;
   }
   // charge right
-  else   if(direction==="right"){
+  else   if(direction==="right"&&!this.charging){
     this.vx =this.speed;
     this.vy=0;
   }
   // charge up
-  else   if(direction==="up"){
+  else   if(direction==="up"&&!this.charging){
     this.vy =-this.speed;
     this.vx=0;
   }
   // charge down
-  else   if(direction==="down"){
+  else   if(direction==="down"&&!this.charging){
     this.vy =this.speed;
     this.vx=0;
   }
+    this.charging = true;
 }
 
 // display()
@@ -357,158 +358,154 @@ EnemyObject.prototype.lookOut = function(target){
     if(collideLineRect(this.x, -world.h/2, this.x, world.h/2, target.x, target.y, target.size, target.size)){
       // player is above and enemy is not heading down
       if(target.y<this.y && this.vy<=0 ){
-        this.nearestHigherObstacle(target);
-        console.log("PLAYER ALIGNED ");
+        this.upperSideClear(target);
       }
       // player is below and enemy is not heading up
       if(target.y>this.y && this.vy>=0 ){
-        this.nearestLowerObstacle(target);
-        console.log("PLAYER ALIGNED ");
+        this.lowerSideClear(target);
       }
-
     }
 
     // enemy and player are aligned on the x axis
-    if(collideLineRect(-world.w/2, this.y, world.w/2, this.y, target.x, target.y, target.size, target.size)){
+    else if(collideLineRect(-world.w/2, this.y, world.w/2, this.y, target.x, target.y, target.size, target.size)){
       // player is to the left and enemy is not heading right
       if(target.x<this.x && this.vx<=0 ){
-        this.nearestLeftObstacle(target);
-        console.log("PLAYER ALIGNED ");
-
+        this.leftSideClear(target);
       }
       // player is to the right and enemy is not heading left
       if(target.x>this.x && this.vx>=0 ){
-        this.nearestRightObstacle(target);
-        console.log("PLAYER ALIGNED ");
+        this.rightSideClear(target);
       }
     }
   }
 
 }
 
-EnemyObject.prototype.nearestLeftObstacle = function(target){
+EnemyObject.prototype.leftSideClear = function(target){
 
 
   var wayIsClear =true;
 
   for(var i=0; i<obstacles.length; i++){
-    if(obstacles[i].x<this.x
+    if(
+      obstacles[i].x<this.x
       && obstacles[i].x > target.x
       && obstacles[i].y > this.y - this.size/2
-      && obstacles[i].y < this.y + this.size/2){
-
-
+      && obstacles[i].y < this.y + this.size/2
+    ){
         wayIsClear = false;
+        return;
       }
     }
 
     if(wayIsClear){
-      
-        this.charge("left");
-
+      this.charge("left");
     }
   }
 
-  EnemyObject.prototype.nearestRightObstacle = function(target){
+  EnemyObject.prototype.rightSideClear = function(target){
 
 
     var wayIsClear =true;
 
     for(var i=0; i<obstacles.length; i++){
-      if(obstacles[i].x>this.x
+      if(
+        obstacles[i].x>this.x
         && obstacles[i].x < target.x
         && obstacles[i].y > this.y - this.size/2
-        && obstacles[i].y < this.y + this.size/2){
+        && obstacles[i].y < this.y + this.size/2
+      ){
+        wayIsClear = false;
+        return;
+      }
+    }
 
+    if(wayIsClear){
+
+      this.charge("right");
+
+    }
+  }
+
+  EnemyObject.prototype.upperSideClear = function(target){
+
+
+    var wayIsClear =true;
+
+    for(var i=0; i<obstacles.length; i++){
+      if(
+        obstacles[i].y<this.y
+        && obstacles[i].y > target.y
+        && obstacles[i].x > this.x - this.size/2
+        && obstacles[i].x < this.x + this.size/2
+      ){
+
+        wayIsClear = false;
+        return;
+      }
+    }
+
+    if(wayIsClear){
+
+      this.charge("up");
+
+    }
+  }
+
+  EnemyObject.prototype.lowerSideClear = function(target){
+
+    var wayIsClear =true;
+
+    for(var i=0; i<obstacles.length; i++){
+      if(
+        obstacles[i].y>this.y
+        && obstacles[i].y < target.y
+        && obstacles[i].x > this.x - this.size/2
+        && obstacles[i].x < this.x + this.size/2){
 
           wayIsClear = false;
+          return;
         }
       }
 
       if(wayIsClear){
 
-          this.charge("right");
+        this.charge("down");
 
       }
     }
 
-    EnemyObject.prototype.nearestHigherObstacle = function(target){
+    EnemyObject.prototype.checkPlayerVisible = function(target, x, y, w, h){
+
+      if(collideRectRect(x, y, w, h, target.x, target.y, target.size, target.size)){
+        console.log("FOUND YE");
+
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+
+    // handleplayercollision()
+    //
+    // check for overlap with player.
+    // teleports the player away
+
+    EnemyObject.prototype.handlePlayerCollision = function(target){
+      // if enemy and player overlap on the x axis
+      if(collideRectRect(target.x, target.y, target.size, target.size, this.x, this.y, this.size, this.size)){
 
 
-      var wayIsClear =true;
-
-      for(var i=0; i<obstacles.length; i++){
-        if(obstacles[i].y<this.y
-          && obstacles[i].y > target.y
-          && obstacles[i].x > this.x - this.size/2
-          && obstacles[i].x < this.x + this.size/2){
-
-
-            wayIsClear = false;
-          }
-        }
-
-        if(wayIsClear){
-
-            this.charge("up");
-
-        }
+        // set new position
+        findGoodPosition(player);
+        player.wasHitTimer = millis() + player.wasHitTimerLength;
+        player.health -= enemyCaughtPlayerPenalty;
+        displayHealth();
+        this.charging = false;
+        music.startSFX(sfx, "trem");
+        // set new bearing
+        this.newBearing(1, 1, 1, 1);
       }
 
-      EnemyObject.prototype.nearestLowerObstacle = function(target){
-
-        var wayIsClear =true;
-
-        for(var i=0; i<obstacles.length; i++){
-          if(obstacles[i].y>this.y
-            && obstacles[i].y < target.y
-            && obstacles[i].x > this.x - this.size/2
-            && obstacles[i].x < this.x + this.size/2){
-
-              wayIsClear = false;
-            }
-          }
-
-          if(wayIsClear){
-
-              this.charge("down");
-
-          }
-        }
-
-        EnemyObject.prototype.checkPlayerVisible = function(target, x, y, w, h){
-
-          if(collideRectRect(x, y, w, h, target.x, target.y, target.size, target.size))
-          {
-            console.log("FOUND YE");
-
-            return true;
-          }
-          else {
-            return false;
-          }
-        }
-
-            // handleplayercollision()
-            //
-            // check for overlap with player.
-            // teleports the player away
-
-            EnemyObject.prototype.handlePlayerCollision = function(target){
-              // if enemy and player overlap on the x axis
-              if(collideRectRect(target.x, target.y, target.size, target.size, this.x, this.y, this.size, this.size)){
-
-
-                // set new position
-                findGoodPosition(player);
-
-                player.wasHitTimer = millis() + player.wasHitTimerLength;
-                player.health -= enemyCaughtPlayerPenalty;
-                displayHealth();
-                this.charging = false;
-                music.startSFX(sfx, "trem");
-                // set new bearing
-                this.newBearing(0, 1, 0, 0);
-              }
-
-            }
+    }

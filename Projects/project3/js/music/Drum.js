@@ -58,6 +58,7 @@ Drum.prototype.handleDrums = function(){
     if(music.musicInc === this.nextKick){
       console.log("drums are playing")
       kick.setVolume(this.kickVol)
+      kick.stop();
       kick.play();
       this.nextKick += this.kickList[this.kickNum];
       this.kickNum +=1;
@@ -69,6 +70,7 @@ Drum.prototype.handleDrums = function(){
     if(music.musicInc === this.nextClap){
       console.log("drums are playing")
       clap.setVolume(this.clapVol)
+      clap.stop();
       clap.play();
       this.nextClap += this.clapList[this.clapNum];
       this.clapNum +=1;
@@ -80,6 +82,7 @@ Drum.prototype.handleDrums = function(){
     if(music.musicInc === this.nextBell){
       console.log("drums are playing")
       cowbell.setVolume(this.bellVol)
+      cowbell.stop();
       cowbell.play();
       this.nextBell += this.bellList[this.bellNum];
       this.bellNum +=1;
@@ -91,6 +94,7 @@ Drum.prototype.handleDrums = function(){
     if(music.musicInc === this.nextTick){
       console.log("drums are playing")
       tick.setVolume(this.tickVol)
+      tick.stop();
       tick.play();
       this.nextTick += this.tickList[this.tickNum];
       this.tickNum +=1;

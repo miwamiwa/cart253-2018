@@ -122,6 +122,8 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
   this.legSin2 = 0;
   this.legCos = 0;
   this.legCos2 =0;
+  this.row = floor(this.x/xobs);
+  this.column = floor((this.y/yobs)%xobs);
 
 }
 
@@ -230,7 +232,11 @@ MovingObject.prototype.handleInput = function() {
 // update position according to velocity
 
 MovingObject.prototype.update = function() {
+  this.column = floor((this.x+world.w/2)/xobs);
 
+this.row = floor((this.y+world.h/2)/yobs);
+
+    console.log("player row "+this.row+" player col " +this.column)
   // check for collision with any obstacle
 
   // check through all obstacles
@@ -682,11 +688,6 @@ MovingObject.prototype.digest = function () {
 
     // reset amount of food inside belly
     this.foodInBelly = 0;
-    this.updateRoomLeft();
-    displayHealth();
-    // update score text
-    displayScore();
-    displayObstaclesLeft();
 
     // shoot the pooping timer
     this.poopingTimer = millis() + this.poopingTimerLength;
@@ -702,7 +703,10 @@ MovingObject.prototype.digest = function () {
       droppings.push(new Droppings(this.x, this.y, true, playerIsFullThreshold));
       this.healthydroppings+=1;
     }
-
+    
+    displayHealth();
+    // update score text
+    displayScore();
     // check if this level is complete
     checkLevelComplete();
 

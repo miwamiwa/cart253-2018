@@ -31,7 +31,7 @@ Music.prototype.setupInstruments = function(){
 for(var i=0; i<synths.length; i++){
   // console.log("synth loaded");
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synths[i].setEnvelope(0.01, 0.4, 0.001, 0.5, 0.32, 0);
+  synths[i].setEnvelope(0.01, 0.4, 0.001, 0.7, 0.52, 0);
   // function(filterType, frequency)
   synths[i].setFilter("BP", i*500);
   // function(delayIsOn, length, feedback, filterFrequency)
@@ -62,11 +62,11 @@ sfx2.setDelay(false, 0, 0, 0);
 this.loadInstrument(sfx2);
 
 // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-bass.setEnvelope(0.01, 0.8, 0.2, 0.8, 0.62, 0);
+bass.setEnvelope(0.01, 0.8, 0.2, 0.31, 0.23, 0);
 // function(filterType, frequency)
 bass.setFilter("LP", 500);
 // function(delayIsOn, length, feedback, filterFrequency)
-bass.setDelay(false, 0.5, 0.55, 400)
+bass.setDelay(true, 0.12, 0.7, 500)
 
 this.loadInstrument(bass);
 
@@ -127,9 +127,12 @@ Music.prototype.launchPart1 = function(){
   var phrase5 = [1, 2, 3]
   var phrase6 = [7, 2, 4]
 
+  var phrases = [phrase1, phrase2, phrase3, phrase4, phrase5, phrase6];
+  phrases = shuffle(phrases);
 
-  var bassPhrase = [0, 0, 3, -7, -7, -5];
-  var bassRhythm = [16, 16, 16, 24, 8, 16];
+
+  var bassPhrase = [0, 0, 0, 1];
+  var bassRhythm = [282, 12, 12, 78];
 
   // while rhythm values are expressed in frames
   // var rhythm1=[60, 40, 20, 40, 20, 40, 20, 40, 120, 80];
@@ -138,25 +141,11 @@ Music.prototype.launchPart1 = function(){
   // octave transposition, list of rhythms to play, pulse rate, whether to start from the top.
   // see Synth.js for how this stuff works
 
-
-    this.startNewPhrase(synths[0], phrase1, 0, 0, 24, true);
-    this.startNewPhrase(synths[1], phrase2, 12, 0, 40, true);
-    if(level>0){
-      this.startNewPhrase(synths[2], phrase3, 0, 0, 50, true);
-    }
-    if(level>1){
-      this.startNewPhrase(synths[3], phrase4, -5, 0, 30, true);
-    }
-    if(level>2){
-      this.startNewPhrase(synths[4], phrase5, +5, 0, 20, true);
-    }
-    if(level>3){
-      this.startNewPhrase(synths[5], phrase6, 0, 0, 70, true);
-    }
-
-
-
-
+for (var i=0; i<level+2; i++){
+  var rhythm = 6*floor(random(4, 9));
+  var transpose = floor(random(-12, 12));
+  this.startNewPhrase(synths[i], phrases[i], transpose, 0, rhythm, true);
+}
 
     this.startNewPhrase(bass, bassPhrase, -24, bassRhythm, 0, true);
 

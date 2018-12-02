@@ -34,6 +34,8 @@ function EnemyObject(x,y) {
   // parts motion
   this.legRate = 0.2;
   this.legMotion = 0;
+  this.row = floor(this.x/xobs);
+  this.column = floor((this.y/yobs)%xobs);
 
   // colours
   this.eyeColor = color(45, 185, 45);
@@ -52,6 +54,10 @@ function EnemyObject(x,y) {
 // checks for obstacle collision and updates position according to bearing.
 
 EnemyObject.prototype.update = function() {
+  this.column = floor((this.x+world.w/2)/xobs);
+
+  this.row = floor((this.y+world.h/2)/yobs);
+  console.log("enemy row "+this.row+" enemy col " +this.column)
   if (this.charging){
     this.legRate = 0.4;
   }
@@ -345,53 +351,36 @@ EnemyObject.prototype.display = function() {
   pop();
 
 }
-
-// lookout()
-//
-// this is the first function of a chain that allows enemies to seek out
-
 EnemyObject.prototype.lookOut = function(target){
-  // enemy not already charging
   if(!this.charging){
-
-    // enemy and player are aligned on the y axis
-    if(collideLineRect(this.x, -world.h/2, this.x, world.h/2, target.x, target.y, target.size, target.size)){
-      // player is above and enemy is not heading down
-      if(target.y<this.y && this.vy<=0 ){
-        this.upperSideClear(target);
-      }
-      // player is below and enemy is not heading up
-      if(target.y>this.y && this.vy>=0 ){
-        this.lowerSideClear(target);
-      }
-    }
-
-    // enemy and player are aligned on the x axis
-    else if(collideLineRect(-world.w/2, this.y, world.w/2, this.y, target.x, target.y, target.size, target.size)){
-      // player is to the left and enemy is not heading right
-      if(target.x<this.x && this.vx<=0 ){
+    if(this.row === player.row){
+      if(player.x<this.x){
         this.leftSideClear(target);
       }
-      // player is to the right and enemy is not heading left
-      if(target.x>this.x && this.vx>=0 ){
+      else if (player.x>this.x){
         this.rightSideClear(target);
       }
     }
+    else if(this.column === player.column){
+      if(player.y<this.y){
+        this.upperSideClear(target);
+      }
+      else if (player.y>this.y){
+        this.lowerSideClear(target);
+      }
+    }
   }
-
 }
 
 EnemyObject.prototype.leftSideClear = function(target){
 
 
   var wayIsClear =true;
-
-  for(var i=0; i<obstacles.length; i++){
+console.log()
+  for(var i=0; i<obsRow[this.row].pos.length; i++){
     if(
-      obstacles[i].x<this.x
-      && obstacles[i].x > target.x
-      && obstacles[i].y > this.y - this.size/2
-      && obstacles[i].y < this.y + this.size/2
+    obsRow[this.row].pos[i] > target.x
+    && obsRow[this.row].pos[i] < this.x
     ){
         wayIsClear = false;
         return;
@@ -408,12 +397,10 @@ EnemyObject.prototype.leftSideClear = function(target){
 
     var wayIsClear =true;
 
-    for(var i=0; i<obstacles.length; i++){
+    for(var i=0; i<obsRow[this.row].pos.length; i++){
       if(
-        obstacles[i].x>this.x
-        && obstacles[i].x < target.x
-        && obstacles[i].y > this.y - this.size/2
-        && obstacles[i].y < this.y + this.size/2
+      obsRow[this.row].pos[i] < target.x
+      && obsRow[this.row].pos[i] > this.x
       ){
         wayIsClear = false;
         return;
@@ -432,12 +419,10 @@ EnemyObject.prototype.leftSideClear = function(target){
 
     var wayIsClear =true;
 
-    for(var i=0; i<obstacles.length; i++){
+    for(var i=0; i<obsCol[this.column].pos.length; i++){
       if(
-        obstacles[i].y<this.y
-        && obstacles[i].y > target.y
-        && obstacles[i].x > this.x - this.size/2
-        && obstacles[i].x < this.x + this.size/2
+      obsCol[this.column].pos[i] > target.y
+      && obsCol[this.column].pos[i] < this.y
       ){
 
         wayIsClear = false;
@@ -456,12 +441,11 @@ EnemyObject.prototype.leftSideClear = function(target){
 
     var wayIsClear =true;
 
-    for(var i=0; i<obstacles.length; i++){
+    for(var i=0; i<obsCol[this.column].pos.length; i++){
       if(
-        obstacles[i].y>this.y
-        && obstacles[i].y < target.y
-        && obstacles[i].x > this.x - this.size/2
-        && obstacles[i].x < this.x + this.size/2){
+      obsCol[this.column].pos[i] < target.y
+      && obsCol[this.column].pos[i] > this.y
+      ){
 
           wayIsClear = false;
           return;

@@ -28,7 +28,7 @@ function Obstacle(index, obstacleindex){
 
   // object position on the grid
   this.row = floor(index/xobs);
-  this.column = index%xobs;
+  this.column = floor(index%xobs);
   this.healthy = true;
 
   // calculate x, y coordinates from grid position
@@ -48,25 +48,23 @@ function Obstacle(index, obstacleindex){
   // (an obstacle/wall is not edible, our racoon is not a rat)
   // also count up healthy and sickly obstacles
 
-  switch(this.type){
-    case 0: this.edible = false; this.size = obsSize; break;
-    case 1: this.loadHealthyObs(); break;
-    case 2: this.loadUnhealthyObs(); break;
-    case 3: this.loadUnhealthyObs(); break;
-    case 4: this.loadHealthyObs(); break;
-    case 5: this.loadHealthyObs(); break;
-    case 6: this.loadUnhealthyObs(); break;
-    case 7: this.loadUnhealthyObs(); break;
-    case 8: this.loadHealthyObs(); break;
-    case 9: this.loadUnhealthyObs(); break;
-    case 10: this.loadHealthyObs(); break;
-    case 11: this.loadUnhealthyObs(); break;
+  if(this.type===0){
+    this.edible = false; this.size = obsSize;
   }
-
+  else if(this.type%2===0){
+     this.loadHealthyObs();
+  }
+  else {
+    this.loadUnhealthyObs();
+  }
+  
   // colour
   this.r = 185;
   this.g = 0;
   this.b = 185;
+  this.column = floor((this.x+world.w/2)/xobs);
+
+this.row = floor((this.y+world.h/2)/yobs);
 }
 
 

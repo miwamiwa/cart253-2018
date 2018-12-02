@@ -23,25 +23,34 @@ function Drum(){
   this.nextTick =0;
 
   this.firstKick =0;
-  this.firstClap =24;
-  this.firstBell =0;
+  this.firstClap =84;
+  this.firstBell =24;
   this.firstTick =12;
 
-  this.kickList = [12, 12, 6, 6, 12, 12, 12, 24];
-  this.clapList = [48, 48];
-  this.bellList = [6, 90];
-  this.tickList = [6, 18, 24, 6, 6, 12, 24];
+  this.kickList = [24, 5, 19];
+  this.clapList = [32];
+  this.bellList = [48, 48];
+  this.tickList = [24, 5, 5, 4, 10, 24, 6, 6, 12];
 
   this.kickNum =0;
   this.clapNum =0;
   this.bellNum =0;
   this.tickNum =0;
 
-  this.kickVol =1.5;
-  this.clapVol = 0.3;
-  this.tickVol =0.8;
-  this.bellVol = 0.2;
+  this.kickVol = 0.8;
+  this.clapVol = 0.2;
+  this.tickVol = 0.15;
+  this.bellVol = 0.1;
 
+  kick.setVolume(this.kickVol)
+  clap.setVolume(this.clapVol)
+  cowbell.setVolume(this.bellVol)
+  tick.setVolume(this.tickVol)
+
+  kick.playMode("restart");
+  clap.playMode("restart");
+  cowbell.playMode("restart");
+  tick.playMode("restart");
 
 }
 
@@ -56,9 +65,8 @@ Drum.prototype.handleDrums = function(){
 
 
     if(music.musicInc === this.nextKick){
-      console.log("drums are playing")
-      kick.setVolume(this.kickVol)
-      kick.stop();
+
+
       kick.play();
       this.nextKick += this.kickList[this.kickNum];
       this.kickNum +=1;
@@ -68,9 +76,8 @@ Drum.prototype.handleDrums = function(){
     }
 
     if(music.musicInc === this.nextClap){
-      console.log("drums are playing")
-      clap.setVolume(this.clapVol)
-      clap.stop();
+
+
       clap.play();
       this.nextClap += this.clapList[this.clapNum];
       this.clapNum +=1;
@@ -80,9 +87,8 @@ Drum.prototype.handleDrums = function(){
     }
 
     if(music.musicInc === this.nextBell){
-      console.log("drums are playing")
-      cowbell.setVolume(this.bellVol)
-      cowbell.stop();
+
+
       cowbell.play();
       this.nextBell += this.bellList[this.bellNum];
       this.bellNum +=1;
@@ -92,9 +98,8 @@ Drum.prototype.handleDrums = function(){
     }
 
     if(music.musicInc === this.nextTick){
-      console.log("drums are playing")
-      tick.setVolume(this.tickVol)
-      tick.stop();
+
+
       tick.play();
       this.nextTick += this.tickList[this.tickNum];
       this.tickNum +=1;

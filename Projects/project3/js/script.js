@@ -81,12 +81,14 @@ function preload() {
   lowergroundImage = loadImage("images/lower.jpg");
   groundTexture = loadImage("images/ground.jpg");
   obsTexture = loadImage("images/xbox.jpg")
+  /*
   pic1 = loadImage("images/1.jpg")
   pic2 = loadImage("images/2.jpg")
   pic3 = loadImage("images/3.jpg")
   pic4 = loadImage("images/4.jpg")
   pic5 = loadImage("images/5.jpg")
   pic6 = loadImage("images/6.jpg")
+  */
   // load drums sounds
   clap = loadSound("sound/clap.mp3");
   kick = loadSound("sound/kick.mp3");
@@ -124,10 +126,7 @@ function setup() {
   // create this level and its objects
   newLevel();
 
-  // display info below screen
-  displayObstaclesLeft();
-  document.getElementById("3").innerHTML = player.healthyFoodEaten;
-  document.getElementById("4").innerHTML = player.sicklyFoodEaten;
+
   document.getElementById("7").innerHTML = player.roomLeft;
   displayHealth();
 
@@ -150,7 +149,7 @@ function setupMenu(){
 
 function draw() {
   if(gameOn){
-    runGame();
+   runGame();
   }
   else {
     runMenu();
@@ -226,18 +225,18 @@ function runGame(){
   // "sniff out" any known smells
 
   player.handleInput();
-  player.update();
+ player.update();
   // trigger digestion
   player.digest();
-  player.sniffOut();
+ player.sniffOut();
   player.display();
 
   // handle dragging mouse to update camera position
   if(mouseIsPressed){
     updateCam();
   }
-
 }
+
 
 // runsound()
 //
@@ -261,11 +260,39 @@ function runSound(){
   bass.playMusic();
 
   // play sfx:
-  sfx.playSFX();
-  sfx2.playSFX();
+  //sfx.playSFX();
+  //sfx2.playSFX();
 
   // increment musical time
   music.musicInc+=music.musicSpeed;
+}
+
+function displayLevelInfo(){
+  // display level
+  document.getElementById("1").innerHTML = level;
+  // display objective
+    document.getElementById("2").innerHTML = levelTarget-player.healthydroppings;
+  // display number of healthy foods and number of unhealthy foods
+var healthyfoods =0;
+var unhealthyfoods =0;
+  if(kindsOfObs%2===0){
+    healthyfoods = (kindsOfObs-2)/2;
+    unhealthyfoods = healthyfoods+1;
+      document.getElementById("3").innerHTML = healthyfoods;
+      document.getElementById("4").innerHTML = unhealthyfoods;
+  }
+  else {
+    healthyfoods = (kindsOfObs-1)/2;
+    unhealthyfoods = healthyfoods;
+      document.getElementById("3").innerHTML = healthyfoods;
+      document.getElementById("4").innerHTML = unhealthyfoods;
+  }
+  // display number of enemies
+  document.getElementById("5").innerHTML = numEnemies;
+  // display health
+  displayHealth();
+  // display room left
+  player.updateRoomLeft();
 }
 
 // displayhealth()
@@ -277,16 +304,6 @@ function displayHealth(){
   document.getElementById("6").innerHTML = player.health;
 }
 
-// displayobstaclesleft()
-//
-// update how many healthy and unhealthy obstacles are left,
-// below the game screen
-
-function displayObstaclesLeft(){
-
-  document.getElementById("1").innerHTML = healthyobs;
-  document.getElementById("2").innerHTML = sicklyobs;
-}
 
 // displayscore()
 //
@@ -294,9 +311,9 @@ function displayObstaclesLeft(){
 
 function displayScore(){
 
-  document.getElementById("3").innerHTML = player.healthyFoodEaten;
-  document.getElementById("4").innerHTML = levelTarget;
-  console.log("healthy droppings: "+player.healthydroppings+", sickly droppings: "+player.sickdroppings, 10, 10);
+  document.getElementById("2").innerHTML = levelTarget-player.healthydroppings;
+  player.updateRoomLeft();
+
 }
 
 // checklevelcomplete()
@@ -418,8 +435,19 @@ function newLevel(){
   // new obstacles have a chance to be a wall-type object or a food object.
 
   // create a grid based on size of food objects
+  obsRow = [];
+  obsCol = [];
   xobs = (world.w)/foodSize;
   yobs = (world.h)/foodSize;
+  console.log(xobs);
+  for(var i=0; i<(xobs+1)*4; i++){
+    obsCol.push(new ObsGroup(0));
+
+  }
+  for(var i=0; i<(yobs+1)*4; i++){
+    obsRow.push(new ObsGroup(1));
+
+  }
 
   // reset obstacles array, number of healthy obstacles and number
   // of unhealthy obstacles.
@@ -436,7 +464,12 @@ function newLevel(){
     if(random()<obstacleDensity){
       obstacles.push(new Obstacle(i, obstacleindex));
       // increment index
-      obstacleindex +=1;
+      console.log(obstacles[obstacleindex].column)
+      var row = obstacles[obstacleindex].row;
+      var col = obstacles[obstacleindex].column;
+      obsRow[row].addNew(obstacles[obstacleindex]);
+      obsCol[col].addNew(obstacles[obstacleindex]);
+        obstacleindex +=1;
     }
   }
 
@@ -461,7 +494,7 @@ function newLevel(){
   music.launchPart1();
 
   // update info below screen
-  displayScore();
+  displayLevelInfo()
 }
 
 

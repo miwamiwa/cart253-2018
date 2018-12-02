@@ -2,8 +2,7 @@
 SFX.js
 
 copied in from project 2.
-no change.
-not used so far either but i have it here in case i want it.
+no change. just here to add some life into the game. 
 
 */
 

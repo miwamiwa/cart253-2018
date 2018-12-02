@@ -2,12 +2,10 @@
 
 Synth.js
 copied in from project 2.
-no change.
+almost no change. simplified playing function by removing unused parts.
+handles changing filter frequency to match player velocity.
 
 */
-
-// starting key midi value
-
 
 // Synth(oscType)
 //
@@ -55,9 +53,6 @@ function Synth(oscType){
   this.nextNote= 0;
   this.isPlaying=true;
 
-  this.sections=[0];
-  this.thisSection=0;
-
 }
 
 //////////////// PLAY MUSIC ////////////////
@@ -78,40 +73,38 @@ Synth.prototype.playMusic = function(){
     // if voice is playing
     if(this.isPlaying){
 
-if(this===bass){
-     this.oct = 12*floor(random(-3, 1));
-}
+      // transpose appropriately if this voice is the bass.
+
+      if(this===bass){
+        this.oct = 12*floor(random(-3, 1));
+      }
 
       // apply octave transposition to note and convert to a frequency value
       var newNote =midiToFreq(music.rootNote+this.oct+this.notes[this.loop]);
 
+      // set filter frequency to reflect player velocity
       this.filter.freq(300+abs(player.vx*player.vy)*100);
+
       // if rhythm is an array, update decay length to deflect time until next note
       if(this.rType==="array"){
         this.env.setADSR(this.attackTime, this.rhythm[this.loop]/100*this.decayTime, this.susLevel, this.releaseTime);
         this.nextNote+=this.rhythm[this.loop];
       }
 
-
+      // set frequency of next note
       this.thisSynth.freq(newNote);
 
       // play note
       this.env.play();
 
-
-
-
-
-    // increment appropriate loop
-    this.loop+=1;
-    // if loop has reached maximum limit reset loop
-    if(this.loop===this.phrase){
-      this.loop=0;
+      // increment appropriate loop
+      this.loop+=1;
+      // if loop has reached maximum limit reset loop
+      if(this.loop===this.phrase){
+        this.loop=0;
+      }
     }
-
-
   }
-}
 }
 
 

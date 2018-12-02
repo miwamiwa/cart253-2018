@@ -1,11 +1,21 @@
 /*
 
 EnemyObject.js
-Modified MovingObject.
-This one is different in that it checks if player is aligned along either axis
-and sends the enemy his way. This "search and destroy" code is pretty
-convoluted but i wanted to add something that at least kind of worked to the
-prototype. will have to revisit that part for sure.
+this script creates a new enemy with random colours, updates and displays it.
+enemies pick new bearings when they hit a wall.
+they also seek and destroy the player: if player is in front of them or
+on either side, they will charge in that direction. This script also contains
+the collision code to be run once enemies reach the player.
+
+I tried making function seekout() more efficient by calculating player and
+obstacles' row and column. the enemy checks for player proximity only if
+player's row or column is a match, and checks for obstacles in the way
+only if their column or row is a match. This way there should be less code
+being called than if I was recalculating collisions with everything all the
+time.
+Added this idea in the final week so I don't think I will take the time to adapt
+every other collision code to it, but I think it would've made my code more
+efficient overall.
 
 */
 
@@ -31,6 +41,7 @@ function EnemyObject(x,y) {
   this.speed = 5;
   this.charging = false;
   this.newBearing(0, 1, 1, 1);
+
   // parts motion
   this.legRate = 0.2;
   this.legMotion = 0;
@@ -47,28 +58,33 @@ function EnemyObject(x,y) {
 
 // update()
 //
-// same obstacle collision code as movingobject.update() except this works
-// with random bearings instead of key controls.
-// more detailed comments in movingobject.js.
-// also includes game boundary collision.
-// checks for obstacle collision and updates position according to bearing.
+// checks for obstacle collisions
+// checks for world boundary collision
+// sets new bearing if necessary,
+// updates position depending on velocity
 
 EnemyObject.prototype.update = function() {
-  this.column = floor((this.x+world.w/2)/xobs);
 
+  // update column and row information
+  this.column = floor((this.x+world.w/2)/xobs);
   this.row = floor((this.y+world.h/2)/yobs);
-  console.log("enemy row "+this.row+" enemy col " +this.column)
+
+  // update leg and arm oscillation speed
+  // depending on if enemy is charging or not
   if (this.charging){
     this.legRate = 0.4;
   }
   else {
     this.legRate = 0.2;
   }
-  // check all obstacles
+
+  // check for COLLISION WITH ANY OBSTACLE
   for (var i=0; i<obstacles.length; i++){
-    // if obstacle is large enough
-    // also do not bother checking if obstacle isn't within 100px
-    if (obstacles[i].size>5 && dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<foodSize*1.6){
+
+    // do not bother checking if:
+    // if obstacle is not large enough
+    // obstacle isn't within 100px of enemy
+    if (obstacles[i].size>5 && (dist(this.x, this.y, obstacles[i].x, obstacles[i].y)<foodSize*1.6)){
 
       //if close to left obstacle wall and moving right
       if(
@@ -109,6 +125,7 @@ EnemyObject.prototype.update = function() {
         // pick a new bearing
         this.newBearing(1, 1, 0, 1);
       }
+
       // if close to top wall and moving down
       if(
         collideLineRect(
@@ -128,6 +145,7 @@ EnemyObject.prototype.update = function() {
         // pick a new bearing
         this.newBearing(1, 0, 1, 1);
       }
+
       //if close to bottom obstacle wall and moving up
       else if(
         collideLineRect(
@@ -150,7 +168,7 @@ EnemyObject.prototype.update = function() {
     }
   }
 
-  // Check for going off screen and set new bearing
+  // Check for WORLD BOUNDARY COLLISION
 
   // if enemy hits the left wall
   if (this.x <= -world.w/2 ) {
@@ -169,13 +187,15 @@ EnemyObject.prototype.update = function() {
     this.newBearing(1, 0, 1, 1);
   }
 
-  // update and constrain x, y position
+  // UPDATE and constrain POSITION
   this.y += this.vy;
   this.y = constrain(this.y,-world.h/2,world.h/2-this.size);
   this.x +=this.vx;
   this.x = constrain(this.x,-world.w/2,world.w/2-this.size);
 
 }
+
+
 
 // newbearing()
 //
@@ -208,12 +228,13 @@ EnemyObject.prototype.newBearing = function(a, b, c, d){
   this.charging = false;
 }
 
+
+
 // charge(direction)
 //
 // charge towards a given direction
 
 EnemyObject.prototype.charge = function(direction){
-
 
   // charge left
   if(direction==="left"&&!this.charging){
@@ -238,11 +259,14 @@ EnemyObject.prototype.charge = function(direction){
     this.charging = true;
 }
 
+
+
 // display()
 //
-// Draw the enemy as a rectangle on the screen
+// Draw the enemy's box parts
 
 EnemyObject.prototype.display = function() {
+
   // set up motion
   // increment motion (arm motion is just reversed leg motion)
   this.legMotion += this.legRate;
@@ -251,6 +275,8 @@ EnemyObject.prototype.display = function() {
   // calculate change in leg position
   var leg1 = cos(this.legMotion)*legTranslate;
   stroke(85)
+
+
   // draw human
   push();
   // move to player position
@@ -351,20 +377,36 @@ EnemyObject.prototype.display = function() {
   pop();
 
 }
+
+
+// lookout()
+//
+// check if player's column or row matches that of enemy's.
+// will ultimately trigger charging.
+// trigger checking for obstacles in the way depending on player position.
+
 EnemyObject.prototype.lookOut = function(target){
+
+  // if enemy is not already charging
   if(!this.charging){
+    // if row is a match
     if(this.row === player.row){
       if(player.x<this.x){
+        // check for obstacles on the left
         this.leftSideClear(target);
       }
+      // check for obstacles on the right
       else if (player.x>this.x){
         this.rightSideClear(target);
       }
     }
+    // if column in a match
     else if(this.column === player.column){
+      // check for obstacles above
       if(player.y<this.y){
         this.upperSideClear(target);
       }
+      // check for obstacles below
       else if (player.y>this.y){
         this.lowerSideClear(target);
       }
@@ -372,11 +414,17 @@ EnemyObject.prototype.lookOut = function(target){
   }
 }
 
+
+// leftsideclear()
+//
+// determine if there are any obstacles between enemy and player
+// in the current row or column
+// trigger charge if no obstacles are in the way.
+
 EnemyObject.prototype.leftSideClear = function(target){
 
-
   var wayIsClear =true;
-console.log()
+
   for(var i=0; i<obsRow[this.row].pos.length; i++){
     if(
     obsRow[this.row].pos[i] > target.x
@@ -392,8 +440,15 @@ console.log()
     }
   }
 
-  EnemyObject.prototype.rightSideClear = function(target){
 
+
+  // rightsideclear()
+  //
+  // determine if there are any obstacles between enemy and player
+  // in the current row or column
+  // trigger charge if no obstacles are in the way.
+
+  EnemyObject.prototype.rightSideClear = function(target){
 
     var wayIsClear =true;
 
@@ -408,14 +463,18 @@ console.log()
     }
 
     if(wayIsClear){
-
       this.charge("right");
-
     }
   }
 
-  EnemyObject.prototype.upperSideClear = function(target){
 
+  // uppersideclear()
+  //
+  // determine if there are any obstacles between enemy and player
+  // in the current row or column
+  // trigger charge if no obstacles are in the way.
+
+  EnemyObject.prototype.upperSideClear = function(target){
 
     var wayIsClear =true;
 
@@ -424,18 +483,23 @@ console.log()
       obsCol[this.column].pos[i] > target.y
       && obsCol[this.column].pos[i] < this.y
       ){
-
         wayIsClear = false;
         return;
       }
     }
 
     if(wayIsClear){
-
       this.charge("up");
-
     }
   }
+
+
+
+  // lowersideclear()
+  //
+  // determine if there are any obstacles between enemy and player
+  // in the current row or column
+  // trigger charge if no obstacles are in the way.
 
   EnemyObject.prototype.lowerSideClear = function(target){
 
@@ -446,41 +510,28 @@ console.log()
       obsCol[this.column].pos[i] < target.y
       && obsCol[this.column].pos[i] > this.y
       ){
-
           wayIsClear = false;
           return;
         }
       }
 
       if(wayIsClear){
-
         this.charge("down");
-
       }
     }
 
-    EnemyObject.prototype.checkPlayerVisible = function(target, x, y, w, h){
-
-      if(collideRectRect(x, y, w, h, target.x, target.y, target.size, target.size)){
-        console.log("FOUND YE");
-
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
 
     // handleplayercollision()
     //
     // check for overlap with player.
-    // teleports the player away
+    // teleports the player away, decreases his health.
+    /// check if game is over 
+    // trigger appropriate sfx
 
     EnemyObject.prototype.handlePlayerCollision = function(target){
+
       // if enemy and player overlap on the x axis
       if(collideRectRect(target.x, target.y, target.size, target.size, this.x, this.y, this.size, this.size)){
-
-
         // set new position
         findGoodPosition(player);
         player.wasHitTimer = millis() + player.wasHitTimerLength;
@@ -492,4 +543,7 @@ console.log()
         this.newBearing(1, 1, 1, 1);
       }
 
+
+        // check if player's health has reached 0
+        checkGameOver();
     }

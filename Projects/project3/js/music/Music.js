@@ -1,8 +1,6 @@
 /*
 Music.js()
-copied in from project 2.
-mostly no change, other than that instruments are set up with sounds and
-notes that are related to this project.
+this script sets up musical structure and objects.
 
 */
 
@@ -27,49 +25,36 @@ function Music(){
 // instruments' sound are declared.
 
 Music.prototype.setupInstruments = function(){
-  console.log("we here")
-for(var i=0; i<synths.length; i++){
-  // console.log("synth loaded");
+
+  // SYNTAX
   // envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-  synths[i].setEnvelope(0.01, 0.4, 0.001, 0.7, 0.52, 0);
-  // function(filterType, frequency)
-  synths[i].setFilter("BP", i*500);
-  // function(delayIsOn, length, feedback, filterFrequency)
-  synths[i].setDelay(true, i*0.1, 0.55, 400)
+  // filter:  function(filterType, frequency)
+  // delay: function(delayIsOn, length, feedback, filterFrequency)
 
-  this.loadInstrument(synths[i]);
+  // LOAD FOOD SOUNDS
+  for(var i=0; i<synths.length; i++){
+    synths[i].setEnvelope(0.01, 0.4, 0.001, 0.7, 0.52, 0);
+    synths[i].setFilter("BP", i*500);
+    synths[i].setDelay(true, i*0.1, 0.55, 400)
+    this.loadInstrument(synths[i]);
+  }
 
-}
+  // LOAD SFX
+  sfx.setEnvelope(0.001, 0.6, 0.0, 0.4, 0.4, 0);
+  sfx.setFilter("LP", 500);
+  sfx.setDelay(false, 0, 0, 0);
+  this.loadInstrument(sfx);
 
+  sfx2.setEnvelope(0.001, 0.6, 0.5, 0.4, 0.8, 0);
+  sfx2.setFilter("LP", 500);
+  sfx2.setDelay(false, 0, 0, 0);
+  this.loadInstrument(sfx2);
 
-
-// sfx setup
-// envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-sfx.setEnvelope(0.001, 0.6, 0.0, 0.4, 0.4, 0);
-// function(filterType, frequency)
-sfx.setFilter("LP", 500);
-// function(delayIsOn, length, feedback, filterFrequency)
-sfx.setDelay(false, 0, 0, 0);
-this.loadInstrument(sfx);
-
-// sfx2 setup
-// envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-sfx2.setEnvelope(0.001, 0.6, 0.5, 0.4, 0.8, 0);
-// function(filterType, frequency)
-sfx2.setFilter("LP", 500);
-// function(delayIsOn, length, feedback, filterFrequency)
-sfx2.setDelay(false, 0, 0, 0);
-this.loadInstrument(sfx2);
-
-// envelope: function(attackTime, decayTime, releaseTime, attackLevel, susLevel, releaseLevel)
-bass.setEnvelope(0.01, 0.8, 0.2, 0.31, 0.23, 0);
-// function(filterType, frequency)
-bass.setFilter("LP", 500);
-// function(delayIsOn, length, feedback, filterFrequency)
-bass.setDelay(true, 0.12, 0.7, 500)
-
-this.loadInstrument(bass);
-
+  // LOAD BASS
+  bass.setEnvelope(0.01, 0.8, 0.2, 0.31, 0.23, 0);
+  bass.setFilter("LP", 500);
+  bass.setDelay(true, 0.12, 0.7, 500)
+  this.loadInstrument(bass);
 
 }
 
@@ -77,6 +62,7 @@ this.loadInstrument(bass);
 // startSFX()
 //
 // prepares a given SFX for playing.
+// copied straight outa project 2.
 
 Music.prototype.startSFX = function(thissfx, sfxType){
 
@@ -103,23 +89,20 @@ Music.prototype.startSFX = function(thissfx, sfxType){
   }
 }
 
-// launchpart1()
+// launchMusic()
 //
-// launch part 1 of the bgm
-// this is the game screen music..
-// synth2 loops through the lead voice while synth3 plays a 12 bar blues bass.
-// synth1 plays some colour tones
-// drums play a (random) rhythm that starts bare but gets more full as levels increase
-// i will include some explanations on how the launch() functions work here
-// startnewphrase() is also explained below. Functionning of the drums is found in Drums.handleDrums()
+// launches the bgm
+// stops any previously playing voices.
+// sets rhythm and notes for each voice.
+// assigns random phrase to each food sound.
 
-Music.prototype.launchPart1 = function(){
+Music.prototype.launchMusic = function(){
 
   // stop any sounds currently playing
   this.stopSound();
+
   // phrase and rhythm
   // phrase values are (midi) intervals over the root note
-
   var phrase1=[0, 13, 8];
   var phrase2=[4, 6];
   var phrase3 =[3, 7]
@@ -127,46 +110,41 @@ Music.prototype.launchPart1 = function(){
   var phrase5 = [1, 2, 3]
   var phrase6 = [7, 2, 4]
 
+  // shuffle phrases
   var phrases = [phrase1, phrase2, phrase3, phrase4, phrase5, phrase6];
   phrases = shuffle(phrases);
-
 
   var bassPhrase = [0, 0, 0, 1];
   var bassRhythm = [282, 12, 12, 78];
 
-  // while rhythm values are expressed in frames
-  // var rhythm1=[60, 40, 20, 40, 20, 40, 20, 40, 120, 80];
+  // assign a phrase and rhythm to each food synth voice.
 
-  // startnewphrase() requires: synth used, list of notes to play,
-  // octave transposition, list of rhythms to play, pulse rate, whether to start from the top.
-  // see Synth.js for how this stuff works
+  for (var i=0; i<level+2; i++){
+    // give a random rhythm
+    var rhythm = 6*floor(random(4, 9));
+    // transpose randomly too
+    var transpose = floor(random(-7, 7));
+    this.startNewPhrase(synths[i], phrases[i], transpose, 0, rhythm, true);
+  }
 
-for (var i=0; i<level+2; i++){
-  var rhythm = 6*floor(random(4, 9));
-  var transpose = floor(random(-12, 12));
-  this.startNewPhrase(synths[i], phrases[i], transpose, 0, rhythm, true);
-}
-
-    this.startNewPhrase(bass, bassPhrase, -24, bassRhythm, 0, true);
-
-
+  // load bass
+  this.startNewPhrase(bass, bassPhrase, -24, bassRhythm, 0, true);
 
   // set voices on and off
   for(var i=0; i<synths.length; i++){
-  synths[i].isPlaying = true;
-}
+    synths[i].isPlaying = true;
+  }
   bass.isPlaying = true;
-
-
   drums.isPlaying = true;
+
   // reset musical time
   this.musicInc = 0;
 
+  // reset drum timing
   drums.nextKick = drums.firstKick;
   drums.nextClap = drums.firstClap;
   drums.nextBell = drums.firstBell;
   drums.nextTick = drums.firstTick;
-
   drums.kickNum =0;
   drums.clapNum =0;
   drums.bellNum =0;
@@ -244,15 +222,26 @@ Music.prototype.startNewPhrase = function(synx, noteList, octave, rhythm, loop, 
   }
 }
 
+// killsynths()
+//
+// deletes all food related synth objects
+
+Music.prototype.killSynths = function(){
+  for (var i=0; i<synths.length; i++){
+    synths[i].thisSynth.stop();
+  }
+  synths = [];
+}
+
 // stopsound()
 //
 // turns all sound objects off
 
 Music.prototype.stopSound= function(){
 
-for (var i=0; i<synths.length; i++){
-  synths[i].isPlaying =false;
-}
+  for (var i=0; i<synths.length; i++){
+    synths[i].isPlaying =false;
+  }
   drums.isPlaying = false;
 
   sfx.upFX=false;

@@ -1,7 +1,7 @@
 /*
 
 droppings.js
-this script displays racoon poop.
+this script creates new racoon poop and display it.
 
 */
 
@@ -12,7 +12,6 @@ this script displays racoon poop.
 function Droppings(x, y, goodOrBad, size){
   this.x = x;
   this.y = y;
-
   this.isHealthy = goodOrBad;
   this.size = 20+2*size;
   this.z = this.size/2  ;

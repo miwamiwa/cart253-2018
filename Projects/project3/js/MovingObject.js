@@ -1,31 +1,27 @@
 /*
 MovingObject.js
-So far this is used to handle the player object only, but I originally intended
-to have multiple objects with the same behavior (thus the name, which is not
-Player.js). I suppose I could have a freakin flock of racoons running around
-the player or something.. this script as it is could open up that option.
+Here we have most everything related to the player object.
+handles motion, collision with obstacles, interaction with foods.
 
 */
 
 // movingobject()
 //
-// modified paddle.js code from project 2.
-// Sets the properties with the provided arguments or defaults
+// creates a new player object
 
 function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
-  // position and size
+
+  // position, size, speed,
   this.x = x;
   this.y = y;
-
   this.size = 50;
   this.z =this.size/2;
-  // speed
   this.vx = 0;
   this.vy = 0;
   this.speed = speed;
   this.angle =0;
-
-  this.health = initialHealth;
+  this.row = floor(this.x/xobs);
+  this.column = floor((this.y/yobs)%xobs);
 
   // key controls
   this.downKey = downKey;
@@ -36,61 +32,53 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
   this.strafeRight = 69;
   this.eatKey = 70;
 
-  // time until the player can eat again
-  this.eatingTimer = 0;
-  this.eatingTimerLength = 2000;
-  //
-  this.poopingTimer =0;
-  this.poopingTimerLength = 500;
-
   // fill
   this.red = random(215);
   this.green = random(125);
   this.blu = random(125);
 
-  //game mechanics
-
-  // counts how many food items the player has eaten
-  // this is reset upon expelling droppings
+  // eating
   this.foodInBelly = 0;
-
-  // if the player ate anything bad he is sick for the rest of this digestive
-  // cycle (meaning he will create sickly droppings)
   this.isSick = false;
+  this.eatingTimer = 0;
+  this.eatingTimerLength = 2000;
+  this.healthyFoodEaten = 0;
+  this.sicklyFoodEaten =0;
+  this.roomLeft = 0;
+  this.updateRoomLeft();
+  this.health = initialHealth;
 
-  // range within which the player will perceive smells/sounds
+  // smelling
   this.smellRange = 200;
-
-  // list of smells the player knows about
   this.knownObjects = [];
-
-  // list of known smells which can be detected within smelling range
   this.knownObjectsInRange = [];
 
-  // count healthy and sickly droppings
-  // (to be used to keep score one way or another)
+  // pooping
   this.healthydroppings = 0;
   this.sickdroppings = 0;
-
+  this.poopingTimer =0;
+  this.poopingTimerLength = 500;
 
   // animation variables
-
-  // back leg motion
   this.legAngle = 0;
-  // front leg motion
   this.legAngle2 = 0;
-  // leg motion speed
   this.legRate =0.5;
-  // tail motion along x and y axis
   this.tailXAngle =0;
   this.tailYAngle =0;
-  // head bob
   this.headWobble = 0;
-  // head bob speed
   this.wobbleRate = 0.2;
+  this.ringOsc =0;
+  this.ringOscRate =0.08;
+  this.tailWiggleX = 0;
+  this.tailWiggleY = 0;
+  this.headBob = 0;
+  this.legTranslate = 10;
+  this.legSin = 0;
+  this.legSin2 = 0;
+  this.legCos = 0;
+  this.legCos2 =0;
 
   // part sizes
-
   this.bodSize = this.size;
   this.headSize = this.size*0.6;
   this.tailSize = this.size*0.2;
@@ -100,30 +88,9 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
   this.legSize = this.size*0.3;
   this.noseSize = this.size*0.3;
 
-  this.healthyFoodEaten = 0;
-  this.sicklyFoodEaten =0;
-
+  // enemy collision
   this.wasHitTimer =0;
   this.wasHitTimerLength = 400;
-
-  this.ringOsc =0;
-  this.ringOscRate =0.08;
-  this.roomLeft = 0;
-  this.updateRoomLeft();
-
-  this.tailWiggleX = 0;
-  this.tailWiggleY = 0;
-
-  this.headBob = 0;
-
-  // calculate change in leg position
-  this.legTranslate = 10;
-  this.legSin = 0;
-  this.legSin2 = 0;
-  this.legCos = 0;
-  this.legCos2 =0;
-  this.row = floor(this.x/xobs);
-  this.column = floor((this.y/yobs)%xobs);
 
 }
 
@@ -131,8 +98,13 @@ function MovingObject(x,y,speed,downKey,upKey,leftKey, rightKey) {
 
 // handleInput()
 //
-// Check if the control keys are pressed and update velocity
+// these are spacelove-based controls.
+// it's kind of weird that our racoon feels like a spacelovin' rocket ship,
+// but it'll do the trick.
+// Checks if the control keys are pressed and update velocity or trigger eating
 // accordingly
+// also update parts position accordingly (legs, head, etc.)
+// also triggers footstep sound
 
 MovingObject.prototype.handleInput = function() {
 
@@ -141,7 +113,6 @@ MovingObject.prototype.handleInput = function() {
 
   // up key is pressed
   if (keyIsDown(this.upKey)) {
-
     // update x and y velocity according to current bearing
     this.vy -= cos(this.angle);
     this.vx += sin(this.angle);
@@ -154,7 +125,6 @@ MovingObject.prototype.handleInput = function() {
 
   // down key is pressed
   else if (keyIsDown(this.downKey)) {
-
     // update x and y velocity according to current bearing
     this.vy += cos(this.angle);
     this.vx -= sin(this.angle);
@@ -162,14 +132,16 @@ MovingObject.prototype.handleInput = function() {
     this.legAngle += this.legRate;
     this.legAngle2 += this.legRate;
     this.tailXAngle += this.legRate;
-  }  // if no keys are pressed stop moving.
+  }
+
+  // if no keys are pressed stop moving.
   else {
     this.vx=0;
     this.vy=0;
   }
+
   // left key is pressed
   if (keyIsDown(this.leftKey)) {
-
     // rotate left
     this.angle -= radians(angleSpeed);
     // trigger appropriate parts motion
@@ -180,7 +152,6 @@ MovingObject.prototype.handleInput = function() {
 
   // right key is pressed
   else if (keyIsDown(this.rightKey)) {
-
     // rotate right
     this.angle += radians(angleSpeed);
     // trigger appropriate parts motion
@@ -192,10 +163,8 @@ MovingObject.prototype.handleInput = function() {
 
   // strafe left key is pressed
   if (keyIsDown(this.strafeLeft)) {
-
     // trigger appropriate parts motion
     this.legAngle2 += this.legRate;
-
     // update x and y velocity according to bearing
     this.vy -= sin(this.angle);
     this.vx -= cos(this.angle);
@@ -203,14 +172,11 @@ MovingObject.prototype.handleInput = function() {
 
   // strafe right key is pressed
   else if (keyIsDown(this.strafeRight)) {
-
     // trigger appropriate parts motion
     this.legAngle2 += this.legRate;
-
     // update x and y velocity according to bearing
     this.vy += sin(this.angle);
     this.vx += cos(this.angle);
-
   }
 
   // trigger footsteps sound
@@ -232,13 +198,12 @@ MovingObject.prototype.handleInput = function() {
 // update position according to velocity
 
 MovingObject.prototype.update = function() {
+
+  // update column and row
   this.column = floor((this.x+world.w/2)/xobs);
+  this.row = floor((this.y+world.h/2)/yobs);
 
-this.row = floor((this.y+world.h/2)/yobs);
-
-    console.log("player row "+this.row+" player col " +this.column)
-  // check for collision with any obstacle
-
+  // check for collision with any obstacle.
   // check through all obstacles
   for (var i=0; i<obstacles.length; i++){
 
@@ -600,14 +565,11 @@ MovingObject.prototype.eatObstacle = function(index) {
       case true: this.healthyObsEaten(index); break;
       case false: this.unhealthyObsEaten(index); break;
     }
-
     // start chewing timer
     this.eatingTimer = millis()+this.eatingTimerLength;
 
     // gain knowledge of this food object
     this.checkKnownObjects(index);
-
-
   }
 }
 
@@ -666,9 +628,7 @@ MovingObject.prototype.unhealthyObsEaten = function(index){
   this.health-=unhealthyPoopPenalty;
   this.isSick = true;
   console.log("blabla "+obstacles[index].size)
-  if (obstacles[index].size<=0){
-    sicklyobs -=1;
-  }
+
 }
 
 
@@ -703,7 +663,7 @@ MovingObject.prototype.digest = function () {
       droppings.push(new Droppings(this.x, this.y, true, playerIsFullThreshold));
       this.healthydroppings+=1;
     }
-    
+
     displayHealth();
     // update score text
     displayScore();
@@ -793,10 +753,10 @@ MovingObject.prototype.sniffOut = function () {
 
 
 
-// increasesize()
-//
-// fired upon eating
-// increase player size and player parts size
+  // increasesize()
+  //
+  // fired upon eating
+  // increase player size and player parts size
 
   MovingObject.prototype.increaseSize = function(){
 

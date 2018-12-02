@@ -56,11 +56,14 @@ h1{
   flex-basis: 20%;
 }
 div{
-  font-family: 'Alfa Slab One', cursive;
+    font-family: 'Monoton', cursive;
+    font-size: 2vw;
 }
 
 .displayit{
-  font-family: 'Monoton', cursive;
-  font-size: 25px;
+
+  font-family: 'Alfa Slab One', cursive;
+  font-size: 1.5vw  ;
 padding:10px;
+width:40%;
 }

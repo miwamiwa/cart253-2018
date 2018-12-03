@@ -204,6 +204,7 @@ function newLevel(){
   gameOver = false
 
   // load PLAYER
+  initialHealth +=1;
   player = new MovingObject(0,height/2,3,83,87, 65, 68);
 
   // load ENEMIES
@@ -239,6 +240,7 @@ function newLevel(){
   obstacles = [];
   // a variable to index obstacle position on the grid
   var obstacleindex =0;
+  obstacleDensity += 0.03;
 
   // for each point on the grid
   for (var i=0; i<xobs*yobs; i++){
@@ -255,6 +257,8 @@ function newLevel(){
       obstacleindex +=1;
     }
   }
+
+  minHealthyFood += 3;
   // make sure our random obstacles meet the level's minimum requirement
   while(healthyobs < minHealthyFood){
     var pick = floor(random(obstacles.length));
@@ -298,14 +302,16 @@ function newLevel(){
 // checkgameover()
 //
 // check if player's health has reached 0.
+// resetgame variables
 // prepare and launch game over screen
 
 function checkGameOver(){
 
   if(player.health<0){
-
-    music.stopSound();
-    player.health =initialHealth;
+    // reset
+    initialHealth =7;
+    minHealthyFood = 7;
+    obstacleDensity =0.08;
     displayHealth();
     gameOver = true;
     gameOn = false;

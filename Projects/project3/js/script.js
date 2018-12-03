@@ -10,28 +10,30 @@ By Samuel Paré-Chouinard
 their smells.
 - Avoid humans and fill yer belly!
 
-This game is still prototypical, in that:
+I'm handing in a bit of a work in progress, but at some point you gotta draw
+a line on some details (and finish up your other final projects). This version
+is very playable. Here are a few issues I was working on at the time I'm
+turning this in:
+
 - levels are limited by the 6 musical phrases i created
 - sound works great but sound design was a bit overlooked because of time spent
 on collisions and visuals. sfx not used very extensively, and musical phrases
 were thrown together quickly
 - obstacle collisions are clunky. player gets glued all over the place and
-has to change directions all the time. 
-- late in the process i updated the manner in which collisions were checked,
-in an effort to enhance performance (kind of needed for slow computers like
-my own). Updated only one collision checking function (EnemyObject.lookOut())
+has to change directions all the time.
+- late in the process i tried changing the manner in which collisions were
+checked, in an effort to enhance performance (necessary for slow computers
+like mine). Updated only one collision-checking function (EnemyObject.lookOut())
 in the interest of time, so not everything is as efficient as it could be.
 The old system checks distance to all obstacles, then checks collisions
-with nearby obstacles, while the new system has obstacles, enemies and the
-player organised in rows and columns and checks for collisions only in matching
-rows or columns.
+with nearby obstacles only, while the new system has obstacles, enemies and the
+player organised in rows and columns and checks for collisions only within
+matching rows or columns.
 - texture image files were crunched to tiny sizes also to optimize performance.
-not sure if images could be buffered differently in p5js, but my computer
-was really not a fan of these more hi-res textures which were working fine
+my computer was not a fan of these more hi-res textures which were working fine
 on school computers.
-- i probably missed something but i don't know how to
+- i feel like i probably missed something but i don't know how to
 display text in 3d, so i have objects with text images as texture :)
-- at some point you just gotta draw the line and turn in your project!
 
 this script handles:
 - declaring global variables
@@ -94,7 +96,7 @@ var titleimg, gameoverimg, nextlvlimg, startimg, controlsimg, instructionsimg;
 
 // game settings
 var playerIsFullThreshold = 2;
-var initialHealth =1;
+var initialHealth =7;
 var healthyPoopBonus = 1;
 var unhealthyPoopPenalty = 1;
 var enemyCaughtPlayerPenalty = 1;
@@ -102,12 +104,12 @@ var numEnemies = 0;
 var foodSize= 80;
 var damageToObstacles = foodSize;
 var chanceForFood = 0.5;
-var obstacleDensity = 0.1;
+var obstacleDensity = 0.08;
 var playerSizeIncrease = 3;
 var levelTarget = level+3;
-var minHealthyFood = 10;
+var minHealthyFood = 7;
 
-// start level
+// levels, game states 
 var level =0;
 var levelComplete = false;
 var gameOn = false;

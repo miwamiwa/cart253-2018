@@ -1,6 +1,13 @@
 /*
 Drum.js
 unlike my previous noise drums, this is a drum machine which plays samples.
+i built a beat around 96-frame loop using 4 audio samples. i cut the samples
+as short as possible and converted them from wav to mp3 to save a bit
+of memory.
+
+there's a bit of a polyrhythm going on here. Each voice has a different
+offset (firstKick, firstClap, etc) to make this endless loop a bit more
+interesting.
 
 */
 
@@ -24,16 +31,20 @@ function Drum(){
   this.bellNum =0;
   this.tickNum =0;
 
-  // time of first notes to play
+  // timing of first notes to play (frames)
   this.firstKick =0;
   this.firstClap =84;
   this.firstBell =24;
   this.firstTick =12;
 
-  // rhythm
+  // rhythm (frames until next note)
+  // the third kick has a bit of swing
   this.kickList = [24, 5, 19];
+  // claps divides measure in 3
   this.clapList = [32];
+  // cowbell divides measure in 2
   this.bellList = [48, 48];
+  // tick: first a(n approximated) 5/8 rhythm, then straight 8/8
   this.tickList = [24, 5, 5, 4, 10, 24, 6, 6, 12];
 
   // volume

@@ -4,6 +4,8 @@ This script creates a box with a texture image that holds information.
 The box can be resized on click. if the box is an action button,
 it will trigger an action if it is clicked while its size is largest.
 Clicking one box will resize the others.
+
+my cat LOVED seeing these big cubes on the screen. this script is cat-approved.
 */
 
 function MenuObject(x, y, img, isActionObject) {
@@ -44,8 +46,10 @@ function MenuObject(x, y, img, isActionObject) {
 MenuObject.prototype.display = function(){
 
   // increment angle
-  this.angle +=0.03;
+  this.angle +=0.01;
   push();
+  // ambient light
+    ambientLight(190, 210, 185);
   // translate and rotate
   var z = cos(this.angle)*5;
   var x = sin(this.angle)*8;

@@ -80,6 +80,7 @@ MenuObject.prototype.check = function(){
       // trigger action
       if(this.isActionObject){
         menuAction();
+        return;
       }
       // change state
       this.shrinking = true;

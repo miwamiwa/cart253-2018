@@ -30,9 +30,9 @@ function menuAction(){
   }
   else if(gameOver){
     gameOver = false;
-    level = 0;
+    level = 0;  gameOn = true;
     setupMenu();
-    newlevel();
+    newLevel();
 
   }
 }
@@ -206,7 +206,7 @@ function newLevel(){
   // load PLAYER
   initialHealth +=1;
   player = new MovingObject(0,height/2,3,83,87, 65, 68);
-
+  
   // load ENEMIES
   // add a new enemy
   numEnemies = 1+level;

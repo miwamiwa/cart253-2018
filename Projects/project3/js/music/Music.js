@@ -35,7 +35,7 @@ Music.prototype.setupInstruments = function(){
   for(var i=0; i<synths.length; i++){
     synths[i].setEnvelope(0.01, 0.4, 0.001, 0.7, 0.52, 0);
     synths[i].setFilter("BP", i*500);
-    synths[i].setDelay(true, i*0.1, 0.55, 400)
+    synths[i].setDelay(true, i*0.1, 0.25, 400)
     this.loadInstrument(synths[i]);
   }
 
@@ -53,7 +53,7 @@ Music.prototype.setupInstruments = function(){
   // LOAD BASS
   bass.setEnvelope(0.01, 0.8, 0.2, 0.31, 0.23, 0);
   bass.setFilter("LP", 500);
-  bass.setDelay(true, 0.12, 0.7, 500)
+  bass.setDelay(true, 0.12, 0.73, 500)
   this.loadInstrument(bass);
 
 }

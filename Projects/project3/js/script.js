@@ -99,7 +99,7 @@ var playerIsFullThreshold = 2;
 var initialHealth =7;
 var healthyPoopBonus = 1;
 var unhealthyPoopPenalty = 1;
-var enemyCaughtPlayerPenalty = 1;
+var enemyCaughtPlayerPenalty = 2;
 var numEnemies = 0;
 var foodSize= 80;
 var damageToObstacles = foodSize;
@@ -109,7 +109,7 @@ var playerSizeIncrease = 3;
 var levelTarget = level+3;
 var minHealthyFood = 7;
 
-// levels, game states 
+// levels, game states
 var level =0;
 var levelComplete = false;
 var gameOn = false;

@@ -79,7 +79,7 @@ function Ant(x1, y1, x2, y2) {
   // the damage an ant deals to a paddle's height
   this.damage = 10;
   // start sfx
-  music.startSFX(sfx, "down");
+if(soundStarted)  music.startSFX(sfx, "down");
 
 }
 
@@ -320,7 +320,7 @@ Ant.prototype.sabotage = function(thing){
         // remove that ball.
         actions.removeBall(i);
         // trigger sabotage sfx
-        music.startSFX(sfx, "downchirp");
+      if(soundStarted)  music.startSFX(sfx, "downchirp");
       }
     }
   }
@@ -331,7 +331,7 @@ Ant.prototype.sabotage = function(thing){
     // signify that paddle was sabotaged (supposed to trigger a safe timer. think i removed it though)
     thing.wasSabotaged=true;
     // trigger sabotage sfx
-    music.startSFX(sfx, "downchirp");
+  if(soundStarted)  music.startSFX(sfx, "downchirp");
   }
 }
 

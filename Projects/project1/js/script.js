@@ -201,7 +201,8 @@ var currentRoot=startRoot;
 // a variable to convert root note to root frequency
 var rootFreq=0;
 
-
+// EDIT
+let soundStarted = false;
 
 //GAME VARIABLES
 
@@ -337,18 +338,26 @@ var bgEllipseY=[10];
 // Sets up the basic elements of the game
 function setup() {
 
-
   createCanvas(700,600);
 
   newBg();
   setupDisplays();
-  loadAnInstrument(syn1);
-  loadAnInstrument(syn2);
-  loadAnInstrument(syn3);
-  loadAnInstrument(syn4);
+
   setupPrey();
   setupPlayer();
   newObstacle();
+
+}
+
+function mousePressed(){
+
+  if(!soundStarted){
+    loadAnInstrument(syn1);
+    loadAnInstrument(syn2);
+    loadAnInstrument(syn3);
+    loadAnInstrument(syn4);
+    soundStarted = true;
+  }
 
 }
 
@@ -403,7 +412,7 @@ function setupPlayer() {
 function draw() {
   //console.log(playerHealth)
   frame+=1;
-  handleMusic();
+  if(soundStarted) handleMusic();
   drawBg();
 
   if (!gameOver) {
@@ -421,6 +430,9 @@ function draw() {
   else {
     showGameOver();
   }
+
+textSize(30);
+  if(!soundStarted) text("CLICK TO START SOUND!", width/2-100, height/2);
 }
 
 // drawBg()
@@ -485,11 +497,15 @@ function handleInput() {
     // if shift key is pressed, player is sprinting.
     // this triggers a different avatar color for the sprinting player
     sprintOn=true;
-    // while shift it pressed, manipulate the delay object to hear a different sound
-    syn2.delayFB=0.7;
-    syn2.delayFilter=1500;
-    //process the sound
-    syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
+
+    if(soundStarted){
+      // while shift it pressed, manipulate the delay object to hear a different sound
+      syn2.delayFB=0.7;
+      syn2.delayFilter=1500;
+      //process the sound
+      syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
+    }
+
     // switch speed to sprinting speed
     playerMaxSpeed=sprintSpeed;
     // increase rate of health loss during sprint
@@ -498,10 +514,13 @@ function handleInput() {
     // if shift is not pressed, player doesn't sprint
     // display regular avatar color
     sprintOn=false;
-    // set delay back to normal settings
-    syn2.delayFB=0.3;
-    syn2.delayFilter=400;
-    syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
+    if(soundStarted){
+      // set delay back to normal settings
+      syn2.delayFB=0.3;
+      syn2.delayFilter=400;
+      syn2.delay.process(syn2.thisSynth, syn2.delayLength, syn2.delayFB, syn2.delayFilter);
+    }
+
     // set speed and health loss to normal settings
     playerMaxSpeed=normalSpeed;
     lossFactor=0.5;

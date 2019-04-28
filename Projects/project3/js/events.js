@@ -206,7 +206,7 @@ function newLevel(){
   // load PLAYER
   initialHealth +=1;
   player = new MovingObject(0,height/2,3,83,87, 65, 68);
-  
+
   // load ENEMIES
   // add a new enemy
   numEnemies = 1+level;
@@ -280,19 +280,7 @@ function newLevel(){
     findGoodPosition(enemies[i]);
   }
 
-  // new OSCILLATORS
-
-  // destroy previously created synth objects.
-  music.killSynths();
-  // create a new synthesizor object for each kind of food in play
-  for (var i=0; i<kindsOfObs-1; i++){
-    synths[i] = new Synth("sine");
-    console.log("newsynth")
-  }
-  // setup instruments
-  music.setupInstruments();
-  // start sound
-  music.launchMusic();
+  if(soundStarted) startLevelSound();
 
   // update info below screen
   displayLevelInfo()

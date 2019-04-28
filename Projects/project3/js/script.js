@@ -115,6 +115,9 @@ var levelComplete = false;
 var gameOn = false;
 var gameOver = false;
 
+
+let soundStarted = false;
+
 // preload()
 //
 // loads texture images and drum sounds
@@ -156,13 +159,6 @@ function setup() {
   canvas = createCanvas(window.innerWidth, window.innerHeight-100, WEBGL);
   canvas.parent('sketch-holder');
 
-  // load music objects
-  drums = new Drum();
-  music = new Music();
-  bass = new Synth("square");
-  sfx = new SFX('sine', 400);
-  sfx2 = new SFX('white', 400);
-
   // create world
   world = new World();
 
@@ -174,6 +170,35 @@ function setup() {
 
   // set no stroke by default
   noStroke();
+}
+
+
+function startSound(){
+  // load music objects
+  drums = new Drum();
+  music = new Music();
+  bass = new Synth("square");
+  sfx = new SFX('sine', 400);
+  sfx2 = new SFX('white', 400);
+
+  soundStarted = true;
+  startLevelSound();
+}
+
+function startLevelSound(){
+  // new OSCILLATORS
+
+  // destroy previously created synth objects.
+  music.killSynths();
+  // create a new synthesizor object for each kind of food in play
+  for (var i=0; i<kindsOfObs-1; i++){
+    synths[i] = new Synth("sine");
+    console.log("newsynth")
+  }
+  // setup instruments
+  music.setupInstruments();
+  // start sound
+  music.launchMusic();
 }
 
 // draw()
@@ -191,7 +216,7 @@ function draw() {
   }
 
   // run sound
-  runSound();
+  if(soundStarted) runSound();
 }
 
 // runmenu()
@@ -218,6 +243,8 @@ function mousePressed(){
     menu2.check();
     menu3.check();
   }
+
+  if(!soundStarted) startSound();
 }
 
 // rungame()

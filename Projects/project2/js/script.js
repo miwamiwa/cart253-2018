@@ -72,6 +72,9 @@ var antEatingBonus=2;
 var canvas;
 var currentScreen = "menu";
 
+
+let soundStarted = false;
+
 // setup()
 //
 // Creates the ball and paddles
@@ -87,6 +90,21 @@ function setup() {
   actions = new Actions();
 
   game = new Game();
+
+  // paddles
+  rightPaddle = new Paddle(game.width-10,game.height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
+  leftPaddle = new Paddle(0,game.height/2,20,60,10,83,87, 65, 68, 49);
+
+  // load the menu screen
+
+  game.setupMenuScreen();
+
+
+
+}
+
+function mousePressed(){
+if(!soundStarted){
   // bgm
   synth1 = new Synth('sine');
   synth2 = new Synth('square');
@@ -95,19 +113,15 @@ function setup() {
   // sfx
   sfx = new SFX('sine', 400);
   sfx2 = new SFX('white', 400);
-  // paddles
-  rightPaddle = new Paddle(game.width-10,game.height/2,20,60,10,DOWN_ARROW,UP_ARROW, LEFT_ARROW, RIGHT_ARROW, 48);
-  leftPaddle = new Paddle(0,game.height/2,20,60,10,83,87, 65, 68, 49);
 
-  // load the menu screen
   music = new Music();
-  game.setupMenuScreen();
-
   // setup audio effects parameters,
   // start audio
   music.setupInstruments();
   // assign appropriate musical material
   music.launchPart2();
+  soundStarted = true;
+}
 
 }
 
@@ -118,7 +132,7 @@ function setup() {
 function draw() {
 
   // play sound
-  playSound();
+if(soundStarted)  playSound();
 
   // run menu screen
   if(currentScreen==="menu"){
@@ -128,6 +142,11 @@ function draw() {
   else if(currentScreen==="game"){
     runGame();
   }
+
+  textSize(30);
+  fill(255, 0, 0);
+    if(!soundStarted) text("CLICK TO START SOUND!", width/2-100, height/4);
+
 }
 
 // rungame()
